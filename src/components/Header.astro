@@ -4,39 +4,41 @@ import AnnouncementBar from './AnnouncementBar.astro';
 ---
 <header class="site-header">
   <div class="navrow">
-    <div class="navrow__left">
-      <a href="/" class="logo" aria-label="Gait Happens — Home">
-        <span class="logo__box">
-          <span class="logo__mark"><img src="/images/nav/logo-mark.svg" alt="" /></span>
-          <span class="logo__gait"><img src="/images/nav/logo-gait.svg" alt="" /></span>
-          <span class="logo__happens"><img src="/images/nav/logo-happens.svg" alt="" /></span>
+    <div class="container navrow__inner">
+      <div class="navrow__left">
+        <a href="/" class="logo" aria-label="Gait Happens — Home">
+          <span class="logo__box">
+            <span class="logo__mark"><img src="/images/nav/logo-mark.svg" alt="" /></span>
+            <span class="logo__gait"><img src="/images/nav/logo-gait.svg" alt="" /></span>
+            <span class="logo__happens"><img src="/images/nav/logo-happens.svg" alt="" /></span>
+          </span>
+        </a>
+        <nav class="top" aria-label="Primary">
+          {menus.map((m) =>
+            m.type === 'link' ? (
+              <a class="top__item" href={m.href}>{m.label}</a>
+            ) : (
+              <button type="button" class="top__item" data-menu-trigger={m.id} aria-expanded="false">{m.label}</button>
+            )
+          )}
+        </nav>
+      </div>
+      <div class="util">
+        <span class="lang">
+          <span class="lang__label">ENGLISH</span>
+          <img src="/images/nav/icon-chevron-down.svg" alt="" width="24" height="24" />
         </span>
-      </a>
-      <nav class="top" aria-label="Primary">
-        {menus.map((m) =>
-          m.type === 'link' ? (
-            <a class="top__item" href={m.href}>{m.label}</a>
-          ) : (
-            <button type="button" class="top__item" data-menu-trigger={m.id} aria-expanded="false">{m.label}</button>
-          )
-        )}
-      </nav>
-    </div>
-    <div class="util">
-      <span class="lang">
-        <span class="lang__label">ENGLISH</span>
-        <img src="/images/nav/icon-chevron-down.svg" alt="" width="24" height="24" class="lang__chevron" />
-      </span>
-      <div class="util__icons">
-        <button type="button" class="util__btn" data-util="search" aria-label="Search">
-          <img src="/images/nav/icon-search.svg" alt="" width="24" height="24" />
-        </button>
-        <button type="button" class="util__btn" data-util="account" aria-label="Account" aria-expanded="false">
-          <img src="/images/nav/icon-user.svg" alt="" width="24" height="24" />
-        </button>
-        <button type="button" class="util__btn" data-util="cart" aria-label="Cart">
-          <img src="/images/nav/icon-cart.svg" alt="" width="24" height="24" />
-        </button>
+        <div class="util__icons">
+          <button type="button" class="util__btn" data-util="search" aria-label="Search">
+            <img src="/images/nav/icon-search.svg" alt="" width="24" height="24" />
+          </button>
+          <button type="button" class="util__btn" data-util="account" aria-label="Account" aria-expanded="false">
+            <img src="/images/nav/icon-user.svg" alt="" width="24" height="24" />
+          </button>
+          <button type="button" class="util__btn" data-util="cart" aria-label="Cart">
+            <img src="/images/nav/icon-cart.svg" alt="" width="24" height="24" />
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -46,14 +48,16 @@ import AnnouncementBar from './AnnouncementBar.astro';
 <style>
   .navrow {
     background: var(--color-ink);
-    padding-block: var(--space-4);
-    padding-inline: var(--space-5);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
     position: sticky;
     top: 0;
     z-index: 50;
+  }
+
+  .navrow__inner {
+    padding-block: var(--space-4);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
   }
 
   .navrow__left {
