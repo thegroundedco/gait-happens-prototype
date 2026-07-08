@@ -23,7 +23,7 @@ const total = routes.length;
 const built = routes.filter((r) => r.status === 'built').length;
 ---
 
-<BaseLayout title="Build Status" breadcrumb={['Internal', 'Status']}>
+<BaseLayout title="Build Status">
   <div class="status">
     <h1>Build Status — {built}/{total} built</h1>
     <p class="status__note">

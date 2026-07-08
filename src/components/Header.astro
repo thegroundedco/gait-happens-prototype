@@ -89,6 +89,7 @@ const megaMenus = menus.filter((m) => m.type === 'mega');
   // so navigating repeatedly cannot stack up duplicate document listeners.
   let header = null;
   let open = null;
+  let openTrigger = null;
   let panels = new Map();
 
   // Utility panels (account dropdown, search overlay, cart drawer) —
@@ -105,12 +106,17 @@ const megaMenus = menus.filter((m) => m.type === 'mega');
   let mobileTrigger = null;
 
   function show(id) {
-    hide();
     const panel = panels.get(id);
     if (!panel || !header) return;
+    // Opening a mega panel closes account+search (mutual exclusion), and
+    // hide()'s own trigger/panel bookkeeping also closes any other mega
+    // panel that's currently open (switching between triggers).
+    closeOverlays('mega');
     panel.hidden = false;
-    header.querySelector(`[data-menu-trigger="${id}"]`)?.setAttribute('aria-expanded', 'true');
+    const trigger = header.querySelector(`[data-menu-trigger="${id}"]`);
+    trigger?.setAttribute('aria-expanded', 'true');
     open = id;
+    openTrigger = trigger;
   }
 
   function hide() {
@@ -119,6 +125,7 @@ const megaMenus = menus.filter((m) => m.type === 'mega');
     if (panel) panel.hidden = true;
     header.querySelector(`[data-menu-trigger="${open}"]`)?.setAttribute('aria-expanded', 'false');
     open = null;
+    openTrigger = null;
   }
 
   function setAccountOpen(next) {
@@ -137,7 +144,22 @@ const megaMenus = menus.filter((m) => m.type === 'mega');
     if (!cart || !scrim) return;
     cart.classList.toggle('open', next);
     cart.setAttribute('aria-hidden', String(!next));
+    // Off-canvas when closed: keep its links out of tab order (in addition
+    // to the visual translateX hide), matching MobileNav's `inert` pattern.
+    cart.toggleAttribute('inert', !next);
     scrim.hidden = !next;
+  }
+
+  // Keeps the mega-menu panel, account dropdown, and search overlay mutually
+  // exclusive — opening any one of them closes the other two. `except` is
+  // whichever of 'mega' | 'account' | 'search' is about to be opened by the
+  // caller (or omitted/unmatched to close all three, e.g. on Escape/outside
+  // click). The cart drawer is intentionally not included here — it's meant
+  // to stay independent of these top-area overlays.
+  function closeOverlays(except) {
+    if (except !== 'mega') hide();
+    if (except !== 'account') setAccountOpen(false);
+    if (except !== 'search') setSearchOpen(false);
   }
 
   function setMobileNavOpen(next) {
@@ -154,6 +176,7 @@ const megaMenus = menus.filter((m) => m.type === 'mega');
   function initMegaMenus() {
     header = document.querySelector('.site-header');
     open = null;
+    openTrigger = null;
     if (!header) return;
 
     const triggers = header.querySelectorAll('[data-menu-trigger]');
@@ -166,6 +189,16 @@ const megaMenus = menus.filter((m) => m.type === 'mega');
       t.addEventListener('mouseenter', () => show(id));
       t.addEventListener('focus', () => show(id));
       t.addEventListener('click', () => (open === id ? hide() : show(id)));
+      // Keyboard users: focus alone opens the panel but Tab would just move
+      // to the next trigger (closing it) without ever reaching the panel's
+      // links. Enter/Space/ArrowDown instead open the panel and jump focus
+      // straight to its first link.
+      t.addEventListener('keydown', (e) => {
+        if (e.key !== 'Enter' && e.key !== ' ' && e.key !== 'ArrowDown') return;
+        e.preventDefault();
+        show(id);
+        panels.get(id)?.querySelector('a')?.focus();
+      });
     });
 
     header.addEventListener('mouseleave', hide);
@@ -180,10 +213,16 @@ const megaMenus = menus.filter((m) => m.type === 'mega');
     scrim = header.querySelector('.cart-scrim');
     accountTrigger = header.querySelector('[data-util="account"]');
 
-    accountTrigger?.addEventListener('click', () => setAccountOpen(Boolean(account?.hidden)));
+    accountTrigger?.addEventListener('click', () => {
+      const next = Boolean(account?.hidden);
+      if (next) closeOverlays('account');
+      setAccountOpen(next);
+    });
 
     header.querySelector('[data-util="search"]')?.addEventListener('click', () => {
-      setSearchOpen(Boolean(search?.hidden));
+      const next = Boolean(search?.hidden);
+      if (next) closeOverlays('search');
+      setSearchOpen(next);
     });
 
     header.querySelector('[data-util="cart"]')?.addEventListener('click', () => setCartOpen(true));
@@ -216,11 +255,16 @@ const megaMenus = menus.filter((m) => m.type === 'mega');
   document.addEventListener('astro:page-load', initHeader);
   document.addEventListener('keydown', (e) => {
     if (e.key !== 'Escape') return;
+    // Capture before hide() clears `open`/`openTrigger`, so focus can return
+    // to the trigger that opened the panel — but only when a mega panel was
+    // actually the thing that closed (not for account/search/cart/mobile).
+    const returnFocusTo = open ? openTrigger : null;
     hide();
     setAccountOpen(false);
     setSearchOpen(false);
     setCartOpen(false);
     setMobileNavOpen(false);
+    returnFocusTo?.focus();
   });
   document.addEventListener('click', (e) => {
     if (!header || header.contains(e.target)) return;

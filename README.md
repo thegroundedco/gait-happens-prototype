@@ -23,7 +23,7 @@ All commands run from the repo root.
 | `npm run dev` | Start the live dev server at `localhost:4321` (hot reload) |
 | `npm run build` | Build the static production site to `./dist/` |
 | `npm run preview` | Serve the built `./dist/` locally, as a final check before sharing/deploying |
-| `npm run check:links` | The core acceptance test for this repo. Spawns `preview` and crawls it with [linkinator](https://github.com/JustinBeckwith/linkinator) to catch broken internal/external links, then tears the server down. Expect `0 broken`. |
+| `npm run check:links` | The core acceptance test for this repo. Spawns `preview` and crawls it with [linkinator](https://github.com/JustinBeckwith/linkinator) to catch broken internal/external links, then tears the server down. Expect `0 broken`. `preview` serves the already-built `./dist/`, so run `npm run build` first — a fresh clone must build before checking links. |
 | `npm test` | Runs the Node test runner (`node --test`) against `tests/*.test.mjs` — sitemap integrity (unique paths, required fields, menu hrefs resolve to real routes) |
 
 ### Dropbox build note
