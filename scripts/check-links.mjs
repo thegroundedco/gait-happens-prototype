@@ -28,5 +28,12 @@ try {
     console.log(`OK — ${result.links.length} links checked, 0 broken.`);
   }
 } finally {
-  preview.kill();
+  try {
+    if (process.platform === 'win32' && preview.pid) {
+      const { spawnSync } = await import('node:child_process');
+      spawnSync('taskkill', ['/pid', String(preview.pid), '/T', '/F'], { stdio: 'ignore' });
+    } else {
+      preview.kill();
+    }
+  } catch { /* best-effort teardown */ }
 }
