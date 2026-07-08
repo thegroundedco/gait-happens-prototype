@@ -2,6 +2,9 @@
 import { menus } from '../data/sitemap.js';
 import AnnouncementBar from './AnnouncementBar.astro';
 import MegaMenu from './MegaMenu.astro';
+import AccountMenu from './AccountMenu.astro';
+import SearchOverlay from './SearchOverlay.astro';
+import CartDrawer from './CartDrawer.astro';
 const megaMenus = menus.filter((m) => m.type === 'mega');
 ---
 <header class="site-header">
@@ -42,7 +45,7 @@ const megaMenus = menus.filter((m) => m.type === 'mega');
           <button type="button" class="util__btn" data-util="search" aria-label="Search">
             <img src="/images/nav/icon-search.svg" alt="" width="24" height="24" />
           </button>
-          <button type="button" class="util__btn" data-util="account" aria-label="Account" aria-expanded="false">
+          <button type="button" class="util__btn" data-util="account" aria-label="Account" aria-expanded="false" aria-controls="account-panel">
             <img src="/images/nav/icon-user.svg" alt="" width="24" height="24" />
           </button>
           <button type="button" class="util__btn" data-util="cart" aria-label="Cart">
@@ -52,21 +55,35 @@ const megaMenus = menus.filter((m) => m.type === 'mega');
       </div>
     </div>
     {megaMenus.map((m) => <MegaMenu menu={m} />)}
+    <AccountMenu />
+    <SearchOverlay />
   </div>
   <AnnouncementBar />
-  <!-- AccountMenu + overlays injected in Tasks 7-8 -->
+  <CartDrawer />
 </header>
 <script>
-  // Mega-menu open/close. The site uses Astro's ClientRouter (view transitions),
-  // which swaps the DOM on navigation and does not re-run already-loaded module
-  // scripts — so setup lives in a function re-invoked on every `astro:page-load`
-  // (fires on first load too), re-querying the fresh header/trigger/panel
-  // elements each time. Document-level listeners (Esc, outside-click) are
-  // registered once at module scope and read the current header/open state via
-  // closure, matching the pattern already used in src/scripts/motion.js.
+  // Mega-menu + account/search/cart utility panels. The site uses Astro's
+  // ClientRouter (view transitions), which swaps the DOM on navigation and
+  // does not re-run already-loaded module scripts — so all setup lives in
+  // functions re-invoked on every `astro:page-load` (fires on first load
+  // too), re-querying the fresh header/trigger/panel elements each time.
+  // Document-level listeners (Esc, outside-click) are registered ONCE at
+  // module scope and read the current header/open state via closure,
+  // matching the pattern already used in src/scripts/motion.js. There is
+  // exactly one `astro:page-load` listener (initHeader) and it only rebinds
+  // element-level listeners — it never itself calls document.addEventListener,
+  // so navigating repeatedly cannot stack up duplicate document listeners.
   let header = null;
   let open = null;
   let panels = new Map();
+
+  // Utility panels (account dropdown, search overlay, cart drawer) —
+  // re-queried in initUtilPanels() alongside the mega-menu elements above.
+  let account = null;
+  let search = null;
+  let cart = null;
+  let scrim = null;
+  let accountTrigger = null;
 
   function show(id) {
     hide();
@@ -83,6 +100,25 @@ const megaMenus = menus.filter((m) => m.type === 'mega');
     if (panel) panel.hidden = true;
     header.querySelector(`[data-menu-trigger="${open}"]`)?.setAttribute('aria-expanded', 'false');
     open = null;
+  }
+
+  function setAccountOpen(next) {
+    if (!account) return;
+    account.hidden = !next;
+    accountTrigger?.setAttribute('aria-expanded', String(next));
+  }
+
+  function setSearchOpen(next) {
+    if (!search) return;
+    search.hidden = !next;
+    if (next) search.querySelector('input')?.focus();
+  }
+
+  function setCartOpen(next) {
+    if (!cart || !scrim) return;
+    cart.classList.toggle('open', next);
+    cart.setAttribute('aria-hidden', String(!next));
+    scrim.hidden = !next;
   }
 
   function initMegaMenus() {
@@ -105,12 +141,48 @@ const megaMenus = menus.filter((m) => m.type === 'mega');
     header.addEventListener('mouseleave', hide);
   }
 
-  document.addEventListener('astro:page-load', initMegaMenus);
+  function initUtilPanels() {
+    if (!header) return;
+
+    account = header.querySelector('[data-util-panel="account"]');
+    search = header.querySelector('[data-util-panel="search"]');
+    cart = header.querySelector('[data-util-panel="cart"]');
+    scrim = header.querySelector('.cart-scrim');
+    accountTrigger = header.querySelector('[data-util="account"]');
+
+    accountTrigger?.addEventListener('click', () => setAccountOpen(Boolean(account?.hidden)));
+
+    header.querySelector('[data-util="search"]')?.addEventListener('click', () => {
+      setSearchOpen(Boolean(search?.hidden));
+    });
+
+    header.querySelector('[data-util="cart"]')?.addEventListener('click', () => setCartOpen(true));
+
+    header.querySelectorAll('[data-cart-close]').forEach((el) => {
+      el.addEventListener('click', () => setCartOpen(false));
+    });
+  }
+
+  function initHeader() {
+    initMegaMenus();
+    initUtilPanels();
+  }
+
+  document.addEventListener('astro:page-load', initHeader);
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') hide();
+    if (e.key !== 'Escape') return;
+    hide();
+    setAccountOpen(false);
+    setSearchOpen(false);
+    setCartOpen(false);
   });
   document.addEventListener('click', (e) => {
-    if (header && !header.contains(e.target)) hide();
+    if (!header || header.contains(e.target)) return;
+    // Cart is intentionally excluded here: its full-viewport scrim already
+    // intercepts outside clicks and closes it via [data-cart-close].
+    hide();
+    setAccountOpen(false);
+    setSearchOpen(false);
   });
 </script>
 <style>
