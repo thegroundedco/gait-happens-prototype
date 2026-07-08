@@ -41,6 +41,7 @@ Faithful but pragmatic. Match the Figma's layout, spacing intent, type, color, i
 - **Local dev:** `npm run dev` for live clicking/linking.
 - **Build:** `npm run build` → static `dist/` the dev team can open or host anywhere.
 - **No CSS framework.** Hand-authored CSS driven by design tokens (CSS custom properties).
+- **Motion:** GSAP + ScrollTrigger for hero/scroll choreography; Astro View Transitions for page-to-page. Shopify-portable. See Section 10.
 - **Fonts:** Montserrat self-hosted (woff2 in `/public/fonts`) — renders identically offline, no external font call.
 
 ## 5. Design tokens
@@ -81,9 +82,12 @@ Source of truth: **Gait Happens Design System** (Figma file `B0fHmlEEm9OdOOnAbnm
       sitemap.js                   single source of truth: routes, labels, nav grouping, status
     styles/
       tokens.css                   design-system tokens as CSS variables
+      motion.css                   motion tokens (durations, easings) + micro-interaction transitions
       global.css                   reset + base + type styles
+    scripts/
+      motion.js                    GSAP setup: reveal-on-scroll, hero timelines, reduced-motion guard
     layouts/
-      BaseLayout.astro             <html> shell: announcement + header + <slot/> + footer
+      BaseLayout.astro             <html> shell: header (nav row + shipping bar) + <slot/> + footer
     components/
       AnnouncementBar.astro
       Header.astro
@@ -182,7 +186,7 @@ UTILITY
 
 **Account dropdown.** Compact dropdown (not a mega-menu) from the account icon with the three login destinations. Each is a placeholder route now, ready to repoint at its external URL (Shopify / Kajabi / consultation platform).
 
-**Mobile nav.** Hamburger → slide-in drawer. Top-level items become accordions expanding to the same cards, stacked. Announcement bar pinned at top.
+**Mobile nav.** Hamburger → slide-in drawer. Top-level items become accordions expanding to the same cards, stacked. The nav row is sticky; the shipping bar sits directly beneath it (per Figma, the two form the single "Nav and Top Bar").
 
 **Utility.**
 - **Search** → icon opens an overlay input; submit → `/search` placeholder.
@@ -192,15 +196,38 @@ UTILITY
 
 **Responsive.** Mobile-first, matching the desktop + mobile mockups; pragmatic between breakpoints.
 
-## 10. Placeholder pattern
+## 10. Motion & animation
+
+"Mildly Awwwards": restrained, purposeful motion that elevates key moments without calling attention to itself. Fast, easing-driven, few elements at a time.
+
+**Tooling.** GSAP + ScrollTrigger for scroll-triggered reveals and hero choreography; Astro View Transitions for smooth page-to-page changes. Both are Shopify-portable so the dev team can reproduce them.
+
+**Established in this foundation slice (so all later pages inherit it):**
+- **Motion tokens** — standard durations and easings as variables (`--motion-fast`, `--ease-out-expo`, …) in `motion.css`.
+- **Reveal-on-scroll utility** — elements marked to fade + rise as they enter the viewport (staggered), via one shared GSAP/ScrollTrigger setup in `motion.js`.
+- **Page transitions** — Astro View Transitions for the SPA-like feel between routes.
+- **Nav / drawer / menu easing** — mega-menu, mobile drawer, cart drawer, and account dropdown all use the shared easing tokens.
+- **Micro-interactions** — card hover lift, button hover, the "→" arrow nudge on hover.
+
+**Applied as hero pages are built (later steps):**
+- **Hero entrances** — staggered fade/rise of headline → subhead → CTA on load.
+- **Subtle hero media motion** — restrained parallax or scale on the hero image.
+- **Section intros** — scroll reveals per section using the shared utility.
+
+**Guardrails.**
+- `prefers-reduced-motion: reduce` → reveals resolve to their final state instantly, parallax/scale off, transitions minimized.
+- Transform/opacity only (GPU-friendly); no layout-thrashing properties.
+- Sparing by design — a few hero moments and section reveals, not motion on everything.
+
+## 11. Placeholder pattern
 
 Every stub is a real, on-brand page: full header + footer, correct `<title>`, an `H1` of the page's name, a breadcrumb, and a small **"In progress"** chip with a one-line note (e.g. *"This page will be built in Phase 3"*). Looks intentional and finished-enough that clicking around feels like a real site — never blank or broken.
 
-## 11. Progress tracking
+## 12. Progress tracking
 
 `sitemap.js` carries a `status` field (`placeholder` / `built`) per route. `src/pages/_status.astro` renders a live checklist of every route and its status — an at-a-glance view for Adam and the dev team of what's done. Underscore-prefixed so it reads as internal, not part of the real site.
 
-## 12. Handoff notes (in README)
+## 13. Handoff notes (in README)
 
 - How to run (`npm install`, `npm run dev`, `npm run build`).
 - Token map: CSS variable names → design-system tokens.
@@ -208,16 +235,16 @@ Every stub is a real, on-brand page: full header + footer, correct `<title>`, an
 - Which routes are placeholders vs. built (mirrors `_status`).
 - URL conventions and where they map in Shopify.
 
-## 13. Assets
+## 14. Assets
 
 Exported from Figma into `public/images`: logo, and the nav card images (Best Sellers photo, WALK cover, Courses for Individuals/Professionals photos, etc.). Placeholder bodies need no imagery. Montserrat woff2 into `public/fonts`.
 
-## 14. Open items / assumptions
+## 15. Open items / assumptions
 
 - Exact color and spacing token values to be read from the DS Colors/Spacing pages at implementation (needs the frames selected in Figma desktop, or node links).
 - Login destinations (Shopify wholesaler portal, Kajabi, consultation platform) are stubbed pending real URLs.
 - "All Courses" grouped PLP design is in progress; route exists as a placeholder until the design lands.
 
-## 15. Out of scope (future steps)
+## 16. Out of scope (future steps)
 
 Homepage (Phase 3), full PDP/PLP/About/Contact/FAQ page buildouts, blog content migration (Phase 4), real cart/checkout/auth, domain consolidation (Phase 5).
