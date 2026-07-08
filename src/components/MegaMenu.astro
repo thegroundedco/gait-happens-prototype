@@ -1,0 +1,55 @@
+---
+// Renders the panel for one mega menu (see `menus` in src/data/sitemap.js).
+// 'cards' (Shop, Courses) and 'white' (Contact) styles are a single row of
+// 3 NavCards. 'bars' (Resources) is 3 columns of 2 stacked bar NavCards —
+// matching the Figma source (node 848:10673), which groups the 6 links
+// column-first: col[c] = cards at index i where i % 3 === c.
+import NavCard from './NavCard.astro';
+const { menu } = Astro.props;
+const panelId = `mega-panel-${menu.id}`;
+const columns = menu.style === 'bars'
+  ? Array.from({ length: 3 }, (_, c) => menu.cards.filter((_, i) => i % 3 === c))
+  : null;
+---
+<div class="mega" data-menu-panel={menu.id} id={panelId} hidden>
+  <div class="mega__pad">
+    <div class="mega__inner">
+      {columns
+        ? columns.map((col) => (
+            <div class="mega__col">
+              {col.map((card) => <NavCard card={card} style={menu.style} />)}
+            </div>
+          ))
+        : menu.cards.map((card) => <NavCard card={card} style={menu.style} />)}
+    </div>
+  </div>
+</div>
+<style>
+  .mega {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: var(--color-paper);
+  }
+  .mega[hidden] { display: none; }
+
+  .mega__pad { padding-inline: var(--space-4); }
+
+  .mega__inner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-5);
+    padding: var(--space-4);
+    background: var(--color-ink);
+  }
+
+  .mega__col {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    height: 250px;
+    flex: 1 1 0;
+  }
+</style>

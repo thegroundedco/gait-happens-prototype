@@ -1,6 +1,8 @@
 ---
 import { menus } from '../data/sitemap.js';
 import AnnouncementBar from './AnnouncementBar.astro';
+import MegaMenu from './MegaMenu.astro';
+const megaMenus = menus.filter((m) => m.type === 'mega');
 ---
 <header class="site-header">
   <div class="navrow">
@@ -18,7 +20,15 @@ import AnnouncementBar from './AnnouncementBar.astro';
             m.type === 'link' ? (
               <a class="top__item" href={m.href}>{m.label}</a>
             ) : (
-              <button type="button" class="top__item" data-menu-trigger={m.id} aria-expanded="false">{m.label}</button>
+              <button
+                type="button"
+                class="top__item"
+                data-menu-trigger={m.id}
+                aria-expanded="false"
+                aria-controls={`mega-panel-${m.id}`}
+              >
+                {m.label}
+              </button>
             )
           )}
         </nav>
@@ -41,10 +51,68 @@ import AnnouncementBar from './AnnouncementBar.astro';
         </div>
       </div>
     </div>
+    {megaMenus.map((m) => <MegaMenu menu={m} />)}
   </div>
   <AnnouncementBar />
-  <!-- MegaMenu panels + AccountMenu + overlays injected in Tasks 6-8 -->
+  <!-- AccountMenu + overlays injected in Tasks 7-8 -->
 </header>
+<script>
+  // Mega-menu open/close. The site uses Astro's ClientRouter (view transitions),
+  // which swaps the DOM on navigation and does not re-run already-loaded module
+  // scripts — so setup lives in a function re-invoked on every `astro:page-load`
+  // (fires on first load too), re-querying the fresh header/trigger/panel
+  // elements each time. Document-level listeners (Esc, outside-click) are
+  // registered once at module scope and read the current header/open state via
+  // closure, matching the pattern already used in src/scripts/motion.js.
+  let header = null;
+  let open = null;
+  let panels = new Map();
+
+  function show(id) {
+    hide();
+    const panel = panels.get(id);
+    if (!panel || !header) return;
+    panel.hidden = false;
+    header.querySelector(`[data-menu-trigger="${id}"]`)?.setAttribute('aria-expanded', 'true');
+    open = id;
+  }
+
+  function hide() {
+    if (!open || !header) return;
+    const panel = panels.get(open);
+    if (panel) panel.hidden = true;
+    header.querySelector(`[data-menu-trigger="${open}"]`)?.setAttribute('aria-expanded', 'false');
+    open = null;
+  }
+
+  function initMegaMenus() {
+    header = document.querySelector('.site-header');
+    open = null;
+    if (!header) return;
+
+    const triggers = header.querySelectorAll('[data-menu-trigger]');
+    panels = new Map(
+      [...header.querySelectorAll('[data-menu-panel]')].map((p) => [p.dataset.menuPanel, p])
+    );
+
+    triggers.forEach((t) => {
+      const id = t.dataset.menuTrigger;
+      t.addEventListener('mouseenter', () => show(id));
+      t.addEventListener('focus', () => show(id));
+      t.addEventListener('click', () => (open === id ? hide() : show(id)));
+    });
+
+    header.addEventListener('mouseleave', hide);
+  }
+
+  document.addEventListener('astro:page-load', initMegaMenus);
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') hide();
+  });
+  document.addEventListener('click', (e) => {
+    if (header && !header.contains(e.target)) hide();
+  });
+</script>
 <style>
   .navrow {
     background: var(--color-ink);

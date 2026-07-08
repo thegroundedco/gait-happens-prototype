@@ -3,7 +3,7 @@ export const menus = [
     id: 'shop', label: 'Shop', type: 'mega', style: 'cards',
     cards: [
       { label: 'Shop Best Sellers', href: '/collections/best-sellers', image: '/images/nav/shop-best-sellers.jpg', variant: 'yellow' },
-      { label: 'Featured Products', href: '/collections/featured', image: '/images/nav/featured-products.jpg', variant: 'yellow' },
+      { label: 'Featured Products', href: '/collections/featured', image: '/images/nav/featured-products.png', variant: 'yellow' },
       { label: 'Shop All', href: '/collections/all', variant: 'teal' },
     ],
   },
