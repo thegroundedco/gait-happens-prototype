@@ -1,0 +1,31 @@
+:root {
+  /* color — sampled from rendered DS mockup PNGs (see task-2-report.md for pixel coords) */
+  --color-ink: #231F20;
+  --color-yellow: #FEC745;
+  --color-teal: #047791;
+  --color-paper: #FFFFFF;
+  --color-ink-70: rgba(35, 31, 32, .7);
+
+  /* type family */
+  --font-sans: "Montserrat", system-ui, sans-serif;
+
+  /* type scale (family/weight/size) — confirmed from DS Typography */
+  --type-display: 700 40px/1.1 var(--font-sans);
+  --type-h3: 600 32px/1.15 var(--font-sans);
+  --type-h4: 500 24px/1.2 var(--font-sans);
+  --type-body-large: 400 20px/1.6 var(--font-sans);
+  --type-body: 400 20px/1.4 var(--font-sans);
+  --type-body-sm: 400 14px/1.5 var(--font-sans);
+  --type-label: 600 16px/1.3 var(--font-sans);
+  --type-caption: 400 12px/1.4 var(--font-sans);
+  --type-cta: 600 16px/1 var(--font-sans);
+  --type-button: 500 20px/1 var(--font-sans);
+  --tracking-caption: 0.108em; /* 1.8 * 0.06 */
+
+  /* spacing — 4px-based scale; exact DS spacing steps still to be confirmed against the Figma Spacing page */
+  --space-1: 4px;  --space-2: 8px;  --space-3: 12px; --space-4: 16px;
+  --space-5: 24px; --space-6: 32px; --space-7: 48px; --space-8: 64px;
+
+  /* layout */
+  --container-max: 1200px;
+}
