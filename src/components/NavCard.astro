@@ -10,8 +10,7 @@ const variant = style === 'bars' ? 'bar' : style === 'white' ? 'white' : (card.v
 const big = variant === 'teal' || variant === 'white';
 const arrowSrc = big ? '/images/nav/arrow-lg.svg' : '/images/nav/arrow.svg';
 const arrowSize = big ? 64 : 24;
-// The WALK book cutout is transparent — contain it instead of cropping with cover.
-const isContain = card.image?.endsWith('.png');
+const fit = card.fit ?? 'cover';
 ---
 <a class={`nav-card nav-card--${variant}`} href={card.href}>
   {card.image && (
@@ -20,7 +19,8 @@ const isContain = card.image?.endsWith('.png');
         src={card.image}
         alt=""
         loading="lazy"
-        class={isContain ? 'nav-card__img nav-card__img--contain' : 'nav-card__img'}
+        class="nav-card__img"
+        style={`object-fit: ${fit};`}
       />
     </span>
   )}
@@ -69,7 +69,6 @@ const isContain = card.image?.endsWith('.png');
     height: 100%;
     object-fit: cover;
   }
-  .nav-card__img--contain { object-fit: contain; }
 
   .nav-card__row {
     position: relative;
@@ -80,9 +79,7 @@ const isContain = card.image?.endsWith('.png');
   }
 
   .nav-card__label {
-    font-weight: 700;
-    font-size: 20px;
-    line-height: 1.2;
+    font: var(--type-nav-label);
   }
   .nav-card__label--display { font: var(--type-display); }
 

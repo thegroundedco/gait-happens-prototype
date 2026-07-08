@@ -20,6 +20,7 @@
   --type-caption: 400 12px/1.4 var(--font-sans);
   --type-cta: 600 16px/1 var(--font-sans);
   --type-button: 500 20px/1 var(--font-sans);
+  --type-nav-label: 700 20px/1.2 var(--font-sans);
   --tracking-caption: 0.108em; /* 1.8 * 0.06 */
 
   /* spacing — 4px-based scale; exact DS spacing steps still to be confirmed against the Figma Spacing page */
