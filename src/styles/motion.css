@@ -7,5 +7,5 @@
 }
 /* Elements the reveal utility manages start hidden, but only when JS+motion are on. */
 @media (prefers-reduced-motion: no-preference) {
-  html.js [data-reveal] { opacity: 0; transform: translateY(16px); }
+  html.js [data-reveal] { opacity: 0; transform: translateY(var(--space-4)); }
 }

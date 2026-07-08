@@ -28,4 +28,6 @@
 
   /* layout */
   --container-max: 1200px;
+  --focus-ring-width: 2px;
+  --focus-ring-offset: 2px;
 }
