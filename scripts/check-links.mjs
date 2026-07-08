@@ -18,7 +18,14 @@ async function waitForServer(url, tries = 40) {
 try {
   await waitForServer(BASE);
   const checker = new LinkChecker();
-  const result = await checker.check({ path: BASE, recurse: true });
+  // Crawl from both `/` and `/_status`. The public nav (header/footer) only
+  // reaches routes that are linked in menus/sitemap footer columns — PDPs,
+  // course pages, /search, /cart, and /account/* aren't reachable from `/`
+  // alone. `/_status` links every route in src/data/sitemap.js, so crawling
+  // both roots together (linkinator's check() accepts `path` as an array
+  // and shares one dedup cache across them) covers all 38 routes + the
+  // status page itself, and reports one combined broken-link count.
+  const result = await checker.check({ path: [BASE, `${BASE}/_status`], recurse: true });
   const broken = result.links.filter(l => l.state === 'BROKEN');
   if (broken.length) {
     console.error(`\n${broken.length} BROKEN links:`);

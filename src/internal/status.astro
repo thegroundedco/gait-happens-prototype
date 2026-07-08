@@ -1,0 +1,70 @@
+---
+// Internal build-progress checklist, served at /_status.
+//
+// This file intentionally lives OUTSIDE src/pages/. Astro's file-based
+// router silently excludes any path segment starting with `_` from routing
+// when it walks src/pages (astro/dist/core/routing/create-manifest.js:
+// `if (name[0] === "_") { continue; }`) — so a literal
+// `src/pages/_status.astro` builds to nothing, no warning given. To keep the
+// `/_status` URL (unlinked from the public nav, but a real, buildable,
+// crawlable page) this component is wired up via `injectRoute` in
+// astro.config.mjs instead, which is unaffected by that exclusion because it
+// never walks src/pages.
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { routes } from '../data/sitemap.js';
+
+const groups = routes.reduce((acc, r) => {
+  const key = r.breadcrumb[1] ?? 'Top';
+  (acc[key] ??= []).push(r);
+  return acc;
+}, {});
+
+const total = routes.length;
+const built = routes.filter((r) => r.status === 'built').length;
+---
+
+<BaseLayout title="Build Status" breadcrumb={['Internal', 'Status']}>
+  <div class="status">
+    <h1>Build Status — {built}/{total} built</h1>
+    <p class="status__note">
+      Internal progress checklist, generated from <code>src/data/sitemap.js</code>.
+      Every route in the sitemap is listed and linked below — this page also
+      doubles as a crawl root for <code>npm run check:links</code> so routes
+      not reachable from the header/footer nav (PDPs, course pages,
+      <code>/account/*</code>, <code>/search</code>, <code>/cart</code>) get verified too.
+    </p>
+
+    {Object.entries(groups).map(([group, groupRoutes]) => (
+      <section class="status__group">
+        <h3>{group}</h3>
+        <ul class="status__list">
+          {groupRoutes.map((r) => (
+            <li class="status__item">
+              <a href={r.path}>{r.path}</a> — {r.title} ·{' '}
+              <strong class={`status__badge status__badge--${r.status}`}>{r.status}</strong>
+              {r.phase ? ` · ${r.phase}` : ''}
+            </li>
+          ))}
+        </ul>
+      </section>
+    ))}
+  </div>
+</BaseLayout>
+
+<style>
+  .status { display: grid; gap: var(--space-6); }
+  .status__note { font: var(--type-body); color: var(--color-ink-70); max-width: 70ch; }
+  .status__note code {
+    font: var(--type-body-sm);
+    background: rgba(35, 31, 32, 0.08);
+    padding: 0 var(--space-1);
+    border-radius: 4px;
+  }
+  .status__group { display: grid; gap: var(--space-3); }
+  .status__group h3 { font: var(--type-h4); }
+  .status__list { list-style: none; padding: 0; display: grid; gap: var(--space-2); }
+  .status__item { font: var(--type-body-sm); }
+  .status__badge { text-transform: uppercase; letter-spacing: var(--tracking-caption); }
+  .status__badge--placeholder { color: var(--color-ink-70); }
+  .status__badge--built { color: var(--color-teal); }
+</style>
