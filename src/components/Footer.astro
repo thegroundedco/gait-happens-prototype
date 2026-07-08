@@ -1,6 +1,7 @@
 ---
 import { menus } from '../data/sitemap.js';
 const columns = menus.filter(m => m.type === 'mega');
+const about = menus.find(m => m.type === 'link');
 ---
 <footer class="site-footer">
   <div class="container cols">
@@ -10,7 +11,7 @@ const columns = menus.filter(m => m.type === 'mega');
         <ul>{col.cards.map(c => <li><a href={c.href}>{c.label}</a></li>)}</ul>
       </div>
     ))}
-    <div class="col"><h4>About</h4><ul><li><a href="/pages/about">About</a></li></ul></div>
+    <div class="col"><h4>About</h4><ul><li><a href={about.href}>{about.label}</a></li></ul></div>
   </div>
   <div class="container legal"><p>© Gait Happens</p></div>
 </footer>

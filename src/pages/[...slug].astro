@@ -10,6 +10,6 @@ export function getStaticPaths() {
 }
 const { route } = Astro.props;
 ---
-<BaseLayout title={route.title} breadcrumb={route.breadcrumb}>
+<BaseLayout title={route.title}>
   <PlaceholderPage route={route} />
 </BaseLayout>
