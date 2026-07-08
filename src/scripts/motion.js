@@ -1,9 +1,58 @@
-// Interim motion stub. The full GSAP reveal-on-scroll system lands in Task 9.
-// motion.css pre-hides [data-reveal]; until GSAP arrives, just show them —
-// on first load and after every ClientRouter navigation.
-document.addEventListener('astro:page-load', () => {
-  document.querySelectorAll('[data-reveal]').forEach((el) => {
-    el.style.opacity = '1';
-    el.style.transform = 'none';
+// GSAP reveal-on-scroll motion system.
+//
+// motion.css pre-hides [data-reveal] elements (opacity:0, translateY) but only
+// under `prefers-reduced-motion: no-preference` — so under reduced-motion the
+// elements are already fully visible and we must skip animating them entirely.
+//
+// Astro's View Transitions (ClientRouter) swap the DOM in place without a full
+// page reload, and this module stays alive across navigations. `astro:page-load`
+// fires once on the initial load and again after every client-side navigation,
+// so it's the single hook we need — registered once, at module scope, below.
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+gsap.registerPlugin(ScrollTrigger);
+
+// Cap on how far the sibling stagger climbs, so pages with many reveal
+// targets don't end up with a long tail of increasing delay.
+const STAGGER_STEP = 0.06;
+const STAGGER_MAX = 0.3;
+
+function initReveals() {
+  // Kill any ScrollTriggers left over from the previous page, then refresh.
+  // Without this, triggers created on a prior page would either leak (never
+  // getting cleaned up) or keep pointing at DOM nodes View Transitions just
+  // removed/replaced, firing against detached elements or stale positions.
+  ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
+  ScrollTrigger.refresh();
+
+  // Re-scan for the current page's reveal targets.
+  const els = gsap.utils.toArray('[data-reveal]');
+  if (els.length === 0) return;
+
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  if (reduced) {
+    // No pre-hide happened under reduced-motion, but clear/normalize anyway
+    // in case an element was left mid-animation by a prior, motion-enabled visit.
+    gsap.set(els, { opacity: 1, y: 0, clearProps: 'all' });
+    return;
+  }
+
+  els.forEach((el, i) => {
+    gsap.fromTo(
+      el,
+      { opacity: 0, y: 16 },
+      {
+        opacity: 1,
+        y: 0,
+        duration: 0.6,
+        ease: 'expo.out',
+        delay: Math.min(i * STAGGER_STEP, STAGGER_MAX),
+        scrollTrigger: { trigger: el, start: 'top 85%', once: true },
+      },
+    );
   });
-});
+}
+
+document.addEventListener('astro:page-load', initReveals);
