@@ -1,0 +1,11 @@
+---
+const { href = '#', variant = 'yellow' } = Astro.props;
+---
+<a class={`btn btn--${variant}`} href={href}><slot /></a>
+<style>
+  .btn { display:inline-flex; align-items:center; gap:var(--space-2); font: var(--type-cta);
+    padding: var(--space-3) var(--space-5); border-radius: 4px; transition: transform var(--motion-fast) var(--ease-standard); }
+  .btn--yellow { background: var(--color-yellow); color: var(--color-ink); }
+  .btn--teal { background: var(--color-teal); color: var(--color-paper); }
+  .btn:hover { transform: translateY(-2px); }
+</style>

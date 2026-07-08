@@ -1,0 +1,17 @@
+---
+import Breadcrumb from './Breadcrumb.astro';
+import StatusChip from './StatusChip.astro';
+const { route } = Astro.props;
+---
+<article class="placeholder">
+  <Breadcrumb trail={route.breadcrumb} />
+  <h1 data-reveal>{route.title}</h1>
+  <StatusChip phase={route.phase} />
+  <p class="note" data-reveal>
+    This page is scaffolded. {route.note ?? 'Full content will be built in a later step.'}
+  </p>
+</article>
+<style>
+  .placeholder { display:grid; gap: var(--space-4); max-width: 60ch; }
+  .note { font: var(--type-body-large); color: var(--color-ink-70); }
+</style>

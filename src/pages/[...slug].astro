@@ -1,0 +1,15 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PlaceholderPage from '../components/PlaceholderPage.astro';
+import { routes } from '../data/sitemap.js';
+
+export function getStaticPaths() {
+  return routes
+    .filter(route => route.path !== '/')
+    .map(route => ({ params: { slug: route.path.replace(/^\//, '') }, props: { route } }));
+}
+const { route } = Astro.props;
+---
+<BaseLayout title={route.title} breadcrumb={route.breadcrumb}>
+  <PlaceholderPage route={route} />
+</BaseLayout>

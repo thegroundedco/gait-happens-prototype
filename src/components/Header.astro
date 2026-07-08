@@ -1,0 +1,18 @@
+---
+import { menus } from '../data/sitemap.js';
+---
+<header class="site-header">
+  <div class="container">
+    <a href="/" class="logo">GAIT<span>Happens</span></a>
+    <nav>
+      {menus.map(m => m.type === 'link'
+        ? <a href={m.href}>{m.label}</a>
+        : <span class="top">{m.label}</span>)}
+    </nav>
+  </div>
+</header>
+<style>
+  .site-header { background: var(--color-ink); color: var(--color-paper); }
+  .site-header .container { display:flex; align-items:center; justify-content:space-between; min-height:64px; }
+  nav { display:flex; gap:var(--space-5); }
+</style>
