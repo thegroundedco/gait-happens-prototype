@@ -13,19 +13,35 @@ import { getCollection, getItem, pressLogos } from '../../data/catalog.js';
 
 const { collection: collectionProp, path } = Astro.props;
 const collection = collectionProp ?? getCollection(path);
-const items = (collection.itemIds ?? []).map(getItem);
+
+// Grouped collections (e.g. all-courses) have no top-level itemIds/intro —
+// their items live inside `grouped[]`, one persona section per entry.
+const groups = collection.grouped ?? null;
+const items = groups
+  ? groups.flatMap((group) => group.itemIds ?? [])
+  : (collection.itemIds ?? []);
+const count = items.length;
 ---
 <div class="plp">
   <div class="plp__pad">
     <div data-reveal>
       <PlpTitle title={collection.title} />
     </div>
-    <FilterSortBar count={items.length} />
+    <FilterSortBar count={count} />
   </div>
-  <!-- Grid breaks out to full width (Polaroid-style full-bleed cards). -->
-  <div class="plp__grid-wrapper" data-reveal>
-    <PlpGrid items={items} intro={collection.intro} />
-  </div>
+  <!-- Grouped: one grid-wrapper per persona section. Ungrouped: single grid,
+       breaking out to full width (Polaroid-style full-bleed cards). -->
+  {groups ? (
+    groups.map((group) => (
+      <div class="plp__grid-wrapper" data-reveal>
+        <PlpGrid items={group.itemIds.map(getItem)} intro={group.intro} />
+      </div>
+    ))
+  ) : (
+    <div class="plp__grid-wrapper" data-reveal>
+      <PlpGrid items={items.map(getItem)} intro={collection.intro} />
+    </div>
+  )}
   <div class="plp__pad">
     <Pagination />
   </div>

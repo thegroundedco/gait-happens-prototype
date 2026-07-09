@@ -63,7 +63,7 @@ export const routes = [
   // Courses
   r('/collections/courses-individuals', 'Courses for Individuals', 'plp', ['Home', 'Courses', 'Individuals'], { status: 'built' }),
   r('/collections/courses-professionals', 'Courses for Professionals', 'plp', ['Home', 'Courses', 'Professionals'], { status: 'built' }),
-  r('/collections/all-courses', 'All Courses', 'plp', ['Home', 'Courses', 'All Courses']),
+  r('/collections/all-courses', 'All Courses', 'plp', ['Home', 'Courses', 'All Courses'], { status: 'built' }),
   r('/courses/foot-fest', 'Foot Fest', 'course', ['Home', 'Courses', 'Foot Fest']),
   r('/courses/combating-bunions', 'Combating Bunions', 'course', ['Home', 'Courses', 'Combating Bunions']),
   r('/courses/fit-feet', 'Fit Feet', 'course', ['Home', 'Courses', 'Fit Feet']),
