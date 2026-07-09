@@ -15,7 +15,29 @@ const { title, description = '' } = Astro.props;
     <title>{title} · Gait Happens</title>
     {description && <meta name="description" content={description} />}
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <script is:inline>document.documentElement.classList.add('js');</script>
+    <script is:inline>
+      document.documentElement.classList.add('js');
+      // Fail-safe: motion.css pre-hides [data-reveal] and the GSAP bundle reveals
+      // it. If that bundle is slow or fails to load (e.g. a dev-server hiccup),
+      // don't leave in-view content stuck invisible — reveal it after a short
+      // grace period. Elements already revealed (opacity != "0") are left alone;
+      // below-the-fold elements (correctly waiting to scroll in) are skipped.
+      (function () {
+        function safety() {
+          var vh = window.innerHeight;
+          document.querySelectorAll('[data-reveal]').forEach(function (el) {
+            if (el.getBoundingClientRect().top < vh && getComputedStyle(el).opacity === '0') {
+              el.style.opacity = '1';
+              el.style.transform = 'none';
+            }
+          });
+        }
+        var t;
+        function arm() { clearTimeout(t); t = setTimeout(safety, 1500); }
+        arm();
+        document.addEventListener('astro:after-swap', arm);
+      })();
+    </script>
     <ClientRouter />
   </head>
   <body>
