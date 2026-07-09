@@ -108,10 +108,10 @@ const megaMenus = menus.filter((m) => m.type === 'mega');
   function show(id) {
     const panel = panels.get(id);
     if (!panel || !header) return;
-    // Opening a mega panel closes account+search (mutual exclusion), and
-    // hide()'s own trigger/panel bookkeeping also closes any other mega
-    // panel that's currently open (switching between triggers).
-    closeOverlays('mega');
+    // Close everything first — the currently-open mega panel (so switching
+    // from one trigger to another never leaves two panels open) AND the
+    // account/search overlays (mutual exclusion) — then open this panel.
+    closeOverlays();
     panel.hidden = false;
     const trigger = header.querySelector(`[data-menu-trigger="${id}"]`);
     trigger?.setAttribute('aria-expanded', 'true');
@@ -252,7 +252,17 @@ const megaMenus = menus.filter((m) => m.type === 'mega');
     initMobileNav();
   }
 
-  document.addEventListener('astro:page-load', initHeader);
+  // Run on the initial page load AND after each View Transition navigation.
+  // (astro:page-load does not reliably fire on the first hard load in this
+  // Astro version, so we init directly.) astro:after-swap fires only on
+  // navigations — never the initial load — and each swap brings fresh header
+  // DOM, so initHeader binds element listeners exactly once per DOM (no leak).
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initHeader);
+  } else {
+    initHeader();
+  }
+  document.addEventListener('astro:after-swap', initHeader);
   document.addEventListener('keydown', (e) => {
     if (e.key !== 'Escape') return;
     // Capture before hide() clears `open`/`openTrigger`, so focus can return

@@ -55,4 +55,14 @@ function initReveals() {
   });
 }
 
-document.addEventListener('astro:page-load', initReveals);
+// Run on the initial page load AND after each View Transition swap.
+// (astro:page-load does not reliably fire on the first hard load in this Astro
+// version, so we init directly.) astro:after-swap fires only on navigations,
+// never the initial load; initReveals kills prior ScrollTriggers first, so
+// re-runs are safe and run exactly once per DOM.
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initReveals);
+} else {
+  initReveals();
+}
+document.addEventListener('astro:after-swap', initReveals);
