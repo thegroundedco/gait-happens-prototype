@@ -32,7 +32,9 @@ const price = item.priceRange || item.price;
           <img class="plp-card__cta-arrow" src="/images/nav/arrow.svg" alt="" width="16" height="16" />
         </a>
         <button type="button" class="plp-card__compare" aria-pressed="false" aria-label={`Compare ${item.title}`}>
-          <img src="/images/plp/icon-compare.svg" alt="" width="16" height="16" />
+          <svg class="plp-card__check" width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+            <path d="M2.5 7.5 5.5 10.5 11.5 3.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
         </button>
         <button type="button" class="plp-card__quick-add" data-quick-add={item.id} aria-label={`Quick add ${item.title}`}>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -188,6 +190,83 @@ const price = item.priceRange || item.price;
   }
   .plp-card__compare[aria-pressed='true'] {
     background: var(--color-teal);
+  }
+  .plp-card__check {
+    opacity: 0;
+    color: var(--color-paper);
+    transition: opacity var(--motion-fast) var(--ease-standard);
+  }
+  .plp-card__compare[aria-pressed='true'] .plp-card__check {
+    opacity: 1;
+  }
+
+  /* Price reads large on the wide full-bleed cards at desktop. */
+  @media (min-width: 1200px) {
+    .plp-card__price {
+      font-size: 24px;
+      letter-spacing: 0.04em;
+    }
+  }
+
+  /* --- Teal-wash + invert hover -------------------------------------------
+     On hover the detail half fills teal, its text/controls flip to white,
+     and the image zooms. Transitions are smooth; the zoom is disabled under
+     reduced-motion (the color wash, being non-motion, still applies). */
+  .plp-card__media img {
+    transition: transform var(--motion-base) var(--ease-standard);
+  }
+  .plp-card__body,
+  .plp-card__title,
+  .plp-card__price,
+  .plp-card__description,
+  .plp-card__cta,
+  .plp-card__cta-arrow,
+  .plp-card__compare,
+  .plp-card__quick-add {
+    transition:
+      color var(--motion-base) var(--ease-standard),
+      background var(--motion-base) var(--ease-standard),
+      border-color var(--motion-base) var(--ease-standard),
+      filter var(--motion-base) var(--ease-standard);
+  }
+
+  .plp-card:hover .plp-card__media img {
+    transform: scale(1.06);
+  }
+  .plp-card:hover .plp-card__body {
+    background: var(--color-teal);
+  }
+  .plp-card:hover .plp-card__title,
+  .plp-card:hover .plp-card__price,
+  .plp-card:hover .plp-card__description {
+    color: var(--color-paper);
+  }
+  /* StarRating lives in a child component — reach in to keep it legible. */
+  .plp-card:hover :global(.star-rating__count) {
+    color: var(--color-paper);
+  }
+  .plp-card:hover :global(.star-rating__star:not(.star-rating__star--filled)) {
+    stroke: var(--color-paper);
+  }
+  /* CTA inverts to a white chip so it stands out on the teal wash. */
+  .plp-card:hover .plp-card__cta {
+    background: var(--color-paper);
+    color: var(--color-teal);
+  }
+  .plp-card:hover .plp-card__cta-arrow {
+    filter: none;
+  }
+  /* Secondary buttons go white outline + white glyphs. */
+  .plp-card:hover .plp-card__compare,
+  .plp-card:hover .plp-card__quick-add {
+    border-color: var(--color-paper);
+    color: var(--color-paper);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .plp-card:hover .plp-card__media img {
+      transform: none;
+    }
   }
 
   @media (max-width: 560px) {
