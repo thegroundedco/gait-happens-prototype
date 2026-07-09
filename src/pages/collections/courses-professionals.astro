@@ -1,0 +1,10 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Plp from '../../components/plp/Plp.astro';
+import { getCollection } from '../../data/catalog.js';
+
+const collection = getCollection('/collections/courses-professionals');
+---
+<BaseLayout title={collection.title} description={collection.intro?.body} wide>
+  <Plp collection={collection} />
+</BaseLayout>
