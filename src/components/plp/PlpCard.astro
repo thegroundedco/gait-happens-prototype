@@ -184,6 +184,7 @@ const price = item.priceRange || item.price;
   .plp-card__quick-add:hover {
     background: var(--color-teal);
     color: var(--color-paper);
+    transform: translateY(-2px);
   }
 
   /* Price reads large on the wide full-bleed cards at desktop. */
@@ -212,7 +213,8 @@ const price = item.priceRange || item.price;
       color var(--motion-base) var(--ease-standard),
       background var(--motion-base) var(--ease-standard),
       border-color var(--motion-base) var(--ease-standard),
-      filter var(--motion-base) var(--ease-standard);
+      filter var(--motion-base) var(--ease-standard),
+      transform var(--motion-fast) var(--ease-standard);
   }
 
   .plp-card:hover .plp-card__media img {
@@ -248,7 +250,9 @@ const price = item.priceRange || item.price;
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .plp-card:hover .plp-card__media img {
+    .plp-card:hover .plp-card__media img,
+    .plp-card__cta:hover,
+    .plp-card__quick-add:hover {
       transform: none;
     }
   }
