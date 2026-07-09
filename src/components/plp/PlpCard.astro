@@ -31,14 +31,12 @@ const price = item.priceRange || item.price;
           <span>{item.cta}</span>
           <img class="plp-card__cta-arrow" src="/images/nav/arrow.svg" alt="" width="16" height="16" />
         </a>
-        <button type="button" class="plp-card__compare" aria-pressed="false" aria-label={`Compare ${item.title}`}>
-          <svg class="plp-card__check" width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
-            <path d="M2.5 7.5 5.5 10.5 11.5 3.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-          </svg>
-        </button>
         <button type="button" class="plp-card__quick-add" data-quick-add={item.id} aria-label={`Quick add ${item.title}`}>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            <path d="M4 5H6L8.5 15H19L21 8H7.5M9.5 18.5H10.5M17 18.5H18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M4 5h2l2 9h9l2-6H8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+            <circle cx="9.5" cy="18.5" r="1.25" fill="currentColor" />
+            <circle cx="16.5" cy="18.5" r="1.25" fill="currentColor" />
+            <path d="M18 2.5v5M15.5 5h5" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
           </svg>
         </button>
       </div>
@@ -170,7 +168,6 @@ const price = item.priceRange || item.price;
     filter: brightness(0) invert(1);
   }
 
-  .plp-card__compare,
   .plp-card__quick-add {
     flex-shrink: 0;
     width: 40px;
@@ -180,24 +177,8 @@ const price = item.priceRange || item.price;
     justify-content: center;
     background: none;
     cursor: pointer;
-  }
-  .plp-card__compare {
     border: 2px solid var(--color-teal);
-  }
-  .plp-card__quick-add {
-    border: 1px solid var(--color-border);
     color: var(--color-ink);
-  }
-  .plp-card__compare[aria-pressed='true'] {
-    background: var(--color-teal);
-  }
-  .plp-card__check {
-    opacity: 0;
-    color: var(--color-paper);
-    transition: opacity var(--motion-fast) var(--ease-standard);
-  }
-  .plp-card__compare[aria-pressed='true'] .plp-card__check {
-    opacity: 1;
   }
 
   /* Price reads large on the wide full-bleed cards at desktop. */
@@ -221,7 +202,6 @@ const price = item.priceRange || item.price;
   .plp-card__description,
   .plp-card__cta,
   .plp-card__cta-arrow,
-  .plp-card__compare,
   .plp-card__quick-add {
     transition:
       color var(--motion-base) var(--ease-standard),
@@ -257,7 +237,6 @@ const price = item.priceRange || item.price;
     filter: none;
   }
   /* Secondary buttons go white outline + white glyphs. */
-  .plp-card:hover .plp-card__compare,
   .plp-card:hover .plp-card__quick-add {
     border-color: var(--color-paper);
     color: var(--color-paper);
