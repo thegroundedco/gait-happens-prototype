@@ -1,0 +1,200 @@
+---
+// Wide PLP card (Figma node 830:7878, 600×298 in a 2-up grid).
+// Left: fixed 298×298 image. Right: badges, title/price, rating,
+// description, and an action row (CTA / compare / quick-add).
+import StarRating from './StarRating.astro';
+
+const { item } = Astro.props;
+const price = item.priceRange || item.price;
+---
+<article class="plp-card">
+  <a class="plp-card__media" href={item.href} tabindex="-1" aria-hidden="true">
+    <img src={item.image} alt="" loading="lazy" />
+  </a>
+  <div class="plp-card__body">
+    {item.badges?.length > 0 && (
+      <div class="plp-card__badges">
+        {item.badges.map((badge) => <span class="plp-card__badge">{badge}</span>)}
+      </div>
+    )}
+    <div class="plp-card__content">
+      <div class="plp-card__top">
+        <div class="plp-card__heading">
+          <h3 class="plp-card__title"><a href={item.href}>{item.title}</a></h3>
+          {price && <p class="plp-card__price">{price}</p>}
+        </div>
+        {item.rating && <StarRating rating={item.rating} count={item.reviewCount} />}
+        <p class="plp-card__description">{item.description}</p>
+      </div>
+      <div class="plp-card__actions">
+        <a class="plp-card__cta" href={item.href}>
+          <span>{item.cta}</span>
+          <img class="plp-card__cta-arrow" src="/images/nav/arrow.svg" alt="" width="16" height="16" />
+        </a>
+        <button type="button" class="plp-card__compare" aria-pressed="false" aria-label={`Compare ${item.title}`}>
+          <img src="/images/plp/icon-compare.svg" alt="" width="16" height="16" />
+        </button>
+        <button type="button" class="plp-card__quick-add" data-quick-add={item.id} aria-label={`Quick add ${item.title}`}>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M4 5H6L8.5 15H19L21 8H7.5M9.5 18.5H10.5M17 18.5H18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+</article>
+<style>
+  .plp-card {
+    display: flex;
+    align-items: stretch;
+    border: 1px solid var(--color-border);
+    background: var(--color-paper);
+    height: 100%;
+  }
+
+  .plp-card__media {
+    display: block;
+    flex-shrink: 0;
+    width: 298px;
+    height: 298px;
+    overflow: hidden;
+  }
+  .plp-card__media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .plp-card__body {
+    flex: 1;
+    min-width: 0;
+    padding: var(--space-3);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  .plp-card__badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    align-self: flex-end;
+  }
+  .plp-card__badge {
+    background: var(--color-yellow);
+    color: var(--color-ink);
+    padding: var(--space-2);
+    font: var(--type-caption);
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-caption);
+    line-height: 1;
+  }
+
+  .plp-card__content {
+    flex: 1;
+    min-height: 0;
+    padding-top: var(--space-5);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: var(--space-3);
+  }
+
+  .plp-card__top {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+
+  .plp-card__heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: var(--space-4);
+  }
+  .plp-card__title {
+    font: var(--type-h4);
+    color: var(--color-ink);
+  }
+  .plp-card__title a {
+    color: inherit;
+  }
+  .plp-card__title a:hover {
+    text-decoration: underline;
+  }
+  .plp-card__price {
+    font: var(--type-caption);
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-caption);
+    color: var(--color-ink);
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .plp-card__description {
+    font: var(--type-body-16);
+    color: var(--color-ink);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .plp-card__actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+  }
+
+  .plp-card__cta {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    background: var(--color-teal);
+    color: var(--color-paper);
+    font: var(--type-cta);
+    padding: var(--space-3) var(--space-5);
+    transition: transform var(--motion-fast) var(--ease-standard);
+  }
+  .plp-card__cta:hover {
+    transform: translateY(-2px);
+  }
+  .plp-card__cta-arrow {
+    /* icon svg is ink-filled by default (var(--fill-0, #231F20)); force it
+       white to read against the teal CTA background, per spec. */
+    filter: brightness(0) invert(1);
+  }
+
+  .plp-card__compare,
+  .plp-card__quick-add {
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    cursor: pointer;
+  }
+  .plp-card__compare {
+    border: 2px solid var(--color-teal);
+  }
+  .plp-card__quick-add {
+    border: 1px solid var(--color-border);
+    color: var(--color-ink);
+  }
+  .plp-card__compare[aria-pressed='true'] {
+    background: var(--color-teal);
+  }
+
+  @media (max-width: 560px) {
+    .plp-card {
+      flex-direction: column;
+    }
+    .plp-card__media {
+      width: 100%;
+      height: auto;
+      aspect-ratio: 1 / 1;
+    }
+  }
+</style>

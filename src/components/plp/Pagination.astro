@@ -1,0 +1,20 @@
+---
+// Static "Page 1 of 1" — real pagination is out of scope until the catalog
+// grows past a single page.
+---
+<nav class="pagination" aria-label="Pagination">
+  <span class="pagination__label">Page 1 of 1</span>
+</nav>
+<style>
+  .pagination {
+    display: flex;
+    justify-content: center;
+    padding-block: var(--space-6);
+  }
+  .pagination__label {
+    font: var(--type-caption);
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-caption);
+    color: var(--color-ink-70);
+  }
+</style>

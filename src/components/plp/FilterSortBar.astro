@@ -1,0 +1,71 @@
+---
+// Static/visual filter + sort row. The selects render as real, focusable,
+// labeled controls but aren't wired to any filtering/sorting logic yet
+// (deferred to a later task) — see task-2-plp-spec.md.
+const { count = 0 } = Astro.props;
+---
+<div class="filter-sort">
+  <div class="filter-sort__group">
+    <span class="filter-sort__label">Filter:</span>
+    <select class="filter-sort__select" aria-label="Availability">
+      <option>Availability</option>
+      <option>In Stock</option>
+      <option>Out of Stock</option>
+    </select>
+    <select class="filter-sort__select" aria-label="Price">
+      <option>Price</option>
+      <option>Under $50</option>
+      <option>$50 – $150</option>
+      <option>$150+</option>
+    </select>
+  </div>
+  <div class="filter-sort__group">
+    <span class="filter-sort__label">Sort by:</span>
+    <select class="filter-sort__select" aria-label="Sort by">
+      <option selected>Best Selling</option>
+      <option>Price: Low to High</option>
+      <option>Price: High to Low</option>
+      <option>Newest</option>
+    </select>
+    <span class="filter-sort__count">{count} Products</span>
+  </div>
+</div>
+<style>
+  .filter-sort {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
+    padding-block: var(--space-4);
+    border-bottom: 1px solid var(--color-border);
+  }
+  .filter-sort__group {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-3);
+  }
+  .filter-sort__label {
+    font: var(--type-label);
+    color: var(--color-ink);
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-caption);
+  }
+  .filter-sort__select {
+    font: var(--type-caption);
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-caption);
+    color: var(--color-ink);
+    background: var(--color-paper);
+    border: 1px solid var(--color-border);
+    padding: var(--space-2) var(--space-3);
+  }
+  .filter-sort__count {
+    font: var(--type-caption);
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-caption);
+    color: var(--color-ink);
+    white-space: nowrap;
+  }
+</style>

@@ -1,0 +1,29 @@
+---
+// Teal intro cell that sits inside the PLP grid (occupies one card-sized cell;
+// stretches to match the row height set by its sibling PlpCards via grid stretch).
+const { heading, body } = Astro.props;
+---
+<div class="intro-block">
+  <h2 class="intro-block__heading">{heading}</h2>
+  <p class="intro-block__body">{body}</p>
+</div>
+<style>
+  .intro-block {
+    height: 100%;
+    background: var(--color-teal);
+    color: var(--color-paper);
+    padding: var(--space-5);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: var(--space-3);
+  }
+  .intro-block__heading {
+    font: var(--type-h4);
+    color: var(--color-paper);
+  }
+  .intro-block__body {
+    font: var(--type-body);
+    color: var(--color-paper);
+  }
+</style>

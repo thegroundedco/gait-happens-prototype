@@ -1,0 +1,26 @@
+---
+// PLP composer: title -> filter/sort -> grid(+intro) -> pagination.
+// Accepts either an already-resolved `collection` object or a `path` to
+// resolve via getCollection (matches Task 1's catalog accessors).
+// CrossSell + LogoWall sections are added in Task 3 — see the marker below.
+import PlpTitle from './PlpTitle.astro';
+import FilterSortBar from './FilterSortBar.astro';
+import PlpGrid from './PlpGrid.astro';
+import Pagination from './Pagination.astro';
+import { getCollection, getItem } from '../../data/catalog.js';
+
+const { collection: collectionProp, path } = Astro.props;
+const collection = collectionProp ?? getCollection(path);
+const items = (collection.itemIds ?? []).map(getItem);
+---
+<div class="plp">
+  <div data-reveal>
+    <PlpTitle title={collection.title} />
+  </div>
+  <FilterSortBar count={items.length} />
+  <div class="plp__grid-wrapper" data-reveal>
+    <PlpGrid items={items} intro={collection.intro} />
+  </div>
+  <Pagination />
+  <!-- Task 3: CrossSell + LogoWall render here -->
+</div>
