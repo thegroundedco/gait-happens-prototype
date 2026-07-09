@@ -5,7 +5,7 @@ import { routes } from '../data/sitemap.js';
 
 export function getStaticPaths() {
   return routes
-    .filter(route => route.path !== '/')
+    .filter(route => route.path !== '/' && route.status === 'placeholder')
     .map(route => ({ params: { slug: route.path.replace(/^\//, '') }, props: { route } }));
 }
 const { route } = Astro.props;
