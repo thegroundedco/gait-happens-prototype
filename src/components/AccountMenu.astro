@@ -1,0 +1,44 @@
+---
+// Compact account dropdown — driven entirely by `accountMenu` (src/data/sitemap.js),
+// not hardcoded. Toggled by Header.astro's `[data-util="account"]` button.
+import { accountMenu } from '../data/sitemap.js';
+---
+<div class="acct" data-util-panel="account" id="account-panel" hidden>
+  <ul>
+    {accountMenu.map((a) => (
+      <li>
+        <a href={a.href}>
+          {a.label}
+          <small>{a.note}</small>
+        </a>
+      </li>
+    ))}
+  </ul>
+</div>
+<style>
+  .acct {
+    position: absolute;
+    top: 100%;
+    right: var(--space-5);
+    z-index: 55;
+    background: var(--color-paper);
+    color: var(--color-ink);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+    border-radius: 6px;
+    min-width: 240px;
+  }
+  .acct[hidden] { display: none; }
+
+  .acct ul { list-style: none; margin: 0; padding: var(--space-2); }
+
+  .acct a {
+    display: flex;
+    flex-direction: column;
+    padding: var(--space-3);
+    border-radius: 4px;
+    font: var(--type-label);
+  }
+  .acct a:hover { background: var(--color-yellow); }
+
+  .acct small { font: var(--type-caption); color: var(--color-ink-70); }
+</style>

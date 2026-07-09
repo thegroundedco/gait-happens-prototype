@@ -1,0 +1,60 @@
+---
+// Slide-in cart drawer — empty-cart state only (no cart data/state management yet).
+// Toggled open by `[data-util="cart"]`; closed via `[data-cart-close]` (header button
+// + full-viewport scrim), or Esc.
+import Button from './Button.astro';
+---
+<aside class="cart-drawer" data-util-panel="cart" aria-hidden="true" inert>
+  <header>
+    <h3>Your Cart</h3>
+    <button type="button" data-cart-close aria-label="Close cart">✕</button>
+  </header>
+  <p class="empty">Your cart is empty.</p>
+  <Button href="/collections/all" variant="teal">Shop All</Button>
+</aside>
+<div class="cart-scrim" data-cart-close hidden></div>
+<style>
+  .cart-drawer {
+    position: fixed;
+    top: 0;
+    right: 0;
+    height: 100dvh;
+    width: min(420px, 90vw);
+    background: var(--color-paper);
+    color: var(--color-ink);
+    transform: translateX(100%);
+    transition: transform var(--motion-base) var(--ease-standard);
+    z-index: 60;
+    padding: var(--space-5);
+    display: grid;
+    gap: var(--space-5);
+    align-content: start;
+  }
+  .cart-drawer.open { transform: translateX(0); }
+
+  .cart-drawer header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .cart-drawer button[data-cart-close] {
+    background: none;
+    border: 0;
+    cursor: pointer;
+    font-size: 20px;
+    line-height: 1;
+    padding: var(--space-2);
+    color: var(--color-ink);
+  }
+
+  .empty { font: var(--type-body); color: var(--color-ink-70); }
+
+  .cart-scrim {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: 59;
+  }
+  .cart-scrim[hidden] { display: none; }
+</style>

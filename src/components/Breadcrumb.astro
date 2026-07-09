@@ -1,0 +1,7 @@
+---
+const { trail = [] } = Astro.props;
+---
+<nav class="crumbs" aria-label="Breadcrumb">
+  {trail.map((c, i) => <span>{c}{i < trail.length - 1 ? ' / ' : ''}</span>)}
+</nav>
+<style>.crumbs { font: var(--type-body-sm); color: var(--color-ink-70); }</style>

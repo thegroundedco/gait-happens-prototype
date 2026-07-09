@@ -1,0 +1,9 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PlaceholderPage from '../components/PlaceholderPage.astro';
+import { getRoute } from '../data/sitemap.js';
+const route = getRoute('/');
+---
+<BaseLayout title={route.title}>
+  <PlaceholderPage route={route} />
+</BaseLayout>

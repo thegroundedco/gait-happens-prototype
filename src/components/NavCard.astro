@@ -1,0 +1,94 @@
+---
+// One card inside a MegaMenu panel. Variant is derived from the panel's `style`
+// and the card's own `variant` (see `menus[].cards[]` in src/data/sitemap.js):
+//   style 'cards' → 'yellow' (photo + label, e.g. Shop Best Sellers) or
+//                   'teal'   (CTA, no photo, big label — e.g. "Shop All")
+//   style 'bars'  → 'bar'    (Resources — small yellow text bar)
+//   style 'white' → 'white'  (Contact — white card, big label)
+const { card, style } = Astro.props;
+const variant = style === 'bars' ? 'bar' : style === 'white' ? 'white' : (card.variant ?? 'yellow');
+const big = variant === 'teal' || variant === 'white';
+const arrowSrc = big ? '/images/nav/arrow-lg.svg' : '/images/nav/arrow.svg';
+const arrowSize = big ? 64 : 24;
+const fit = card.fit ?? 'cover';
+---
+<a class={`nav-card nav-card--${variant}`} href={card.href}>
+  {card.image && (
+    <span class="nav-card__media">
+      <img
+        src={card.image}
+        alt=""
+        loading="lazy"
+        class="nav-card__img"
+        style={`object-fit: ${fit};`}
+      />
+    </span>
+  )}
+  <span class={`nav-card__row${big ? ' nav-card__row--display' : ''}`}>
+    <span class={`nav-card__label${big ? ' nav-card__label--display' : ''}`}>{card.label}</span>
+    <img class="nav-card__arrow" src={arrowSrc} width={arrowSize} height={arrowSize} alt="" />
+  </span>
+</a>
+<style>
+  .nav-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    gap: var(--space-2);
+    padding: var(--space-4);
+    text-decoration: none;
+  }
+  /* cards/white variants are fixed-height panel tiles; bar variant fills its column slot */
+  .nav-card--yellow,
+  .nav-card--teal,
+  .nav-card--white {
+    height: 250px;
+    flex: 1 1 0;
+  }
+  .nav-card--bar {
+    flex: 1 1 0;
+    min-height: 0;
+  }
+
+  .nav-card--yellow { background: var(--color-yellow); color: var(--color-ink); }
+  .nav-card--teal { background: var(--color-teal); color: var(--color-ink); }
+  .nav-card--bar { background: var(--color-yellow); color: var(--color-ink); }
+  .nav-card--white { background: var(--color-paper); color: var(--color-ink); }
+
+  .nav-card__media {
+    position: relative;
+    flex: 1 1 0;
+    min-height: 0;
+    overflow: hidden;
+  }
+  .nav-card__img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .nav-card__row {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+  }
+
+  .nav-card__label {
+    font: var(--type-nav-label);
+  }
+  .nav-card__label--display { font: var(--type-display); }
+
+  .nav-card__arrow {
+    flex-shrink: 0;
+    transition: transform var(--motion-fast) var(--ease-out-expo);
+  }
+  .nav-card:hover .nav-card__arrow,
+  .nav-card:focus-visible .nav-card__arrow {
+    transform: translateX(6px);
+  }
+</style>

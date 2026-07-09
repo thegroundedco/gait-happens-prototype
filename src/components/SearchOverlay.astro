@@ -1,0 +1,29 @@
+---
+// Full-width search overlay — submitting navigates to /search?q=... (no client-side
+// results wiring here; that's a future task). Toggled by `[data-util="search"]`.
+---
+<div class="search-overlay" data-util-panel="search" hidden>
+  <form class="container" action="/search" method="get" role="search">
+    <input name="q" type="search" placeholder="Search products, courses, resources…" aria-label="Search" />
+  </form>
+</div>
+<style>
+  .search-overlay {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    z-index: 55;
+    background: var(--color-ink);
+    padding-block: var(--space-5);
+  }
+  .search-overlay[hidden] { display: none; }
+
+  input {
+    width: 100%;
+    font: var(--type-body-large);
+    padding: var(--space-4);
+    border: 0;
+    border-radius: 4px;
+  }
+</style>

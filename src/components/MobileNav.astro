@@ -1,0 +1,87 @@
+---
+// Mobile slide-in nav drawer (<=820px only) — driven entirely by `menus` +
+// `accountMenu` (src/data/sitemap.js), not hardcoded. Toggled by Header.astro's
+// `[data-util="menu"]` hamburger button; closed via Esc or `[data-util-panel-scrim="menu"]`.
+// Each `type:'mega'` menu becomes a <details> accordion of its `cards`; the
+// `type:'link'` menu (About) becomes a plain link — same source data Header.astro
+// and MegaMenu.astro already use for the desktop nav.
+import { menus, accountMenu } from '../data/sitemap.js';
+---
+<aside class="mobile-nav" data-util-panel="menu" id="mobile-nav" aria-hidden="true" inert>
+  <nav aria-label="Mobile">
+    {menus.map((m) =>
+      m.type === 'link' ? (
+        <a class="m-item" href={m.href}>{m.label}</a>
+      ) : (
+        <details class="m-acc">
+          <summary>{m.label}</summary>
+          <ul>{m.cards.map((c) => <li><a href={c.href}>{c.label}</a></li>)}</ul>
+        </details>
+      )
+    )}
+    <details class="m-acc">
+      <summary>Account</summary>
+      <ul>{accountMenu.map((a) => <li><a href={a.href}>{a.label}</a></li>)}</ul>
+    </details>
+    <a class="m-item" href="/search">Search</a>
+  </nav>
+</aside>
+<div class="mobile-scrim" data-util-panel-scrim="menu" hidden></div>
+<style>
+  .mobile-nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100dvh;
+    width: min(360px, 88vw);
+    background: var(--color-ink);
+    color: var(--color-paper);
+    transform: translateX(-100%);
+    transition: transform var(--motion-base) var(--ease-standard);
+    z-index: 60;
+    padding: var(--space-6) var(--space-5);
+    overflow: auto;
+  }
+  .mobile-nav.open { transform: translateX(0); }
+
+  .m-item,
+  summary {
+    display: block;
+    font: var(--type-h4);
+    padding-block: var(--space-3);
+    cursor: pointer;
+  }
+
+  .m-item { color: var(--color-paper); }
+
+  .m-acc ul {
+    list-style: none;
+    margin: 0;
+    padding-left: var(--space-4);
+  }
+
+  .m-acc a {
+    display: block;
+    font: var(--type-body);
+    padding-block: var(--space-2);
+    /* `--color-ink-70` (dark @ 70%) is only legible on the paper background it
+       was designed for (see AccountMenu.astro); on this drawer's dark ink
+       background it would be near-invisible, so the secondary-text treatment
+       here is the paper token dimmed via opacity instead. */
+    color: var(--color-paper);
+    opacity: 0.7;
+  }
+
+  .mobile-scrim {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: 59;
+  }
+  .mobile-scrim[hidden] { display: none; }
+
+  @media (min-width: 821px) {
+    .mobile-nav,
+    .mobile-scrim { display: none; }
+  }
+</style>

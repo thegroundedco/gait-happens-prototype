@@ -1,0 +1,367 @@
+---
+import { menus } from '../data/sitemap.js';
+import AnnouncementBar from './AnnouncementBar.astro';
+import MegaMenu from './MegaMenu.astro';
+import AccountMenu from './AccountMenu.astro';
+import SearchOverlay from './SearchOverlay.astro';
+import CartDrawer from './CartDrawer.astro';
+import MobileNav from './MobileNav.astro';
+const megaMenus = menus.filter((m) => m.type === 'mega');
+---
+<header class="site-header">
+  <div class="navrow">
+    <div class="container navrow__inner">
+      <div class="navrow__left">
+        <button
+          type="button"
+          class="hamburger"
+          data-util="menu"
+          aria-label="Menu"
+          aria-expanded="false"
+          aria-controls="mobile-nav"
+        >
+          <span class="hamburger__bar"></span>
+          <span class="hamburger__bar"></span>
+          <span class="hamburger__bar"></span>
+        </button>
+        <a href="/" class="logo" aria-label="Gait Happens — Home">
+          <span class="logo__box">
+            <span class="logo__mark"><img src="/images/nav/logo-mark.svg" alt="" /></span>
+            <span class="logo__gait"><img src="/images/nav/logo-gait.svg" alt="" /></span>
+            <span class="logo__happens"><img src="/images/nav/logo-happens.svg" alt="" /></span>
+          </span>
+        </a>
+        <nav class="top" aria-label="Primary">
+          {menus.map((m) =>
+            m.type === 'link' ? (
+              <a class="top__item" href={m.href}>{m.label}</a>
+            ) : (
+              <button
+                type="button"
+                class="top__item"
+                data-menu-trigger={m.id}
+                aria-expanded="false"
+                aria-controls={`mega-panel-${m.id}`}
+              >
+                {m.label}
+              </button>
+            )
+          )}
+        </nav>
+      </div>
+      <div class="util">
+        <span class="lang">
+          <span class="lang__label">ENGLISH</span>
+          <img src="/images/nav/icon-chevron-down.svg" alt="" width="24" height="24" />
+        </span>
+        <div class="util__icons">
+          <button type="button" class="util__btn" data-util="search" aria-label="Search">
+            <img src="/images/nav/icon-search.svg" alt="" width="24" height="24" />
+          </button>
+          <button type="button" class="util__btn" data-util="account" aria-label="Account" aria-expanded="false" aria-controls="account-panel">
+            <img src="/images/nav/icon-user.svg" alt="" width="24" height="24" />
+          </button>
+          <button type="button" class="util__btn" data-util="cart" aria-label="Cart">
+            <img src="/images/nav/icon-cart.svg" alt="" width="24" height="24" />
+          </button>
+        </div>
+      </div>
+    </div>
+    {megaMenus.map((m) => <MegaMenu menu={m} />)}
+    <AccountMenu />
+    <SearchOverlay />
+  </div>
+  <AnnouncementBar />
+  <CartDrawer />
+  <MobileNav />
+</header>
+<script>
+  // Mega-menu + account/search/cart utility panels. The site uses Astro's
+  // ClientRouter (view transitions), which swaps the DOM on navigation and
+  // does not re-run already-loaded module scripts — so all setup lives in
+  // functions re-invoked on every `astro:page-load` (fires on first load
+  // too), re-querying the fresh header/trigger/panel elements each time.
+  // Document-level listeners (Esc, outside-click) are registered ONCE at
+  // module scope and read the current header/open state via closure,
+  // matching the pattern already used in src/scripts/motion.js. There is
+  // exactly one `astro:page-load` listener (initHeader) and it only rebinds
+  // element-level listeners — it never itself calls document.addEventListener,
+  // so navigating repeatedly cannot stack up duplicate document listeners.
+  let header = null;
+  let open = null;
+  let openTrigger = null;
+  let panels = new Map();
+
+  // Utility panels (account dropdown, search overlay, cart drawer) —
+  // re-queried in initUtilPanels() alongside the mega-menu elements above.
+  let account = null;
+  let search = null;
+  let cart = null;
+  let scrim = null;
+  let accountTrigger = null;
+
+  // Mobile nav drawer — re-queried in initMobileNav() below, same pattern.
+  let mobileNav = null;
+  let mobileScrim = null;
+  let mobileTrigger = null;
+
+  function show(id) {
+    const panel = panels.get(id);
+    if (!panel || !header) return;
+    // Opening a mega panel closes account+search (mutual exclusion), and
+    // hide()'s own trigger/panel bookkeeping also closes any other mega
+    // panel that's currently open (switching between triggers).
+    closeOverlays('mega');
+    panel.hidden = false;
+    const trigger = header.querySelector(`[data-menu-trigger="${id}"]`);
+    trigger?.setAttribute('aria-expanded', 'true');
+    open = id;
+    openTrigger = trigger;
+  }
+
+  function hide() {
+    if (!open || !header) return;
+    const panel = panels.get(open);
+    if (panel) panel.hidden = true;
+    header.querySelector(`[data-menu-trigger="${open}"]`)?.setAttribute('aria-expanded', 'false');
+    open = null;
+    openTrigger = null;
+  }
+
+  function setAccountOpen(next) {
+    if (!account) return;
+    account.hidden = !next;
+    accountTrigger?.setAttribute('aria-expanded', String(next));
+  }
+
+  function setSearchOpen(next) {
+    if (!search) return;
+    search.hidden = !next;
+    if (next) search.querySelector('input')?.focus();
+  }
+
+  function setCartOpen(next) {
+    if (!cart || !scrim) return;
+    cart.classList.toggle('open', next);
+    cart.setAttribute('aria-hidden', String(!next));
+    // Off-canvas when closed: keep its links out of tab order (in addition
+    // to the visual translateX hide), matching MobileNav's `inert` pattern.
+    cart.toggleAttribute('inert', !next);
+    scrim.hidden = !next;
+  }
+
+  // Keeps the mega-menu panel, account dropdown, and search overlay mutually
+  // exclusive — opening any one of them closes the other two. `except` is
+  // whichever of 'mega' | 'account' | 'search' is about to be opened by the
+  // caller (or omitted/unmatched to close all three, e.g. on Escape/outside
+  // click). The cart drawer is intentionally not included here — it's meant
+  // to stay independent of these top-area overlays.
+  function closeOverlays(except) {
+    if (except !== 'mega') hide();
+    if (except !== 'account') setAccountOpen(false);
+    if (except !== 'search') setSearchOpen(false);
+  }
+
+  function setMobileNavOpen(next) {
+    if (!mobileNav || !mobileScrim) return;
+    mobileNav.classList.toggle('open', next);
+    mobileNav.setAttribute('aria-hidden', String(!next));
+    // Off-canvas when closed: keep its links out of tab order (in addition
+    // to the visual translateX hide) so focus can't land on a hidden panel.
+    mobileNav.toggleAttribute('inert', !next);
+    mobileScrim.hidden = !next;
+    mobileTrigger?.setAttribute('aria-expanded', String(next));
+  }
+
+  function initMegaMenus() {
+    header = document.querySelector('.site-header');
+    open = null;
+    openTrigger = null;
+    if (!header) return;
+
+    const triggers = header.querySelectorAll('[data-menu-trigger]');
+    panels = new Map(
+      [...header.querySelectorAll('[data-menu-panel]')].map((p) => [p.dataset.menuPanel, p])
+    );
+
+    triggers.forEach((t) => {
+      const id = t.dataset.menuTrigger;
+      t.addEventListener('mouseenter', () => show(id));
+      t.addEventListener('focus', () => show(id));
+      t.addEventListener('click', () => (open === id ? hide() : show(id)));
+      // Keyboard users: focus alone opens the panel but Tab would just move
+      // to the next trigger (closing it) without ever reaching the panel's
+      // links. Enter/Space/ArrowDown instead open the panel and jump focus
+      // straight to its first link.
+      t.addEventListener('keydown', (e) => {
+        if (e.key !== 'Enter' && e.key !== ' ' && e.key !== 'ArrowDown') return;
+        e.preventDefault();
+        show(id);
+        panels.get(id)?.querySelector('a')?.focus();
+      });
+    });
+
+    header.addEventListener('mouseleave', hide);
+  }
+
+  function initUtilPanels() {
+    if (!header) return;
+
+    account = header.querySelector('[data-util-panel="account"]');
+    search = header.querySelector('[data-util-panel="search"]');
+    cart = header.querySelector('[data-util-panel="cart"]');
+    scrim = header.querySelector('.cart-scrim');
+    accountTrigger = header.querySelector('[data-util="account"]');
+
+    accountTrigger?.addEventListener('click', () => {
+      const next = Boolean(account?.hidden);
+      if (next) closeOverlays('account');
+      setAccountOpen(next);
+    });
+
+    header.querySelector('[data-util="search"]')?.addEventListener('click', () => {
+      const next = Boolean(search?.hidden);
+      if (next) closeOverlays('search');
+      setSearchOpen(next);
+    });
+
+    header.querySelector('[data-util="cart"]')?.addEventListener('click', () => setCartOpen(true));
+
+    header.querySelectorAll('[data-cart-close]').forEach((el) => {
+      el.addEventListener('click', () => setCartOpen(false));
+    });
+  }
+
+  function initMobileNav() {
+    if (!header) return;
+
+    mobileNav = header.querySelector('[data-util-panel="menu"]');
+    mobileScrim = header.querySelector('[data-util-panel-scrim="menu"]');
+    mobileTrigger = header.querySelector('[data-util="menu"]');
+
+    mobileTrigger?.addEventListener('click', () => {
+      setMobileNavOpen(!mobileNav?.classList.contains('open'));
+    });
+
+    mobileScrim?.addEventListener('click', () => setMobileNavOpen(false));
+  }
+
+  function initHeader() {
+    initMegaMenus();
+    initUtilPanels();
+    initMobileNav();
+  }
+
+  document.addEventListener('astro:page-load', initHeader);
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape') return;
+    // Capture before hide() clears `open`/`openTrigger`, so focus can return
+    // to the trigger that opened the panel — but only when a mega panel was
+    // actually the thing that closed (not for account/search/cart/mobile).
+    const returnFocusTo = open ? openTrigger : null;
+    hide();
+    setAccountOpen(false);
+    setSearchOpen(false);
+    setCartOpen(false);
+    setMobileNavOpen(false);
+    returnFocusTo?.focus();
+  });
+  document.addEventListener('click', (e) => {
+    if (!header || header.contains(e.target)) return;
+    // Cart is intentionally excluded here: its full-viewport scrim already
+    // intercepts outside clicks and closes it via [data-cart-close].
+    hide();
+    setAccountOpen(false);
+    setSearchOpen(false);
+  });
+</script>
+<style>
+  .navrow {
+    background: var(--color-ink);
+    position: sticky;
+    top: 0;
+    z-index: 50;
+  }
+
+  .navrow__inner {
+    padding-block: var(--space-4);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .navrow__left {
+    display: flex;
+    align-items: center;
+    gap: var(--space-7);
+  }
+
+  .hamburger {
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    gap: 5px;
+    width: 24px;
+    height: 24px;
+    background: none;
+    border: 0;
+    padding: 0;
+    cursor: pointer;
+  }
+  .hamburger__bar {
+    display: block;
+    width: 100%;
+    height: 2px;
+    background: var(--color-paper);
+  }
+
+  .logo { display: block; }
+
+  .logo__box {
+    position: relative;
+    display: block;
+    width: 148px;
+    height: 26.929px;
+  }
+  .logo__box span { position: absolute; display: block; }
+  .logo__box img { width: 100%; height: 100%; display: block; }
+  .logo__mark { top: 0; right: 92.61%; bottom: 0.02%; left: 0; }
+  .logo__gait { top: 24.99%; right: 55.87%; bottom: 24.2%; left: 10.35%; }
+  .logo__happens { top: 25.25%; right: 0; bottom: 9.39%; left: 45.89%; }
+
+  .top { display: flex; align-items: center; }
+  .top__item {
+    font: var(--type-label);
+    color: var(--color-paper);
+    background: none;
+    border: 0;
+    cursor: pointer;
+    padding-block: var(--space-3);
+    padding-inline: var(--space-5);
+  }
+
+  .util { display: flex; align-items: center; gap: var(--space-5); }
+
+  .lang { display: flex; align-items: center; gap: var(--space-2); color: var(--color-paper); }
+  .lang__label { font: var(--type-caption); text-transform: uppercase; letter-spacing: var(--tracking-caption); }
+  .lang img { display: block; }
+
+  .util__icons { display: flex; align-items: center; gap: var(--space-2); }
+  .util__btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: 0;
+    padding: 0;
+    cursor: pointer;
+  }
+  .util__btn img { display: block; }
+
+  @media (max-width: 820px) {
+    .top,
+    .lang { display: none; }
+
+    .hamburger { display: flex; }
+  }
+</style>
