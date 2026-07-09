@@ -58,9 +58,12 @@ const megaMenus = menus.filter((m) => m.type === 'mega');
           <button type="button" class="util__btn" data-util="search" aria-label="Search">
             <img src="/images/nav/icon-search.svg" alt="" width="24" height="24" />
           </button>
-          <button type="button" class="util__btn" data-util="account" aria-label="Account" aria-expanded="false" aria-controls="account-panel">
-            <img src="/images/nav/icon-user.svg" alt="" width="24" height="24" />
-          </button>
+          <div class="util__acct">
+            <button type="button" class="util__btn" data-util="account" aria-label="Account" aria-expanded="false" aria-controls="account-panel">
+              <img src="/images/nav/icon-user.svg" alt="" width="24" height="24" />
+            </button>
+            <AccountMenu />
+          </div>
           <button type="button" class="util__btn" data-util="cart" aria-label="Cart">
             <img src="/images/nav/icon-cart.svg" alt="" width="24" height="24" />
           </button>
@@ -68,7 +71,6 @@ const megaMenus = menus.filter((m) => m.type === 'mega');
       </div>
     </div>
     {megaMenus.map((m) => <MegaMenu menu={m} />)}
-    <AccountMenu />
     <SearchOverlay />
   </div>
   <AnnouncementBar />
@@ -357,6 +359,8 @@ const megaMenus = menus.filter((m) => m.type === 'mega');
   .lang img { display: block; }
 
   .util__icons { display: flex; align-items: center; gap: var(--space-2); }
+  /* Positioning context so the account dropdown drops directly under its icon. */
+  .util__acct { position: relative; display: inline-flex; }
   .util__btn {
     display: inline-flex;
     align-items: center;
