@@ -1,0 +1,140 @@
+---
+// Full-width yellow cross-sell band, rendered below the PLP grid/pagination.
+// Row of 3 mini item cards (image + label + arrow, nav-card-like) plus a
+// teal "Shop All" CTA card mirroring the header mega-menu's teal NavCard.
+import { getItem } from '../../data/catalog.js';
+
+const { crossSell } = Astro.props;
+const items = (crossSell?.itemIds ?? []).map(getItem);
+---
+<section class="cross-sell">
+  <div class="cross-sell__pad">
+    <h2 class="cross-sell__heading">{crossSell?.heading}</h2>
+    <div class="cross-sell__row">
+      {items.map((item) => (
+        <a class="cross-sell__card" href={item.href}>
+          <span class="cross-sell__media">
+            <img src={item.image} alt="" loading="lazy" />
+          </span>
+          <span class="cross-sell__label-row">
+            <span class="cross-sell__label">{item.title}</span>
+            <img class="cross-sell__arrow" src="/images/nav/arrow.svg" width="24" height="24" alt="" />
+          </span>
+        </a>
+      ))}
+      <a class="cross-sell__card cross-sell__card--all" href={crossSell?.shopAllHref}>
+        <span class="cross-sell__label-row cross-sell__label-row--display">
+          <span class="cross-sell__label cross-sell__label--display">Shop All</span>
+          <img class="cross-sell__arrow" src="/images/nav/arrow-lg.svg" width="64" height="64" alt="" />
+        </span>
+      </a>
+    </div>
+  </div>
+</section>
+<style>
+  .cross-sell {
+    background: var(--color-yellow);
+  }
+
+  .cross-sell__pad {
+    max-width: var(--container-max);
+    margin-inline: auto;
+    padding-block: var(--space-7);
+    padding-inline: var(--space-5);
+  }
+
+  .cross-sell__heading {
+    font: var(--type-h4);
+    color: var(--color-ink);
+    margin-bottom: var(--space-5);
+  }
+
+  .cross-sell__row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--space-4);
+  }
+
+  .cross-sell__card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    height: 280px;
+    text-decoration: none;
+    overflow: hidden;
+  }
+
+  .cross-sell__media {
+    position: absolute;
+    inset: 0;
+  }
+  .cross-sell__media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform var(--motion-base) var(--ease-standard);
+  }
+  .cross-sell__card:hover .cross-sell__media img {
+    transform: scale(1.06);
+  }
+
+  .cross-sell__label-row {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+    padding: var(--space-4);
+    background: var(--color-ink-70);
+  }
+
+  .cross-sell__label {
+    font: var(--type-nav-label);
+    color: var(--color-paper);
+  }
+
+  .cross-sell__arrow {
+    flex-shrink: 0;
+    transition: transform var(--motion-fast) var(--ease-out-expo);
+  }
+  .cross-sell__card:hover .cross-sell__arrow,
+  .cross-sell__card:focus-visible .cross-sell__arrow {
+    transform: translateX(6px);
+  }
+
+  /* "Shop All" CTA card — teal, no photo, mirrors the mega-menu teal NavCard. */
+  .cross-sell__card--all {
+    background: var(--color-teal);
+    justify-content: center;
+  }
+  .cross-sell__card--all .cross-sell__label-row--display {
+    background: none;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: var(--space-4);
+  }
+  .cross-sell__card--all .cross-sell__label--display {
+    font: var(--type-display);
+    color: var(--color-paper);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .cross-sell__card:hover .cross-sell__media img,
+    .cross-sell__card:hover .cross-sell__arrow {
+      transform: none;
+    }
+  }
+
+  @media (max-width: 900px) {
+    .cross-sell__row {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+  @media (max-width: 560px) {
+    .cross-sell__row {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
