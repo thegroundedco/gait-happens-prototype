@@ -14,13 +14,23 @@ const collection = collectionProp ?? getCollection(path);
 const items = (collection.itemIds ?? []).map(getItem);
 ---
 <div class="plp">
-  <div data-reveal>
-    <PlpTitle title={collection.title} />
+  <div class="plp__pad">
+    <div data-reveal>
+      <PlpTitle title={collection.title} />
+    </div>
+    <FilterSortBar count={items.length} />
   </div>
-  <FilterSortBar count={items.length} />
+  <!-- Grid breaks out to full width (Polaroid-style full-bleed cards). -->
   <div class="plp__grid-wrapper" data-reveal>
     <PlpGrid items={items} intro={collection.intro} />
   </div>
-  <Pagination />
+  <div class="plp__pad">
+    <Pagination />
+  </div>
   <!-- Task 3: CrossSell + LogoWall render here -->
 </div>
+<style>
+  /* Title, filter bar and pagination stay padded from the viewport edges;
+     the card grid between them spans full width. */
+  .plp__pad { padding-inline: var(--space-5); }
+</style>

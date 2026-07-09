@@ -5,6 +5,6 @@ import { getCollection } from '../../data/catalog.js';
 
 const collection = getCollection('/collections/courses-individuals');
 ---
-<BaseLayout title={collection.title} description={collection.intro?.body}>
+<BaseLayout title={collection.title} description={collection.intro?.body} wide>
   <Plp collection={collection} />
 </BaseLayout>

@@ -54,9 +54,12 @@ const price = item.priceRange || item.price;
 
   .plp-card__media {
     display: block;
-    flex-shrink: 0;
-    width: 298px;
-    height: 298px;
+    /* Scales with the card (full-bleed cards get large images) instead of a
+       fixed 298px; stretches to the card's full height. */
+    flex: 0 0 42%;
+    min-width: 220px;
+    align-self: stretch;
+    min-height: 298px;
     overflow: hidden;
   }
   .plp-card__media img {
