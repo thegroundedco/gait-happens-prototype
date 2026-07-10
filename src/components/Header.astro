@@ -32,6 +32,7 @@ const megaMenus = menus.filter((m) => m.type === 'mega');
           </span>
         </a>
         <nav class="top" aria-label="Primary">
+          <span class="nav-pill" aria-hidden="true"></span>
           {menus.map((m) =>
             m.type === 'link' ? (
               <a class="top__item" href={m.href}>{m.label}</a>
@@ -80,6 +81,7 @@ const megaMenus = menus.filter((m) => m.type === 'mega');
 </header>
 <script>
   import { getCart } from '../scripts/cart.js';
+  import { gsap } from 'gsap';
 
   // Mega-menu + account/search/cart utility panels. The site uses Astro's
   // ClientRouter (view transitions), which swaps the DOM on navigation and
@@ -96,6 +98,14 @@ const megaMenus = menus.filter((m) => m.type === 'mega');
   let open = null;
   let openTrigger = null;
   let panels = new Map();
+
+  // Magic-pill active-item indicator — the yellow pill that glides behind
+  // the hovered/focused top-nav item. Re-queried in initNavPill() alongside
+  // the mega-menu elements above; `pillPinned` holds the trigger the pill
+  // should stay on while a mega panel is open (set/cleared by show()/hide()
+  // below), same module-scope-state pattern as `open`/`openTrigger`.
+  let navPill = null;
+  let pillPinned = null;
 
   // Utility panels (account dropdown, search overlay, cart drawer) —
   // re-queried in initUtilPanels() alongside the mega-menu elements above.
@@ -116,6 +126,33 @@ const megaMenus = menus.filter((m) => m.type === 'mega');
   // the cart drawer.
   let cartTrigger = null;
 
+  // offset relative to nav.top (item.offsetParent is nav.top since it's
+  // positioned) — used by movePillTo() to tween the pill under an item.
+  function measure(item) {
+    return { x: item.offsetLeft, w: item.offsetWidth };
+  }
+
+  function movePillTo(item, { elastic = true } = {}) {
+    if (!navPill || !item) return;
+    const { x, w } = measure(item);
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    header?.querySelectorAll('.top__item.is-active').forEach((el) => el.classList.remove('is-active'));
+    item.classList.add('is-active');
+    gsap.to(navPill, {
+      x, width: w, autoAlpha: 1,
+      duration: reduce ? 0.001 : 0.5,
+      ease: reduce ? 'none' : 'back.out(1.7)',
+      overwrite: true,
+    });
+  }
+
+  function retractPill() {
+    if (!navPill) return;
+    if (pillPinned) { movePillTo(pillPinned, { elastic: false }); return; }
+    header?.querySelectorAll('.top__item.is-active').forEach((el) => el.classList.remove('is-active'));
+    gsap.to(navPill, { autoAlpha: 0, duration: 0.25, overwrite: true });
+  }
+
   function show(id) {
     const panel = panels.get(id);
     if (!panel || !header) return;
@@ -128,6 +165,12 @@ const megaMenus = menus.filter((m) => m.type === 'mega');
     trigger?.setAttribute('aria-expanded', 'true');
     open = id;
     openTrigger = trigger;
+    // Pin the magic pill to this trigger — it stays put even if the pointer
+    // leaves the nav while the mega panel is open (see retractPill()).
+    if (trigger) {
+      pillPinned = trigger;
+      movePillTo(trigger);
+    }
   }
 
   function hide() {
@@ -137,6 +180,10 @@ const megaMenus = menus.filter((m) => m.type === 'mega');
     header.querySelector(`[data-menu-trigger="${open}"]`)?.setAttribute('aria-expanded', 'false');
     open = null;
     openTrigger = null;
+    // Release the pill's pin and let it retract (unless the pointer is
+    // still resting on a top item, whose own mouseenter will re-pin it).
+    pillPinned = null;
+    retractPill();
   }
 
   function setAccountOpen(next) {
@@ -249,6 +296,23 @@ const megaMenus = menus.filter((m) => m.type === 'mega');
     header.addEventListener('mouseleave', hide);
   }
 
+  // Magic-pill follow logic — re-bound per DOM (element-level listeners only,
+  // no document.addEventListener here) so it rebinds cleanly on every
+  // astro:after-swap, matching initMegaMenus()'s pattern. Must run after
+  // initMegaMenus() so `header` is already set.
+  function initNavPill() {
+    if (!header) return;
+    navPill = header.querySelector('.nav-pill');
+    pillPinned = null;
+    const items = header.querySelectorAll('.top__item');
+    items.forEach((item) => {
+      item.addEventListener('mouseenter', () => movePillTo(item));
+      item.addEventListener('focus', () => movePillTo(item));
+    });
+    // Retract when the pointer leaves the whole top nav (unless a mega is pinned).
+    header.querySelector('.top')?.addEventListener('mouseleave', () => retractPill());
+  }
+
   function initUtilPanels() {
     if (!header) return;
 
@@ -296,6 +360,7 @@ const megaMenus = menus.filter((m) => m.type === 'mega');
 
   function initHeader() {
     initMegaMenus();
+    initNavPill();
     initUtilPanels();
     initMobileNav();
     renderCartBadge();
@@ -398,8 +463,10 @@ const megaMenus = menus.filter((m) => m.type === 'mega');
   .logo__gait { top: 24.99%; right: 55.87%; bottom: 24.2%; left: 10.35%; }
   .logo__happens { top: 25.25%; right: 0; bottom: 9.39%; left: 45.89%; }
 
-  .top { display: flex; align-items: center; }
+  .top { position: relative; display: flex; align-items: center; }
   .top__item {
+    position: relative;
+    z-index: 1;
     font: var(--type-label);
     color: var(--color-paper);
     background: none;
@@ -407,6 +474,25 @@ const megaMenus = menus.filter((m) => m.type === 'mega');
     cursor: pointer;
     padding-block: var(--space-3);
     padding-inline: var(--space-5);
+  }
+  .top__item.is-active { color: var(--color-ink); }
+
+  /* Magic-pill active-item indicator — glides behind the hovered/focused
+     top item (see initNavPill()/movePillTo() in the script above). Sits
+     below the labels (z-index: 0 vs. .top__item's 1) and is positioned
+     relative to nav.top via the x/width GSAP tweens setting its transform. */
+  .nav-pill {
+    position: absolute;
+    left: 0;
+    top: 50%;
+    height: calc(100% - var(--space-3));
+    width: 0;
+    transform: translate(0, -50%);
+    background: var(--color-yellow);
+    border-radius: 4px;
+    opacity: 0;
+    pointer-events: none;
+    z-index: 0;
   }
 
   .util { display: flex; align-items: center; gap: var(--space-5); }
