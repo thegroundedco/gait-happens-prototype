@@ -153,15 +153,58 @@ const megaMenus = menus.filter((m) => m.type === 'mega');
     gsap.to(navPill, { autoAlpha: 0, duration: 0.25, overwrite: true });
   }
 
+  // Mega-panel morph — crossfade + staggered card animation, replacing the
+  // old instant hidden/display:none show/hide (see MegaMenu.astro's
+  // `.mega`/`.mega.is-open` CSS: opacity-driven, GSAP owns the tween).
+  // Placed just above show()/hide() since those two now call them, same
+  // placement pattern as movePillTo()/retractPill() above for Task 2.
+  const reduceMo = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function animatePanelIn(panel) {
+    panel.classList.add('is-open');
+    panel.removeAttribute('inert');
+    const cards = panel.querySelectorAll('.nav-card'); // NavCard's real root class
+    if (reduceMo()) {
+      gsap.set(panel, { autoAlpha: 1 });
+      gsap.set(cards, { autoAlpha: 1, y: 0 });
+      return;
+    }
+    gsap.to(panel, { autoAlpha: 1, duration: 0.28, overwrite: true });
+    gsap.fromTo(
+      cards,
+      { autoAlpha: 0, y: 14 },
+      { autoAlpha: 1, y: 0, duration: 0.34, stagger: 0.04, ease: 'power2.out', overwrite: true }
+    );
+  }
+
+  function animatePanelOut(panel) {
+    panel.setAttribute('inert', '');
+    panel.classList.remove('is-open');
+    if (reduceMo()) {
+      gsap.set(panel, { autoAlpha: 0 });
+      return;
+    }
+    gsap.to(panel, { autoAlpha: 0, duration: 0.2, overwrite: true });
+  }
+
   function show(id) {
     const panel = panels.get(id);
     if (!panel || !header) return;
-    // Close everything first — the currently-open mega panel (so switching
-    // from one trigger to another never leaves two panels open) AND the
-    // account/search overlays (mutual exclusion) — then open this panel.
-    closeOverlays();
-    panel.hidden = false;
+    // Close the account/search overlays (mutual exclusion) but NOT the mega
+    // category itself — this function handles the outgoing mega panel
+    // explicitly below (crossfade), instead of routing it through hide()
+    // via a plain closeOverlays(), so the outgoing and incoming panels can
+    // animate concurrently rather than close-then-open.
+    closeOverlays('mega');
     const trigger = header.querySelector(`[data-menu-trigger="${id}"]`);
+    if (open && open !== id) {
+      // A different mega was already open — fade it out while the new one
+      // fades in; both are async GSAP tweens started in the same tick, so
+      // they run concurrently and read as one panel morphing into the next.
+      animatePanelOut(panels.get(open));
+      header.querySelector(`[data-menu-trigger="${open}"]`)?.setAttribute('aria-expanded', 'false');
+    }
+    animatePanelIn(panel);
     trigger?.setAttribute('aria-expanded', 'true');
     open = id;
     openTrigger = trigger;
@@ -176,7 +219,7 @@ const megaMenus = menus.filter((m) => m.type === 'mega');
   function hide() {
     if (!open || !header) return;
     const panel = panels.get(open);
-    if (panel) panel.hidden = true;
+    if (panel) animatePanelOut(panel);
     header.querySelector(`[data-menu-trigger="${open}"]`)?.setAttribute('aria-expanded', 'false');
     open = null;
     openTrigger = null;
@@ -275,6 +318,16 @@ const megaMenus = menus.filter((m) => m.type === 'mega');
     panels = new Map(
       [...header.querySelectorAll('[data-menu-panel]')].map((p) => [p.dataset.menuPanel, p])
     );
+    // Guard the initial state: every panel starts closed — inert, no
+    // `is-open`, opacity 0 — replacing the old default-`hidden` attribute.
+    // Each swap brings fresh (already-`inert`) panel DOM, but this also
+    // resets their GSAP-driven opacity, since MegaMenu.astro's CSS default
+    // (`opacity: 0`) only covers panels that were never animated in.
+    panels.forEach((panel) => {
+      panel.classList.remove('is-open');
+      panel.setAttribute('inert', '');
+      gsap.set(panel, { autoAlpha: 0 });
+    });
 
     triggers.forEach((t) => {
       const id = t.dataset.menuTrigger;
