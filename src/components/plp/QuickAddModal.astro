@@ -1,0 +1,515 @@
+---
+// Quick-Add modal (Task 8) — centered dialog + scrim, populated at runtime
+// from a card's `[data-quick-add={id}]` trigger (see PlpCard.astro). One
+// instance is rendered per PLP page (Plp.astro), matching the one CartDrawer
+// instance Header.astro renders per page. Markup here is SSR-stable and
+// starts closed (`hidden` + `inert`); the co-located client script below
+// fills in title/price/image/variant pills/size chart/quantity and toggles
+// the open state. See that script's header comment for the leak-free
+// (View-Transitions-safe) event-binding pattern.
+---
+<div class="quick-add-scrim" data-quick-add-scrim hidden></div>
+<div
+  class="quick-add-modal"
+  data-quick-add-modal
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="quick-add-title"
+  aria-hidden="true"
+  hidden
+  inert
+>
+  <button type="button" class="quick-add-modal__close" data-quick-add-close aria-label="Close quick add">✕</button>
+
+  <div class="quick-add-modal__media">
+    <img data-quick-add-image src="" alt="" width="420" height="420" />
+  </div>
+
+  <div class="quick-add-modal__body">
+    <h3 class="quick-add-modal__title" id="quick-add-title" data-quick-add-title></h3>
+    <p class="quick-add-modal__price" data-quick-add-price></p>
+
+    <div class="quick-add-modal__variants" data-quick-add-variants hidden>
+      <span class="quick-add-modal__variants-label" data-quick-add-variants-label>Size</span>
+      <div class="quick-add-modal__pills" data-quick-add-pills></div>
+    </div>
+
+    <details class="quick-add-modal__sizechart" data-quick-add-sizechart hidden>
+      <summary>Size chart</summary>
+      <div class="quick-add-modal__sizechart-scroll">
+        <table>
+          <thead data-quick-add-sizechart-head></thead>
+          <tbody data-quick-add-sizechart-body></tbody>
+        </table>
+      </div>
+    </details>
+
+    <div class="quick-add-modal__qty">
+      <span class="quick-add-modal__qty-label" id="quick-add-qty-label">Quantity</span>
+      <div class="quick-add-modal__stepper" role="group" aria-labelledby="quick-add-qty-label">
+        <button type="button" class="quick-add-modal__step" data-quick-add-qty-decr aria-label="Decrease quantity">−</button>
+        <span class="quick-add-modal__qty-value" data-quick-add-qty-value aria-live="polite">1</span>
+        <button type="button" class="quick-add-modal__step" data-quick-add-qty-incr aria-label="Increase quantity">+</button>
+      </div>
+    </div>
+
+    <button type="button" class="quick-add-modal__add" data-quick-add-submit>Add to Cart</button>
+  </div>
+</div>
+<script>
+  import { getItem } from '../../data/catalog.js';
+  import { addLine } from '../../scripts/cart.js';
+
+  // Astro's ClientRouter (View Transitions) swaps the DOM on navigation and
+  // does NOT re-run this already-loaded module script. To stay leak-free
+  // across navigations we never bind a listener to a specific element that
+  // could later be swapped out from under it: every DOM lookup below is done
+  // fresh, at the moment it's needed (mirrors CartDrawer.astro's render()),
+  // and the interactive surface (quick-add triggers, close button, scrim,
+  // variant pills, qty stepper, submit) is handled by exactly TWO document-
+  // level listeners (`click`, `keydown`) registered ONCE at module scope.
+  // Because state lives in module-scope variables (not cached element refs)
+  // and every open() call re-populates it from scratch, there is nothing
+  // that can go stale on `astro:after-swap` — the swap listener below only
+  // defensively resets state in case a navigation happened while the modal
+  // was open.
+
+  // Closing is instant (state flips synchronously below) so submitAddToCart
+  // can close the modal and open the cart drawer back-to-back with no race.
+  const state = {
+    item: null,
+    variant: null,
+    qty: 1,
+    trigger: null,
+  };
+
+  function escapeHtml(str) {
+    return String(str).replace(/[&<>"']/g, (c) => (
+      { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]
+    ));
+  }
+
+  function els() {
+    return {
+      modal: document.querySelector('[data-quick-add-modal]'),
+      scrim: document.querySelector('[data-quick-add-scrim]'),
+      title: document.querySelector('[data-quick-add-title]'),
+      price: document.querySelector('[data-quick-add-price]'),
+      image: document.querySelector('[data-quick-add-image]'),
+      variantsWrap: document.querySelector('[data-quick-add-variants]'),
+      variantsLabel: document.querySelector('[data-quick-add-variants-label]'),
+      pills: document.querySelector('[data-quick-add-pills]'),
+      sizeChart: document.querySelector('[data-quick-add-sizechart]'),
+      sizeChartHead: document.querySelector('[data-quick-add-sizechart-head]'),
+      sizeChartBody: document.querySelector('[data-quick-add-sizechart-body]'),
+      qtyValue: document.querySelector('[data-quick-add-qty-value]'),
+    };
+  }
+
+  function getFocusable(container) {
+    if (!container) return [];
+    return Array.from(
+      container.querySelectorAll(
+        'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+      )
+    );
+  }
+
+  function renderQty() {
+    const { qtyValue } = els();
+    if (qtyValue) qtyValue.textContent = String(state.qty);
+  }
+
+  function setQty(n) {
+    state.qty = Math.max(1, n);
+    renderQty();
+  }
+
+  function renderPillPressedState() {
+    document.querySelectorAll('[data-quick-add-pill]').forEach((p) => {
+      p.setAttribute('aria-pressed', String(p.getAttribute('data-quick-add-pill') === state.variant));
+    });
+  }
+
+  function selectVariant(option) {
+    state.variant = option;
+    renderPillPressedState();
+  }
+
+  // Fills the SSR-stable modal markup from a catalog item. Pre-selects the
+  // first variant option (if any) so Add to Cart always yields a valid line
+  // without requiring the shopper to make a choice first.
+  function populate(item) {
+    const e = els();
+    if (!e.modal) return;
+
+    state.item = item;
+    state.variant = item.variants ? item.variants.options[0] : null;
+    state.qty = 1;
+
+    if (e.title) e.title.textContent = item.title;
+    if (e.price) e.price.textContent = item.priceRange || item.price || '';
+    if (e.image) {
+      e.image.src = item.image;
+      e.image.alt = item.title;
+    }
+
+    if (item.variants && e.variantsWrap && e.pills) {
+      e.variantsWrap.hidden = false;
+      if (e.variantsLabel) e.variantsLabel.textContent = item.variants.label;
+      e.pills.innerHTML = item.variants.options
+        .map(
+          (opt) =>
+            `<button type="button" class="quick-add-modal__pill" data-quick-add-pill="${escapeHtml(opt)}" aria-pressed="${opt === state.variant}">${escapeHtml(opt)}</button>`
+        )
+        .join('');
+    } else {
+      if (e.variantsWrap) e.variantsWrap.hidden = true;
+      if (e.pills) e.pills.innerHTML = '';
+    }
+
+    if (item.sizeChart && e.sizeChart && e.sizeChartHead && e.sizeChartBody) {
+      e.sizeChart.hidden = false;
+      e.sizeChart.open = false;
+      e.sizeChartHead.innerHTML = `<tr>${item.sizeChart.columns.map((c) => `<th>${escapeHtml(c)}</th>`).join('')}</tr>`;
+      e.sizeChartBody.innerHTML = item.sizeChart.rows
+        .map((row) => `<tr>${row.map((cell) => `<td>${escapeHtml(cell)}</td>`).join('')}</tr>`)
+        .join('');
+    } else if (e.sizeChart) {
+      e.sizeChart.hidden = true;
+      e.sizeChart.open = false;
+    }
+
+    renderQty();
+  }
+
+  function openModal(item, trigger) {
+    const e = els();
+    if (!e.modal || !e.scrim) return;
+
+    populate(item);
+    state.trigger = trigger ?? null;
+
+    e.modal.hidden = false;
+    e.modal.removeAttribute('inert');
+    e.modal.setAttribute('aria-hidden', 'false');
+    e.scrim.hidden = false;
+
+    // Two-step unhide -> add-class so the opacity/scale transition actually
+    // runs (toggling a class in the same frame `hidden` is removed wouldn't
+    // give the browser a "from" state to transition out of).
+    requestAnimationFrame(() => e.modal.classList.add('is-open'));
+
+    const focusable = getFocusable(e.modal);
+    (focusable[0] || e.modal).focus();
+  }
+
+  function closeModal() {
+    const e = els();
+    if (!e.modal || !e.scrim) return;
+    const trigger = state.trigger;
+
+    e.modal.classList.remove('is-open');
+    e.modal.hidden = true;
+    e.modal.setAttribute('inert', '');
+    e.modal.setAttribute('aria-hidden', 'true');
+    e.scrim.hidden = true;
+
+    state.trigger = null;
+    trigger?.focus();
+  }
+
+  function submitAddToCart() {
+    const item = state.item;
+    if (!item) return;
+
+    addLine({
+      id: item.id,
+      title: item.title,
+      variant: state.variant ?? null,
+      price: item.price ?? item.priceRange,
+      qty: state.qty,
+      image: item.image,
+      href: item.href,
+    });
+
+    closeModal();
+    // Open the cart drawer via its existing header trigger rather than
+    // duplicating CartDrawer's open logic — Header.astro's click handler
+    // already opens it, and addLine()'s `cart:change` event has already
+    // refreshed the drawer contents + badge (see cart.js / CartDrawer.astro).
+    document.querySelector('[data-util="cart"]')?.click();
+  }
+
+  // Resets in-memory state (and defensively re-closes the modal) on initial
+  // load and after every View Transition swap. Each swap brings a brand-new,
+  // already-closed modal element from the server, so this mainly guards
+  // against a stray `state.trigger` reference to a DOM node the swap just
+  // removed (e.g. a navigation firing while the modal happened to be open).
+  function resetQuickAdd() {
+    state.item = null;
+    state.variant = null;
+    state.qty = 1;
+    state.trigger = null;
+    const e = els();
+    if (e.modal) {
+      e.modal.classList.remove('is-open');
+      e.modal.hidden = true;
+      e.modal.setAttribute('inert', '');
+      e.modal.setAttribute('aria-hidden', 'true');
+    }
+    if (e.scrim) e.scrim.hidden = true;
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', resetQuickAdd);
+  } else {
+    resetQuickAdd();
+  }
+  document.addEventListener('astro:after-swap', resetQuickAdd);
+
+  // Single delegated click listener, bound once at module scope, handles
+  // the entire interactive surface: opening from any `[data-quick-add]`
+  // trigger (there are many, re-rendered per PLP page — see PlpCard.astro),
+  // and everything inside the modal itself (close, scrim, variant pills,
+  // qty stepper, submit). Pills/size-chart rows are (re)written via
+  // innerHTML in populate() above, so delegation is required for them —
+  // a per-element listener would be lost on the next populate() call.
+  document.addEventListener('click', (e) => {
+    const target = e.target;
+    if (!(target instanceof Element)) return;
+
+    const trigger = target.closest('[data-quick-add]');
+    if (trigger) {
+      const id = trigger.getAttribute('data-quick-add');
+      const item = id ? getItem(id) : undefined;
+      if (item) openModal(item, trigger);
+      return;
+    }
+
+    if (target.closest('[data-quick-add-close]')) {
+      closeModal();
+      return;
+    }
+    if (target.closest('[data-quick-add-scrim]')) {
+      closeModal();
+      return;
+    }
+
+    const pill = target.closest('[data-quick-add-pill]');
+    if (pill) {
+      selectVariant(pill.getAttribute('data-quick-add-pill'));
+      return;
+    }
+    if (target.closest('[data-quick-add-qty-incr]')) {
+      setQty(state.qty + 1);
+      return;
+    }
+    if (target.closest('[data-quick-add-qty-decr]')) {
+      setQty(state.qty - 1);
+      return;
+    }
+    if (target.closest('[data-quick-add-submit]')) {
+      submitAddToCart();
+      return;
+    }
+  });
+
+  // Esc-to-close + a simple Tab/Shift+Tab focus trap while the modal is
+  // open — also bound once at module scope. Reads the modal's current
+  // open state fresh via `hidden` each keystroke rather than a cached flag.
+  document.addEventListener('keydown', (e) => {
+    const { modal } = els();
+    if (!modal || modal.hidden) return;
+
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      closeModal();
+      return;
+    }
+
+    if (e.key !== 'Tab') return;
+    const focusable = getFocusable(modal);
+    if (focusable.length === 0) return;
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    if (e.shiftKey && document.activeElement === first) {
+      e.preventDefault();
+      last.focus();
+    } else if (!e.shiftKey && document.activeElement === last) {
+      e.preventDefault();
+      first.focus();
+    }
+  });
+</script>
+<style>
+  .quick-add-scrim {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: 69;
+  }
+  .quick-add-scrim[hidden] { display: none; }
+
+  .quick-add-modal {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.96);
+    opacity: 0;
+    width: min(420px, 92vw);
+    max-height: 88vh;
+    overflow-y: auto;
+    background: var(--color-paper);
+    color: var(--color-ink);
+    z-index: 70;
+    transition:
+      opacity var(--motion-base) var(--ease-standard),
+      transform var(--motion-base) var(--ease-standard);
+  }
+  .quick-add-modal.is-open {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  .quick-add-modal[hidden] { display: none; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .quick-add-modal { transition: none; }
+  }
+
+  .quick-add-modal__close {
+    position: absolute;
+    top: var(--space-3);
+    right: var(--space-3);
+    background: none;
+    border: 0;
+    cursor: pointer;
+    font-size: 18px;
+    line-height: 1;
+    padding: var(--space-2);
+    color: var(--color-ink);
+    z-index: 1;
+  }
+
+  .quick-add-modal__media {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    max-height: 280px;
+    overflow: hidden;
+  }
+  .quick-add-modal__media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .quick-add-modal__body {
+    padding: var(--space-5);
+    display: grid;
+    gap: var(--space-4);
+  }
+
+  .quick-add-modal__title { font: var(--type-h4); color: var(--color-ink); }
+  .quick-add-modal__price { font: var(--type-label); color: var(--color-ink); }
+
+  .quick-add-modal__variants[hidden] { display: none; }
+  .quick-add-modal__variants { display: grid; gap: var(--space-2); }
+  .quick-add-modal__variants-label {
+    font: var(--type-caption);
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-caption);
+    color: var(--color-ink-70);
+  }
+  .quick-add-modal__pills { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+  .quick-add-modal__pill {
+    border: 1px solid var(--color-border);
+    background: var(--color-paper);
+    color: var(--color-ink);
+    font: var(--type-body-16);
+    padding: var(--space-2) var(--space-4);
+    cursor: pointer;
+    transition:
+      border-color var(--motion-fast) var(--ease-standard),
+      background var(--motion-fast) var(--ease-standard),
+      color var(--motion-fast) var(--ease-standard);
+  }
+  .quick-add-modal__pill:hover { border-color: var(--color-teal); }
+  .quick-add-modal__pill[aria-pressed="true"] {
+    border-color: var(--color-teal);
+    background: var(--color-teal);
+    color: var(--color-paper);
+  }
+
+  .quick-add-modal__sizechart[hidden] { display: none; }
+  .quick-add-modal__sizechart summary {
+    font: var(--type-label);
+    cursor: pointer;
+    color: var(--color-teal);
+  }
+  .quick-add-modal__sizechart-scroll { overflow-x: auto; margin-top: var(--space-3); }
+  .quick-add-modal__sizechart table {
+    width: 100%;
+    border-collapse: collapse;
+    font: var(--type-body-sm);
+  }
+  .quick-add-modal__sizechart th,
+  .quick-add-modal__sizechart td {
+    border: 1px solid var(--color-border);
+    padding: var(--space-2);
+    text-align: left;
+    white-space: nowrap;
+  }
+  .quick-add-modal__sizechart th { background: var(--color-ink); color: var(--color-paper); }
+
+  .quick-add-modal__qty {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
+  }
+  .quick-add-modal__qty-label { font: var(--type-label); color: var(--color-ink); }
+  .quick-add-modal__stepper {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    border: 1px solid var(--color-border);
+  }
+  .quick-add-modal__step {
+    background: none;
+    border: 0;
+    padding: 0;
+    cursor: pointer;
+    width: 32px;
+    height: 32px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font: var(--type-label);
+    color: var(--color-ink);
+  }
+  .quick-add-modal__qty-value {
+    font: var(--type-body-16);
+    min-width: var(--space-5);
+    text-align: center;
+  }
+
+  .quick-add-modal__add {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    font: var(--type-cta);
+    background: var(--color-teal);
+    color: var(--color-paper);
+    border: 0;
+    padding: var(--space-3) var(--space-5);
+    cursor: pointer;
+    transition: transform var(--motion-fast) var(--ease-standard);
+  }
+  .quick-add-modal__add:hover { transform: translateY(-2px); }
+
+  @media (prefers-reduced-motion: reduce) {
+    .quick-add-modal__add:hover { transform: none; }
+  }
+</style>

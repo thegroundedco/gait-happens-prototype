@@ -9,6 +9,7 @@ import PlpGrid from './PlpGrid.astro';
 import Pagination from './Pagination.astro';
 import CrossSell from './CrossSell.astro';
 import LogoWall from './LogoWall.astro';
+import QuickAddModal from './QuickAddModal.astro';
 import { getCollection, getItem, pressLogos } from '../../data/catalog.js';
 
 const { collection: collectionProp, path } = Astro.props;
@@ -51,6 +52,9 @@ const count = items.length;
   <div data-reveal>
     <LogoWall logos={pressLogos} />
   </div>
+  <!-- One Quick-Add modal per PLP page (Task 8) — populated at runtime for
+       whichever card's `[data-quick-add]` trigger was clicked (PlpCard.astro). -->
+  <QuickAddModal />
 </div>
 <style>
   /* Title, filter bar and pagination stay padded from the viewport edges;
