@@ -2,7 +2,7 @@
 // Static/visual filter + sort row. The selects render as real, focusable,
 // labeled controls but aren't wired to any filtering/sorting logic yet
 // (deferred to a later task) — see task-2-plp-spec.md.
-const { count = 0 } = Astro.props;
+const { count = 0, noun = 'Products' } = Astro.props;
 ---
 <div class="filter-sort">
   <div class="filter-sort__group">
@@ -27,7 +27,7 @@ const { count = 0 } = Astro.props;
       <option>Price: High to Low</option>
       <option>Newest</option>
     </select>
-    <span class="filter-sort__count">{count} Products</span>
+    <span class="filter-sort__count">{count} {noun}</span>
   </div>
 </div>
 <style>

@@ -21,6 +21,7 @@ test('every collection key is a sitemap route and every itemId resolves', () => 
     const ids = col.grouped ? col.grouped.flatMap(g => g.itemIds) : col.itemIds;
     for (const id of ids) assert.ok(getItem(id), `collection ${path} bad itemId: ${id}`);
     for (const id of col.crossSell.itemIds) assert.ok(getItem(id), `crossSell bad itemId: ${id}`);
+    assert.ok(routePaths.has(col.crossSell.shopAllHref), `crossSell shopAllHref not a route: ${col.crossSell.shopAllHref}`);
   }
 });
 

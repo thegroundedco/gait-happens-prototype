@@ -192,14 +192,19 @@ const megaMenus = menus.filter((m) => m.type === 'mega');
   // Reflects the cart's item count onto the header cart icon's badge. Called
   // from initHeader() (initial load + every astro:after-swap, since each swap
   // brings a fresh badge element) and from the module-scope `cart:change`
-  // listener below (cart.js dispatches that on every mutation).
+  // listener below (cart.js dispatches that on every mutation). Also updates
+  // the cart button's aria-label — a static "Cart" label on the button
+  // overrides its child badge <span> for screen readers, so the count must
+  // be announced here instead.
   function renderCartBadge() {
     if (!header) return;
     const badge = header.querySelector('[data-cart-badge]');
+    const cartBtn = header.querySelector('[data-util="cart"]');
     if (!badge) return;
     const { count } = getCart();
     badge.textContent = String(count);
     badge.hidden = count === 0;
+    cartBtn?.setAttribute('aria-label', count ? `Cart, ${count} items` : 'Cart');
   }
 
   function setMobileNavOpen(next) {

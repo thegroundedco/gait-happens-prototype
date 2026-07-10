@@ -137,6 +137,39 @@ import Button from './Button.astro';
     const delta = step.hasAttribute('data-cart-incr') ? 1 : -1;
     setQty(key, current.qty + delta);
   });
+
+  function getFocusable(container) {
+    if (!container) return [];
+    return Array.from(
+      container.querySelectorAll(
+        'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+      )
+    );
+  }
+
+  // Tab/Shift+Tab focus trap while the drawer is open — bound once at module
+  // scope (leak-free across astro:after-swap), mirroring the trap in
+  // QuickAddModal.astro. No-ops when the drawer is closed (checked fresh via
+  // the `.open` class every keystroke, since line items re-render). Esc-to-
+  // close and focus-in-on-open/focus-return-on-close are already handled by
+  // Header.astro's setCartOpen — this only adds the Tab cycle.
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Tab') return;
+    const drawer = document.querySelector('[data-util-panel="cart"]');
+    if (!drawer || !drawer.classList.contains('open')) return;
+
+    const focusable = getFocusable(drawer);
+    if (focusable.length === 0) return;
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    if (e.shiftKey && document.activeElement === first) {
+      e.preventDefault();
+      last.focus();
+    } else if (!e.shiftKey && document.activeElement === last) {
+      e.preventDefault();
+      first.focus();
+    }
+  });
 </script>
 <style>
   .cart-drawer {
@@ -287,6 +320,10 @@ import Button from './Button.astro';
     transition: transform var(--motion-fast) var(--ease-standard);
   }
   .cart-checkout:hover { transform: translateY(-2px); }
+
+  @media (prefers-reduced-motion: reduce) {
+    .cart-checkout:hover { transform: none; }
+  }
 
   .cart-scrim {
     position: fixed;

@@ -1,13 +1,16 @@
 ---
 // Row of 5 stars (filled up to `rating`, rest outline) + review count.
-// The wrapper carries the full aria-label; the stars themselves are
-// aria-hidden decoration so screen readers get one clean announcement.
+// The accessible text is a visually-hidden text node (an `aria-label` on a
+// generic, role-less <span> is announced inconsistently across screen
+// readers); the stars and the visible "(count)" text are both aria-hidden
+// decoration so screen readers get one clean announcement from the hidden
+// text node instead.
 const { rating = 0, count = 0 } = Astro.props;
 const stars = [1, 2, 3, 4, 5];
 const STAR_PATH =
   'M12 .587l3.668 7.568 8.332 1.151-6.064 5.828 1.48 8.279L12 19.771l-7.416 3.642 1.48-8.279L0 9.306l8.332-1.151z';
 ---
-<span class="star-rating" aria-label={`Rated ${rating} out of 5, ${count} reviews`}>
+<span class="star-rating">
   <span class="star-rating__stars" aria-hidden="true">
     {stars.map((n) => (
       <svg
@@ -20,13 +23,25 @@ const STAR_PATH =
       </svg>
     ))}
   </span>
-  <span class="star-rating__count">({count})</span>
+  <span class="star-rating__sr-only">{`Rated ${rating} out of 5, ${count} reviews`}</span>
+  <span class="star-rating__count" aria-hidden="true">({count})</span>
 </span>
 <style>
   .star-rating {
     display: inline-flex;
     align-items: center;
     gap: var(--space-2);
+  }
+  .star-rating__sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
   }
   .star-rating__stars {
     display: inline-flex;

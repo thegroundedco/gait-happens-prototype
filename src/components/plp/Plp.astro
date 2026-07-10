@@ -22,13 +22,22 @@ const items = groups
   ? groups.flatMap((group) => group.itemIds ?? [])
   : (collection.itemIds ?? []);
 const count = items.length;
+
+// "N Products" reads wrong on course collections (courses-individuals,
+// courses-professionals, all-courses) — derive the noun from the resolved
+// items' `kind` rather than hardcoding per-route logic, so grouped
+// collections (all-courses) are covered too.
+const resolvedItems = items.map(getItem).filter(Boolean);
+const noun = resolvedItems.length > 0 && resolvedItems.every((it) => it.kind === 'course')
+  ? 'Courses'
+  : 'Products';
 ---
 <div class="plp">
   <div class="plp__pad">
     <div data-reveal>
       <PlpTitle title={collection.title} />
     </div>
-    <FilterSortBar count={count} />
+    <FilterSortBar count={count} noun={noun} />
   </div>
   <!-- Grouped: one grid-wrapper per persona section. Ungrouped: single grid,
        breaking out to full width (Polaroid-style full-bleed cards). -->
