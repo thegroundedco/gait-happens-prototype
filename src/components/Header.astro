@@ -99,6 +99,14 @@ const megaMenus = menus.filter((m) => m.type === 'mega');
   let openTrigger = null;
   let panels = new Map();
 
+  // Set true only while the Esc handler is programmatically refocusing the
+  // trigger that owned the just-closed mega — suppresses that trigger's own
+  // `focus`→show() binding (see initMegaMenus()) so Esc doesn't immediately
+  // reopen the panel it just closed. Cleared synchronously right after the
+  // `.focus()` call returns (focus fires its listeners synchronously), so it
+  // never leaks into a later, real focus-driven open (Tab navigation, etc).
+  let suppressFocusOpen = false;
+
   // Magic-pill active-item indicator — the yellow pill that glides behind
   // the hovered/focused top-nav item. Re-queried in initNavPill() alongside
   // the mega-menu elements above; `pillPinned` holds the trigger the pill
@@ -140,8 +148,8 @@ const megaMenus = menus.filter((m) => m.type === 'mega');
     item.classList.add('is-active');
     gsap.to(navPill, {
       x, width: w, autoAlpha: 1,
-      duration: reduce ? 0.001 : 0.5,
-      ease: reduce ? 'none' : 'back.out(1.7)',
+      duration: reduce ? 0.001 : (elastic ? 0.5 : 0.3),
+      ease: reduce ? 'none' : (elastic ? 'back.out(1.7)' : 'power2.out'),
       overwrite: true,
     });
   }
@@ -150,7 +158,8 @@ const megaMenus = menus.filter((m) => m.type === 'mega');
     if (!navPill) return;
     if (pillPinned) { movePillTo(pillPinned, { elastic: false }); return; }
     header?.querySelectorAll('.top__item.is-active').forEach((el) => el.classList.remove('is-active'));
-    gsap.to(navPill, { autoAlpha: 0, duration: 0.25, overwrite: true });
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    gsap.to(navPill, { autoAlpha: 0, duration: reduce ? 0.001 : 0.25, overwrite: true });
   }
 
   // Mega-panel morph — crossfade + staggered card animation, replacing the
@@ -333,7 +342,9 @@ const megaMenus = menus.filter((m) => m.type === 'mega');
     triggers.forEach((t) => {
       const id = t.dataset.menuTrigger;
       t.addEventListener('mouseenter', () => show(id));
-      t.addEventListener('focus', () => show(id));
+      t.addEventListener('focus', () => {
+        if (!suppressFocusOpen) show(id);
+      });
       t.addEventListener('click', () => (open === id ? hide() : show(id)));
       // Keyboard users: focus alone opens the panel but Tab would just move
       // to the next trigger (closing it) without ever reaching the panel's
@@ -446,7 +457,12 @@ const megaMenus = menus.filter((m) => m.type === 'mega');
     setSearchOpen(false);
     setCartOpen(false);
     setMobileNavOpen(false);
+    // Suppress the trigger's own focus→show() binding for this programmatic
+    // refocus only — .focus() fires listeners synchronously, so the flag is
+    // back off before any other code runs.
+    suppressFocusOpen = true;
     returnFocusTo?.focus();
+    suppressFocusOpen = false;
   });
   document.addEventListener('click', (e) => {
     if (!header || header.contains(e.target)) return;
