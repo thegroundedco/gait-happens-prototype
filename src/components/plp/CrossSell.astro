@@ -104,6 +104,8 @@ const items = (crossSell?.itemIds ?? []).map(getItem);
 
   .cross-sell__arrow {
     flex-shrink: 0;
+    /* White arrows on the teal label bars / teal Shop All card (was ink). */
+    filter: brightness(0) invert(1);
     transition: transform var(--motion-fast) var(--ease-out-expo);
   }
   .cross-sell__card:hover .cross-sell__arrow,

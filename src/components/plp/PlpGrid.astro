@@ -8,12 +8,32 @@
 // natural height on the single-column mobile layout (stacked cards).
 import PlpCard from './PlpCard.astro';
 import IntroBlock from './IntroBlock.astro';
+import PromoCard from './PromoCard.astro';
 
-const { items = [], intro } = Astro.props;
+const { items = [], intro, promos = [] } = Astro.props;
+
+// Build the ordered cell sequence: the intro (if any) first, then the item
+// cards, then splice any promo/CTA cells in at their `at` index within the
+// FINAL sequence. Promos are inserted in ascending `at` order so each splice
+// lands at the intended position (later inserts account for earlier ones).
+const cells = [];
+if (intro) cells.push({ type: 'intro', ...intro });
+for (const item of items) cells.push({ type: 'item', item });
+for (const promo of [...promos].sort((a, b) => a.at - b.at)) {
+  const at = Math.min(Math.max(promo.at, 0), cells.length);
+  cells.splice(at, 0, { type: 'promo', ...promo });
+}
 ---
 <div class="plp-grid">
-  {intro && <IntroBlock heading={intro.heading} body={intro.body} />}
-  {items.map((item) => <PlpCard item={item} />)}
+  {cells.map((cell) =>
+    cell.type === 'intro' ? (
+      <IntroBlock heading={cell.heading} body={cell.body} />
+    ) : cell.type === 'promo' ? (
+      <PromoCard heading={cell.heading} body={cell.body} cta={cell.cta} />
+    ) : (
+      <PlpCard item={cell.item} />
+    )
+  )}
 </div>
 <style>
   .plp-grid {

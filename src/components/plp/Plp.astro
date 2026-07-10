@@ -49,7 +49,7 @@ const noun = resolvedItems.length > 0 && resolvedItems.every((it) => it.kind ===
     ))
   ) : (
     <div class="plp__grid-wrapper" data-reveal>
-      <PlpGrid items={items.map(getItem)} intro={collection.intro} />
+      <PlpGrid items={items.map(getItem)} intro={collection.intro} promos={collection.promos} />
     </div>
   )}
   <div class="plp__pad">

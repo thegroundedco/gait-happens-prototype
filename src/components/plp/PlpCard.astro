@@ -29,7 +29,7 @@ const price = item.priceRange || item.price;
       <div class="plp-card__actions">
         <a class="plp-card__cta" href={item.href}>
           <span>{item.cta}</span>
-          <img class="plp-card__cta-arrow" src="/images/nav/arrow.svg" alt="" width="16" height="16" />
+          <span class="plp-card__cta-arrow" aria-hidden="true"></span>
         </a>
         <button type="button" class="plp-card__quick-add" data-quick-add={item.id} aria-label={`Quick add ${item.title}`}>
           <!-- Official QuickCart icon (01_Assets/00_Icons/QuickCart.svg); stroke
@@ -163,9 +163,15 @@ const price = item.priceRange || item.price;
     transform: translateY(-2px);
   }
   .plp-card__cta-arrow {
-    /* icon svg is ink-filled by default (var(--fill-0, #231F20)); force it
-       white to read against the teal CTA background, per spec. */
-    filter: brightness(0) invert(1);
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+    /* Masked so the arrow paints in the CTA's own text colour: white on the
+       teal CTA, and teal when the CTA inverts to a white chip on hover —
+       following currentColor automatically instead of a fixed filter. */
+    background-color: currentColor;
+    -webkit-mask: url(/images/nav/arrow.svg) no-repeat center / contain;
+    mask: url(/images/nav/arrow.svg) no-repeat center / contain;
   }
 
   .plp-card__quick-add {
@@ -241,9 +247,9 @@ const price = item.priceRange || item.price;
     color: var(--color-teal);
   }
   .plp-card:hover .plp-card__cta-arrow {
-    filter: none;
-    /* Small directional nudge — reinforces the CTA's forward motion.
-       Transition already covers `transform` via the shared rule above. */
+    /* Colour follows currentColor (teal on the inverted white chip)
+       automatically. Small directional nudge reinforces forward motion;
+       the shared rule above transitions `transform`. */
     transform: translateX(4px);
   }
   /* Secondary buttons go white outline + white glyphs. */

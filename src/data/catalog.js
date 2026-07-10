@@ -317,6 +317,23 @@ export const collections = {
     title: 'Gait Happens Professionals Courses',
     intro: professionalsIntro,
     itemIds: ['sole-switch-pro', 'gait-foundations', 'functional-gait-assessment-l1', 'gait-guru-membership', 'trainer-certification'],
+    // Teal CTA cells interspersed in the grid (Figma Professionals PLP).
+    // `at` is the index in the final cell sequence (intro is cell 0).
+    // href is a placeholder until the real wholesale/affiliate URLs exist.
+    promos: [
+      {
+        at: 5,
+        heading: 'Become a Wholesaler',
+        body: "Interested in carrying Gait Happens products? Join our wholesale program to offer trusted foot health solutions backed by education and designed for lasting results. Whether you're a retailer, clinic, or wellness professional, you'll receive access to wholesale pricing, dedicated support, and premium products your customers will love.",
+        cta: { label: 'Learn More', href: '#' },
+      },
+      {
+        at: 6,
+        heading: 'Become an Ambassador!',
+        body: 'Ready to share natural foot health with the world while earning rewards? Sign up to become our affiliate! After sign up, you will get access to your custom referral link, instructional videos, digital assets, and your own dashboard.',
+        cta: { label: 'Ambassador Program', href: '#' },
+      },
+    ],
     crossSell: {
       heading: 'Shop Our Products',
       itemIds: ['toe-spacers', 'foot-health-kit', 'toe-dynamometer'],
