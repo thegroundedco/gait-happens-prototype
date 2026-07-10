@@ -55,17 +55,10 @@ const fit = card.fit ?? 'cover';
     flex: 1 1 0;
     min-height: 0;
   }
-  /* No-photo variants (CTA/Contact/Resources) have only a label+arrow row —
-     at the taller panel height, anchoring that row to the bottom (as the
-     photo variant still does, over its image) would leave a large blank
-     field above it. Centering it reads as an intentional CTA tile instead of
-     text stranded at the bottom of an oversized box; the row's own internal
-     layout (label, gap, arrow) is unchanged. */
-  .nav-card--teal,
-  .nav-card--white,
-  .nav-card--bar {
-    justify-content: center;
-  }
+  /* All variants (photo and no-photo) anchor the label+arrow row to the
+     BOTTOM-LEFT, per the Figma mega-nav cards (label bottom-left, arrow
+     bottom-right) — inheriting the base .nav-card `justify-content: flex-end`
+     + the row's `justify-content: space-between`. */
 
   .nav-card--yellow { background: var(--color-yellow); color: var(--color-ink); }
   .nav-card--teal { background: var(--color-teal); color: var(--color-ink); }
