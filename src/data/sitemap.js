@@ -50,9 +50,9 @@ export const routes = [
   r('/', 'Home', 'home', ['Home'], { phase: 'Phase 3' }),
 
   // Shop
-  r('/collections/best-sellers', 'Shop Best Sellers', 'plp', ['Home', 'Shop', 'Best Sellers']),
-  r('/collections/featured', 'Featured Products', 'plp', ['Home', 'Shop', 'Featured Products']),
-  r('/collections/all', 'Shop All', 'plp', ['Home', 'Shop', 'All']),
+  r('/collections/best-sellers', 'Shop Best Sellers', 'plp', ['Home', 'Shop', 'Best Sellers'], { status: 'built' }),
+  r('/collections/featured', 'Featured Products', 'plp', ['Home', 'Shop', 'Featured Products'], { status: 'built' }),
+  r('/collections/all', 'Shop All', 'plp', ['Home', 'Shop', 'All'], { status: 'built' }),
   r('/products/toe-spacers', 'Toe Spacers', 'pdp', ['Home', 'Shop', 'Toe Spacers']),
   r('/products/foot-health-kit', 'The Foot Health Kit', 'pdp', ['Home', 'Shop', 'The Foot Health Kit']),
   r('/products/cork-supplement', 'Cork Supplement', 'pdp', ['Home', 'Shop', 'Cork Supplement']),
@@ -61,9 +61,9 @@ export const routes = [
   r('/products/walk', 'WALK', 'pdp', ['Home', 'Shop', 'WALK']),
 
   // Courses
-  r('/collections/courses-individuals', 'Courses for Individuals', 'plp', ['Home', 'Courses', 'Individuals']),
-  r('/collections/courses-professionals', 'Courses for Professionals', 'plp', ['Home', 'Courses', 'Professionals']),
-  r('/collections/all-courses', 'All Courses', 'plp', ['Home', 'Courses', 'All Courses']),
+  r('/collections/courses-individuals', 'Courses for Individuals', 'plp', ['Home', 'Courses', 'Individuals'], { status: 'built' }),
+  r('/collections/courses-professionals', 'Courses for Professionals', 'plp', ['Home', 'Courses', 'Professionals'], { status: 'built' }),
+  r('/collections/all-courses', 'All Courses', 'plp', ['Home', 'Courses', 'All Courses'], { status: 'built' }),
   r('/courses/foot-fest', 'Foot Fest', 'course', ['Home', 'Courses', 'Foot Fest']),
   r('/courses/combating-bunions', 'Combating Bunions', 'course', ['Home', 'Courses', 'Combating Bunions']),
   r('/courses/fit-feet', 'Fit Feet', 'course', ['Home', 'Courses', 'Fit Feet']),

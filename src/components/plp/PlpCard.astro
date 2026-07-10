@@ -1,0 +1,274 @@
+---
+// Wide PLP card (Figma node 830:7878, 600×298 in a 2-up grid).
+// Left: fixed 298×298 image. Right: badges, title/price, rating,
+// description, and an action row (CTA / compare / quick-add).
+import StarRating from './StarRating.astro';
+
+const { item } = Astro.props;
+const price = item.priceRange || item.price;
+---
+<article class="plp-card">
+  <a class="plp-card__media" href={item.href} tabindex="-1" aria-hidden="true">
+    <img src={item.image} alt={item.title} loading="lazy" />
+  </a>
+  <div class="plp-card__body">
+    {item.badges?.length > 0 && (
+      <div class="plp-card__badges">
+        {item.badges.map((badge) => <span class="plp-card__badge">{badge}</span>)}
+      </div>
+    )}
+    <div class="plp-card__content">
+      <div class="plp-card__top">
+        <div class="plp-card__heading">
+          <h3 class="plp-card__title"><a href={item.href}>{item.title}</a></h3>
+          {price && <p class="plp-card__price">{price}</p>}
+        </div>
+        {item.rating && <StarRating rating={item.rating} count={item.reviewCount} />}
+        <p class="plp-card__description">{item.description}</p>
+      </div>
+      <div class="plp-card__actions">
+        <a class="plp-card__cta" href={item.href}>
+          <span>{item.cta}</span>
+          <img class="plp-card__cta-arrow" src="/images/nav/arrow.svg" alt="" width="16" height="16" />
+        </a>
+        <button type="button" class="plp-card__quick-add" data-quick-add={item.id} aria-label={`Quick add ${item.title}`}>
+          <!-- Official QuickCart icon (01_Assets/00_Icons/QuickCart.svg); stroke
+               switched to currentColor so it recolors teal -> white on hover. -->
+          <svg width="21" height="18" viewBox="0 0 19 16" fill="none" aria-hidden="true">
+            <path d="M1 1H3L5.5 11H16L18 4M6.5 14.5H7.5M14 14.5H15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+            <path d="M10.5 2V7M13 4.5L8 4.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+</article>
+<style>
+  .plp-card {
+    display: flex;
+    align-items: stretch;
+    border: 1px solid var(--color-border);
+    background: var(--color-paper);
+    height: 100%;
+  }
+
+  .plp-card__media {
+    display: block;
+    /* Scales with the card (full-bleed cards get large images) instead of a
+       fixed 298px; stretches to the card's full height. */
+    flex: 0 0 42%;
+    min-width: 220px;
+    align-self: stretch;
+    min-height: 298px;
+    overflow: hidden;
+  }
+  .plp-card__media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .plp-card__body {
+    flex: 1;
+    min-width: 0;
+    padding: var(--space-3);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  .plp-card__badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    align-self: flex-end;
+  }
+  .plp-card__badge {
+    background: var(--color-yellow);
+    color: var(--color-ink);
+    padding: var(--space-2);
+    font: var(--type-caption);
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-caption);
+    line-height: 1;
+  }
+
+  .plp-card__content {
+    flex: 1;
+    min-height: 0;
+    padding-top: var(--space-5);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: var(--space-3);
+  }
+
+  .plp-card__top {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+
+  .plp-card__heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: var(--space-4);
+  }
+  .plp-card__title {
+    font: var(--type-h4);
+    color: var(--color-ink);
+  }
+  .plp-card__title a {
+    color: inherit;
+  }
+  .plp-card__title a:hover {
+    text-decoration: underline;
+  }
+  .plp-card__price {
+    font: var(--type-caption);
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-caption);
+    color: var(--color-ink);
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .plp-card__description {
+    font: var(--type-body-16);
+    color: var(--color-ink);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .plp-card__actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+  }
+
+  .plp-card__cta {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    background: var(--color-teal);
+    color: var(--color-paper);
+    font: var(--type-cta);
+    padding: var(--space-3) var(--space-5);
+    transition: transform var(--motion-fast) var(--ease-standard);
+  }
+  .plp-card__cta:hover {
+    transform: translateY(-2px);
+  }
+  .plp-card__cta-arrow {
+    /* icon svg is ink-filled by default (var(--fill-0, #231F20)); force it
+       white to read against the teal CTA background, per spec. */
+    filter: brightness(0) invert(1);
+  }
+
+  .plp-card__quick-add {
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    cursor: pointer;
+    border: 2px solid var(--color-teal);
+    color: var(--color-teal);
+  }
+  /* Its own hover: solid teal fill + white icon (independent of the card wash). */
+  .plp-card__quick-add:hover {
+    background: var(--color-teal);
+    color: var(--color-paper);
+    transform: translateY(-2px);
+  }
+
+  /* Price reads large on the wide full-bleed cards at desktop. */
+  @media (min-width: 1200px) {
+    .plp-card__price {
+      font-size: 24px;
+      letter-spacing: 0.04em;
+    }
+  }
+
+  /* --- Teal-wash + invert hover -------------------------------------------
+     On hover the detail half fills teal, its text/controls flip to white,
+     and the image zooms. Transitions are smooth; the zoom is disabled under
+     reduced-motion (the color wash, being non-motion, still applies). */
+  .plp-card__media img {
+    transition: transform var(--motion-base) var(--ease-standard);
+  }
+  .plp-card__body,
+  .plp-card__title,
+  .plp-card__price,
+  .plp-card__description,
+  .plp-card__cta,
+  .plp-card__cta-arrow,
+  .plp-card__quick-add {
+    transition:
+      color var(--motion-base) var(--ease-standard),
+      background var(--motion-base) var(--ease-standard),
+      border-color var(--motion-base) var(--ease-standard),
+      filter var(--motion-base) var(--ease-standard),
+      transform var(--motion-fast) var(--ease-standard);
+  }
+
+  .plp-card:hover .plp-card__media img {
+    transform: scale(1.06);
+  }
+  .plp-card:hover .plp-card__body {
+    background: var(--color-teal);
+  }
+  .plp-card:hover .plp-card__title,
+  .plp-card:hover .plp-card__price,
+  .plp-card:hover .plp-card__description {
+    color: var(--color-paper);
+  }
+  /* StarRating lives in a child component — reach in to keep it legible. */
+  .plp-card:hover :global(.star-rating__count) {
+    color: var(--color-paper);
+  }
+  .plp-card:hover :global(.star-rating__star:not(.star-rating__star--filled)) {
+    stroke: var(--color-paper);
+  }
+  /* CTA inverts to a white chip so it stands out on the teal wash. */
+  .plp-card:hover .plp-card__cta {
+    background: var(--color-paper);
+    color: var(--color-teal);
+  }
+  .plp-card:hover .plp-card__cta-arrow {
+    filter: none;
+    /* Small directional nudge — reinforces the CTA's forward motion.
+       Transition already covers `transform` via the shared rule above. */
+    transform: translateX(4px);
+  }
+  /* Secondary buttons go white outline + white glyphs. */
+  .plp-card:hover .plp-card__quick-add {
+    border-color: var(--color-paper);
+    color: var(--color-paper);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .plp-card:hover .plp-card__media img,
+    .plp-card__cta:hover,
+    .plp-card__quick-add:hover,
+    .plp-card:hover .plp-card__cta-arrow {
+      transform: none;
+    }
+  }
+
+  @media (max-width: 560px) {
+    .plp-card {
+      flex-direction: column;
+    }
+    .plp-card__media {
+      width: 100%;
+      height: auto;
+      aspect-ratio: 1 / 1;
+    }
+  }
+</style>

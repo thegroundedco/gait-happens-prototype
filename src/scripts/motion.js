@@ -19,12 +19,10 @@ const STAGGER_STEP = 0.06;
 const STAGGER_MAX = 0.3;
 
 function initReveals() {
-  // Kill any ScrollTriggers left over from the previous page, then refresh.
-  // Without this, triggers created on a prior page would either leak (never
-  // getting cleaned up) or keep pointing at DOM nodes View Transitions just
-  // removed/replaced, firing against detached elements or stale positions.
+  // Kill any ScrollTriggers left over from the previous page. Without this,
+  // triggers created on a prior page would either leak or keep pointing at DOM
+  // nodes View Transitions just removed/replaced.
   ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
-  ScrollTrigger.refresh();
 
   // Re-scan for the current page's reveal targets.
   const els = gsap.utils.toArray('[data-reveal]');
@@ -39,20 +37,23 @@ function initReveals() {
     return;
   }
 
+  const vh = window.innerHeight;
   els.forEach((el, i) => {
-    gsap.fromTo(
-      el,
-      { opacity: 0, y: 16 },
-      {
-        opacity: 1,
-        y: 0,
-        duration: 0.6,
-        ease: 'expo.out',
-        delay: Math.min(i * STAGGER_STEP, STAGGER_MAX),
-        scrollTrigger: { trigger: el, start: 'top 85%', once: true },
-      },
-    );
+    const from = { opacity: 0, y: 16 };
+    const to = { opacity: 1, y: 0, duration: 0.6, ease: 'expo.out' };
+    // Above-the-fold targets animate IMMEDIATELY — never gate visible content
+    // behind a scroll the user hasn't made. Only below-the-fold targets wait
+    // for a ScrollTrigger. (getBoundingClientRect().top < 90% viewport ≈ in view.)
+    if (el.getBoundingClientRect().top < vh * 0.9) {
+      gsap.fromTo(el, from, { ...to, delay: Math.min(i * STAGGER_STEP, STAGGER_MAX) });
+    } else {
+      gsap.fromTo(el, from, { ...to, scrollTrigger: { trigger: el, start: 'top 85%', once: true } });
+    }
   });
+
+  // Recompute trigger positions once tweens are registered (and again after
+  // images/fonts settle) so below-the-fold triggers fire at the right scroll.
+  ScrollTrigger.refresh();
 }
 
 // Run on the initial page load AND after each View Transition swap.

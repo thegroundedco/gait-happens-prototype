@@ -1,0 +1,19 @@
+---
+const { title } = Astro.props;
+---
+<div class="plp-title">
+  <h1 class="plp-title__heading">{title}</h1>
+</div>
+<style>
+  .plp-title {
+    display: flex;
+    justify-content: center;
+    background: var(--color-paper);
+    padding-block: var(--space-7);
+  }
+  .plp-title__heading {
+    font: var(--type-h3);
+    color: var(--color-teal);
+    text-align: center;
+  }
+</style>

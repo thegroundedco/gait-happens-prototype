@@ -64,8 +64,9 @@ const megaMenus = menus.filter((m) => m.type === 'mega');
             </button>
             <AccountMenu />
           </div>
-          <button type="button" class="util__btn" data-util="cart" aria-label="Cart">
+          <button type="button" class="util__btn util__cart" data-util="cart" aria-label="Cart">
             <img src="/images/nav/icon-cart.svg" alt="" width="24" height="24" />
+            <span class="cart-badge" data-cart-badge hidden></span>
           </button>
         </div>
       </div>
@@ -78,6 +79,8 @@ const megaMenus = menus.filter((m) => m.type === 'mega');
   <MobileNav />
 </header>
 <script>
+  import { getCart } from '../scripts/cart.js';
+
   // Mega-menu + account/search/cart utility panels. The site uses Astro's
   // ClientRouter (view transitions), which swaps the DOM on navigation and
   // does not re-run already-loaded module scripts — so all setup lives in
@@ -106,6 +109,12 @@ const megaMenus = menus.filter((m) => m.type === 'mega');
   let mobileNav = null;
   let mobileScrim = null;
   let mobileTrigger = null;
+
+  // Element that had focus just before the cart drawer opened, so closing
+  // it (Esc, scrim, or the drawer's own close button) can return focus
+  // there — mirrors the mega-menu's openTrigger pattern above, scoped to
+  // the cart drawer.
+  let cartTrigger = null;
 
   function show(id) {
     const panel = panels.get(id);
@@ -144,12 +153,28 @@ const megaMenus = menus.filter((m) => m.type === 'mega');
 
   function setCartOpen(next) {
     if (!cart || !scrim) return;
+    const wasOpen = cart.classList.contains('open');
     cart.classList.toggle('open', next);
     cart.setAttribute('aria-hidden', String(!next));
     // Off-canvas when closed: keep its links out of tab order (in addition
     // to the visual translateX hide), matching MobileNav's `inert` pattern.
     cart.toggleAttribute('inert', !next);
     scrim.hidden = !next;
+
+    // Focus management: on open, move focus into the drawer (its close
+    // button) — a keyboard user who triggered the drawer should land
+    // inside it, not stay behind it on the cart icon. On close, return
+    // focus to whatever was focused right before it opened. Guarded on an
+    // actual state transition so redundant calls (e.g. Esc firing every
+    // keystroke, or the cart trigger's click handler always passing `true`)
+    // never steal focus a second time.
+    if (next && !wasOpen) {
+      cartTrigger = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+      cart.querySelector('[data-cart-close]')?.focus();
+    } else if (!next && wasOpen) {
+      cartTrigger?.focus();
+      cartTrigger = null;
+    }
   }
 
   // Keeps the mega-menu panel, account dropdown, and search overlay mutually
@@ -162,6 +187,24 @@ const megaMenus = menus.filter((m) => m.type === 'mega');
     if (except !== 'mega') hide();
     if (except !== 'account') setAccountOpen(false);
     if (except !== 'search') setSearchOpen(false);
+  }
+
+  // Reflects the cart's item count onto the header cart icon's badge. Called
+  // from initHeader() (initial load + every astro:after-swap, since each swap
+  // brings a fresh badge element) and from the module-scope `cart:change`
+  // listener below (cart.js dispatches that on every mutation). Also updates
+  // the cart button's aria-label — a static "Cart" label on the button
+  // overrides its child badge <span> for screen readers, so the count must
+  // be announced here instead.
+  function renderCartBadge() {
+    if (!header) return;
+    const badge = header.querySelector('[data-cart-badge]');
+    const cartBtn = header.querySelector('[data-util="cart"]');
+    if (!badge) return;
+    const { count } = getCart();
+    badge.textContent = String(count);
+    badge.hidden = count === 0;
+    cartBtn?.setAttribute('aria-label', count ? `Cart, ${count} items` : 'Cart');
   }
 
   function setMobileNavOpen(next) {
@@ -214,6 +257,9 @@ const megaMenus = menus.filter((m) => m.type === 'mega');
     cart = header.querySelector('[data-util-panel="cart"]');
     scrim = header.querySelector('.cart-scrim');
     accountTrigger = header.querySelector('[data-util="account"]');
+    // Each swap brings a fresh (closed) drawer — drop any stale reference to
+    // a trigger element the swap just removed.
+    cartTrigger = null;
 
     accountTrigger?.addEventListener('click', () => {
       const next = Boolean(account?.hidden);
@@ -252,6 +298,7 @@ const megaMenus = menus.filter((m) => m.type === 'mega');
     initMegaMenus();
     initUtilPanels();
     initMobileNav();
+    renderCartBadge();
   }
 
   // Run on the initial page load AND after each View Transition navigation.
@@ -265,6 +312,10 @@ const megaMenus = menus.filter((m) => m.type === 'mega');
     initHeader();
   }
   document.addEventListener('astro:after-swap', initHeader);
+  // Bound once at module scope, per the leak-free pattern — re-renders the
+  // badge (via the closure over `header` above) on every cart mutation,
+  // independent of navigation.
+  document.addEventListener('cart:change', renderCartBadge);
   document.addEventListener('keydown', (e) => {
     if (e.key !== 'Escape') return;
     // Capture before hide() clears `open`/`openTrigger`, so focus can return
@@ -371,6 +422,26 @@ const megaMenus = menus.filter((m) => m.type === 'mega');
     cursor: pointer;
   }
   .util__btn img { display: block; }
+
+  /* Positioning context so the badge overlays the cart icon's top-right corner. */
+  .util__cart { position: relative; }
+  .cart-badge {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    min-width: 16px;
+    height: 16px;
+    padding-inline: var(--space-1);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    background: var(--color-yellow);
+    color: var(--color-ink);
+    font: var(--type-caption);
+    line-height: 1;
+  }
+  .cart-badge[hidden] { display: none; }
 
   @media (max-width: 820px) {
     .top,

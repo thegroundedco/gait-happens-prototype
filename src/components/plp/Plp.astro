@@ -1,0 +1,72 @@
+---
+// PLP composer: title -> filter/sort -> grid(+intro) -> pagination.
+// Accepts either an already-resolved `collection` object or a `path` to
+// resolve via getCollection (matches Task 1's catalog accessors).
+// CrossSell + LogoWall sections render after Pagination (Task 3).
+import PlpTitle from './PlpTitle.astro';
+import FilterSortBar from './FilterSortBar.astro';
+import PlpGrid from './PlpGrid.astro';
+import Pagination from './Pagination.astro';
+import CrossSell from './CrossSell.astro';
+import LogoWall from './LogoWall.astro';
+import QuickAddModal from './QuickAddModal.astro';
+import { getCollection, getItem, pressLogos } from '../../data/catalog.js';
+
+const { collection: collectionProp, path } = Astro.props;
+const collection = collectionProp ?? getCollection(path);
+
+// Grouped collections (e.g. all-courses) have no top-level itemIds/intro —
+// their items live inside `grouped[]`, one persona section per entry.
+const groups = collection.grouped ?? null;
+const items = groups
+  ? groups.flatMap((group) => group.itemIds ?? [])
+  : (collection.itemIds ?? []);
+const count = items.length;
+
+// "N Products" reads wrong on course collections (courses-individuals,
+// courses-professionals, all-courses) — derive the noun from the resolved
+// items' `kind` rather than hardcoding per-route logic, so grouped
+// collections (all-courses) are covered too.
+const resolvedItems = items.map(getItem).filter(Boolean);
+const noun = resolvedItems.length > 0 && resolvedItems.every((it) => it.kind === 'course')
+  ? 'Courses'
+  : 'Products';
+---
+<div class="plp">
+  <div class="plp__pad">
+    <div data-reveal>
+      <PlpTitle title={collection.title} />
+    </div>
+    <FilterSortBar count={count} noun={noun} />
+  </div>
+  <!-- Grouped: one grid-wrapper per persona section. Ungrouped: single grid,
+       breaking out to full width (Polaroid-style full-bleed cards). -->
+  {groups ? (
+    groups.map((group) => (
+      <div class="plp__grid-wrapper" data-reveal>
+        <PlpGrid items={(group.itemIds ?? []).map(getItem)} intro={group.intro} />
+      </div>
+    ))
+  ) : (
+    <div class="plp__grid-wrapper" data-reveal>
+      <PlpGrid items={items.map(getItem)} intro={collection.intro} />
+    </div>
+  )}
+  <div class="plp__pad">
+    <Pagination />
+  </div>
+  <div data-reveal>
+    <CrossSell crossSell={collection.crossSell} />
+  </div>
+  <div data-reveal>
+    <LogoWall logos={pressLogos} />
+  </div>
+  <!-- One Quick-Add modal per PLP page (Task 8) — populated at runtime for
+       whichever card's `[data-quick-add]` trigger was clicked (PlpCard.astro). -->
+  <QuickAddModal />
+</div>
+<style>
+  /* Title, filter bar and pagination stay padded from the viewport edges;
+     the card grid between them spans full width. */
+  .plp__pad { padding-inline: var(--space-5); }
+</style>
