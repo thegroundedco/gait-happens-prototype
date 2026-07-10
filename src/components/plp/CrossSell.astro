@@ -44,9 +44,15 @@ const items = (crossSell?.itemIds ?? []).map(getItem);
   }
 
   .cross-sell__heading {
-    font: var(--type-h4);
-    color: var(--color-ink);
-    margin-bottom: var(--space-5);
+    /* Figma: type/display (Montserrat 700, 40px), line-height 100%, cap-height
+       trimmed. Color is the DS's --text-inverse, which on the yellow band
+       resolves to brand teal (#047791), not white. */
+    font: var(--type-display);
+    line-height: 1;
+    color: var(--color-teal);
+    margin-bottom: var(--space-6);
+    text-box-trim: trim-both;
+    text-box-edge: cap alphabetic;
   }
 
   .cross-sell__row {
@@ -87,7 +93,8 @@ const items = (crossSell?.itemIds ?? []).map(getItem);
     justify-content: space-between;
     gap: var(--space-3);
     padding: var(--space-4);
-    background: var(--color-ink-70);
+    /* Figma: solid brand teal label bar (--bg-brand), not a translucent ink wash. */
+    background: var(--color-teal);
   }
 
   .cross-sell__label {
@@ -104,19 +111,22 @@ const items = (crossSell?.itemIds ?? []).map(getItem);
     transform: translateX(6px);
   }
 
-  /* "Shop All" CTA card — teal, no photo, mirrors the mega-menu teal NavCard. */
+  /* "Shop All" CTA card — teal, no photo, mirrors the mega-menu teal NavCard.
+     Figma (node 892:9667): content bottom-left, with the display "Shop All"
+     label (which grows and wraps) and the 64px arrow on one row. */
   .cross-sell__card--all {
     background: var(--color-teal);
-    justify-content: center;
+    justify-content: flex-end;
   }
   .cross-sell__card--all .cross-sell__label-row--display {
+    /* Inherit the base row layout (align-items:center, justify-between,
+       padding) — just drop the teal bar; the whole card is already teal. */
     background: none;
-    flex-direction: column;
-    align-items: flex-start;
-    padding: var(--space-4);
   }
   .cross-sell__card--all .cross-sell__label--display {
+    flex: 1;
     font: var(--type-display);
+    line-height: 1;
     color: var(--color-paper);
   }
 

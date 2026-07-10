@@ -2,8 +2,10 @@
 // 2-col grid of PlpCards. When `intro` is present it fills the first cell
 // (top-left); the item cards fill the remaining cells in order. Grid gap
 // is intentionally 0 — the 600px Figma cards tile edge-to-edge, borders
-// touching. Rows stretch to the tallest cell (card height), so IntroBlock
-// matches the adjacent card's height automatically.
+// touching. `grid-auto-rows: 1fr` makes EVERY row the same height (the
+// tallest row's height), so all cards — and the IntroBlock cell — are
+// uniform across the whole grid, not just within a single row. Reset to
+// natural height on the single-column mobile layout (stacked cards).
 import PlpCard from './PlpCard.astro';
 import IntroBlock from './IntroBlock.astro';
 
@@ -17,10 +19,12 @@ const { items = [], intro } = Astro.props;
   .plp-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
+    grid-auto-rows: 1fr;
   }
   @media (max-width: 720px) {
     .plp-grid {
       grid-template-columns: 1fr;
+      grid-auto-rows: auto;
     }
   }
 </style>
