@@ -110,6 +110,12 @@ const megaMenus = menus.filter((m) => m.type === 'mega');
   let mobileScrim = null;
   let mobileTrigger = null;
 
+  // Element that had focus just before the cart drawer opened, so closing
+  // it (Esc, scrim, or the drawer's own close button) can return focus
+  // there — mirrors the mega-menu's openTrigger pattern above, scoped to
+  // the cart drawer.
+  let cartTrigger = null;
+
   function show(id) {
     const panel = panels.get(id);
     if (!panel || !header) return;
@@ -147,12 +153,28 @@ const megaMenus = menus.filter((m) => m.type === 'mega');
 
   function setCartOpen(next) {
     if (!cart || !scrim) return;
+    const wasOpen = cart.classList.contains('open');
     cart.classList.toggle('open', next);
     cart.setAttribute('aria-hidden', String(!next));
     // Off-canvas when closed: keep its links out of tab order (in addition
     // to the visual translateX hide), matching MobileNav's `inert` pattern.
     cart.toggleAttribute('inert', !next);
     scrim.hidden = !next;
+
+    // Focus management: on open, move focus into the drawer (its close
+    // button) — a keyboard user who triggered the drawer should land
+    // inside it, not stay behind it on the cart icon. On close, return
+    // focus to whatever was focused right before it opened. Guarded on an
+    // actual state transition so redundant calls (e.g. Esc firing every
+    // keystroke, or the cart trigger's click handler always passing `true`)
+    // never steal focus a second time.
+    if (next && !wasOpen) {
+      cartTrigger = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+      cart.querySelector('[data-cart-close]')?.focus();
+    } else if (!next && wasOpen) {
+      cartTrigger?.focus();
+      cartTrigger = null;
+    }
   }
 
   // Keeps the mega-menu panel, account dropdown, and search overlay mutually
@@ -230,6 +252,9 @@ const megaMenus = menus.filter((m) => m.type === 'mega');
     cart = header.querySelector('[data-util-panel="cart"]');
     scrim = header.querySelector('.cart-scrim');
     accountTrigger = header.querySelector('[data-util="account"]');
+    // Each swap brings a fresh (closed) drawer — drop any stale reference to
+    // a trigger element the swap just removed.
+    cartTrigger = null;
 
     accountTrigger?.addEventListener('click', () => {
       const next = Boolean(account?.hidden);

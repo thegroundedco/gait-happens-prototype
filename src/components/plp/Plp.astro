@@ -35,7 +35,7 @@ const count = items.length;
   {groups ? (
     groups.map((group) => (
       <div class="plp__grid-wrapper" data-reveal>
-        <PlpGrid items={group.itemIds.map(getItem)} intro={group.intro} />
+        <PlpGrid items={(group.itemIds ?? []).map(getItem)} intro={group.intro} />
       </div>
     ))
   ) : (

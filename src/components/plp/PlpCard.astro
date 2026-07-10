@@ -9,7 +9,7 @@ const price = item.priceRange || item.price;
 ---
 <article class="plp-card">
   <a class="plp-card__media" href={item.href} tabindex="-1" aria-hidden="true">
-    <img src={item.image} alt="" loading="lazy" />
+    <img src={item.image} alt={item.title} loading="lazy" />
   </a>
   <div class="plp-card__body">
     {item.badges?.length > 0 && (
@@ -242,6 +242,9 @@ const price = item.priceRange || item.price;
   }
   .plp-card:hover .plp-card__cta-arrow {
     filter: none;
+    /* Small directional nudge — reinforces the CTA's forward motion.
+       Transition already covers `transform` via the shared rule above. */
+    transform: translateX(4px);
   }
   /* Secondary buttons go white outline + white glyphs. */
   .plp-card:hover .plp-card__quick-add {
@@ -252,7 +255,8 @@ const price = item.priceRange || item.price;
   @media (prefers-reduced-motion: reduce) {
     .plp-card:hover .plp-card__media img,
     .plp-card__cta:hover,
-    .plp-card__quick-add:hover {
+    .plp-card__quick-add:hover,
+    .plp-card:hover .plp-card__cta-arrow {
       transform: none;
     }
   }
