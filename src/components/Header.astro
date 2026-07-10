@@ -190,6 +190,7 @@ const megaMenus = menus.filter((m) => m.type === 'mega');
   function show(id) {
     const panel = panels.get(id);
     if (!panel || !header) return;
+    if (open === id) return; // already open — don't re-run the open animation (would re-hide cards mid-focus)
     // Close the account/search overlays (mutual exclusion) but NOT the mega
     // category itself — this function handles the outgoing mega panel
     // explicitly below (crossfade), instead of routing it through hide()
