@@ -1,7 +1,9 @@
 ---
-// Slide-in cart drawer — empty-cart state only (no cart data/state management yet).
-// Toggled open by `[data-util="cart"]`; closed via `[data-cart-close]` (header button
-// + full-viewport scrim), or Esc.
+// Slide-in cart drawer. Markup below is SSR-stable — an empty-state block, a
+// line-items list, and a subtotal/checkout summary — and the client script
+// toggles between them and fills the line items from `cart.js`'s `getCart()`.
+// Toggled open by `[data-util="cart"]` (wired in Header.astro); closed via
+// `[data-cart-close]` (header button + full-viewport scrim), or Esc.
 import Button from './Button.astro';
 ---
 <aside class="cart-drawer" data-util-panel="cart" aria-hidden="true" inert>
@@ -9,10 +11,133 @@ import Button from './Button.astro';
     <h3>Your Cart</h3>
     <button type="button" data-cart-close aria-label="Close cart">✕</button>
   </header>
-  <p class="empty">Your cart is empty.</p>
-  <Button href="/collections/all" variant="teal">Shop All</Button>
+
+  <div class="cart-empty" data-cart-empty>
+    <p class="empty">Your cart is empty.</p>
+    <Button href="/collections/all" variant="teal">Shop All</Button>
+  </div>
+
+  <ul class="cart-lines" data-cart-lines hidden></ul>
+
+  <div class="cart-summary" data-cart-summary hidden>
+    <div class="cart-summary__row">
+      <span>Subtotal</span>
+      <span data-cart-subtotal>$0 USD</span>
+    </div>
+    <!-- Placeholder — checkout is a Shopify-owned step with no route in this
+         reference build, so this is a non-navigating button, not a link. -->
+    <button type="button" class="cart-checkout" data-cart-checkout>Checkout</button>
+  </div>
 </aside>
 <div class="cart-scrim" data-cart-close hidden></div>
+<script>
+  import { getCart, removeLine, setQty, parsePrice } from '../scripts/cart.js';
+
+  // Renders cart line items into the SSR-stable structure above from
+  // `cart.js`'s `getCart()`. Runs on initial load, after every View
+  // Transition swap (astro:after-swap fires only on navigations and always
+  // hands us fresh DOM), and on every `cart:change` event dispatched by
+  // cart.js (fired by Task 8's Quick-Add modal, and by the remove/qty
+  // controls wired below). Remove/qty use event delegation — one click
+  // listener bound once at module scope, reading `data-cart-line` /
+  // `data-cart-remove` / `data-cart-incr` / `data-cart-decr` — so re-rendered
+  // lines never need per-button (re)binding. This mirrors the leak-free
+  // pattern established in Header.astro: element-bound setup goes through a
+  // function re-invoked per DOM (here, `render()` itself, since it re-queries
+  // and rewrites the DOM wholesale each time); document-level listeners are
+  // registered exactly once below.
+
+  function escapeHtml(str) {
+    return String(str).replace(/[&<>"']/g, (c) => (
+      { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]
+    ));
+  }
+
+  function formatMoney(n) {
+    return `$${Math.round(n).toLocaleString('en-US')} USD`;
+  }
+
+  function lineHtml(line) {
+    const linePrice = parsePrice(line.price) * line.qty;
+    return `
+      <li class="cart-line" data-cart-line="${escapeHtml(line.key)}">
+        <a class="cart-line__media" href="${escapeHtml(line.href)}" tabindex="-1" aria-hidden="true">
+          <img src="${escapeHtml(line.image)}" alt="" loading="lazy" />
+        </a>
+        <div class="cart-line__body">
+          <div class="cart-line__top">
+            <a class="cart-line__title" href="${escapeHtml(line.href)}">${escapeHtml(line.title)}</a>
+            <button type="button" class="cart-line__remove" data-cart-remove aria-label="Remove ${escapeHtml(line.title)}">✕</button>
+          </div>
+          ${line.variant ? `<p class="cart-line__variant">${escapeHtml(line.variant)}</p>` : ''}
+          <div class="cart-line__bottom">
+            <div class="cart-line__stepper">
+              <button type="button" class="cart-line__step" data-cart-decr aria-label="Decrease quantity">−</button>
+              <span class="cart-line__qty">${line.qty}</span>
+              <button type="button" class="cart-line__step" data-cart-incr aria-label="Increase quantity">+</button>
+            </div>
+            <span class="cart-line__price">${formatMoney(linePrice)}</span>
+          </div>
+        </div>
+      </li>
+    `;
+  }
+
+  function render() {
+    const drawer = document.querySelector('[data-util-panel="cart"]');
+    if (!drawer) return;
+    const emptyEl = drawer.querySelector('[data-cart-empty]');
+    const linesEl = drawer.querySelector('[data-cart-lines]');
+    const summaryEl = drawer.querySelector('[data-cart-summary]');
+    const subtotalEl = drawer.querySelector('[data-cart-subtotal]');
+    if (!emptyEl || !linesEl || !summaryEl || !subtotalEl) return;
+
+    const { lines, count, subtotal } = getCart();
+
+    emptyEl.hidden = count > 0;
+    linesEl.hidden = count === 0;
+    summaryEl.hidden = count === 0;
+
+    linesEl.innerHTML = count === 0 ? '' : lines.map(lineHtml).join('');
+    subtotalEl.textContent = formatMoney(subtotal);
+  }
+
+  // Initial render — direct call, or DOMContentLoaded if the script executes
+  // before the DOM is ready — then astro:after-swap on every subsequent
+  // client-side navigation (each swap brings fresh drawer DOM to fill).
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', render);
+  } else {
+    render();
+  }
+  document.addEventListener('astro:after-swap', render);
+
+  // Re-render whenever the cart mutates — bound once at module scope.
+  document.addEventListener('cart:change', render);
+
+  // Delegated remove/qty handling — bound once at module scope so it keeps
+  // working across re-renders (render() replaces the line-item DOM wholesale
+  // via innerHTML on every call).
+  document.addEventListener('click', (e) => {
+    const target = e.target;
+    if (!(target instanceof Element)) return;
+    const lineEl = target.closest('[data-cart-line]');
+    if (!lineEl) return;
+    const key = lineEl.getAttribute('data-cart-line');
+    if (!key) return;
+
+    if (target.closest('[data-cart-remove]')) {
+      removeLine(key);
+      return;
+    }
+    const step = target.closest('[data-cart-incr], [data-cart-decr]');
+    if (!step) return;
+    const current = getCart().lines.find((l) => l.key === key);
+    if (!current) return;
+    const delta = step.hasAttribute('data-cart-incr') ? 1 : -1;
+    setQty(key, current.qty + delta);
+  });
+</script>
 <style>
   .cart-drawer {
     position: fixed;
@@ -29,6 +154,7 @@ import Button from './Button.astro';
     display: grid;
     gap: var(--space-5);
     align-content: start;
+    overflow-y: auto;
   }
   .cart-drawer.open { transform: translateX(0); }
 
@@ -48,7 +174,118 @@ import Button from './Button.astro';
     color: var(--color-ink);
   }
 
+  .cart-empty { display: grid; gap: var(--space-4); justify-items: start; }
   .empty { font: var(--type-body); color: var(--color-ink-70); }
+
+  .cart-lines {
+    list-style: none;
+    display: grid;
+    gap: var(--space-4);
+  }
+  .cart-lines[hidden] { display: none; }
+
+  .cart-line {
+    display: flex;
+    gap: var(--space-3);
+  }
+  .cart-line__media {
+    display: block;
+    flex-shrink: 0;
+    width: 72px;
+    height: 72px;
+    overflow: hidden;
+  }
+  .cart-line__media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .cart-line__body {
+    flex: 1;
+    min-width: 0;
+    display: grid;
+    gap: var(--space-2);
+  }
+  .cart-line__top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--space-3);
+  }
+  .cart-line__title { font: var(--type-label); color: var(--color-ink); }
+  .cart-line__title:hover { text-decoration: underline; }
+  .cart-line__remove {
+    background: none;
+    border: 0;
+    cursor: pointer;
+    font-size: 14px;
+    line-height: 1;
+    color: var(--color-ink-70);
+    padding: var(--space-1);
+    flex-shrink: 0;
+  }
+  .cart-line__variant { font: var(--type-caption); color: var(--color-ink-70); }
+  .cart-line__bottom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+  }
+  .cart-line__stepper {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    border: 1px solid var(--color-border);
+  }
+  .cart-line__step {
+    background: none;
+    border: 0;
+    padding: 0;
+    cursor: pointer;
+    width: 28px;
+    height: 28px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font: var(--type-label);
+    color: var(--color-ink);
+  }
+  .cart-line__qty {
+    font: var(--type-body-16);
+    min-width: var(--space-4);
+    text-align: center;
+  }
+  .cart-line__price { font: var(--type-label); color: var(--color-ink); white-space: nowrap; }
+
+  .cart-summary {
+    display: grid;
+    gap: var(--space-4);
+    border-top: 1px solid var(--color-border);
+    padding-top: var(--space-4);
+  }
+  .cart-summary[hidden] { display: none; }
+  .cart-summary__row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font: var(--type-label);
+    color: var(--color-ink);
+  }
+  .cart-checkout {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    font: var(--type-cta);
+    background: var(--color-teal);
+    color: var(--color-paper);
+    border: 0;
+    border-radius: 4px;
+    padding: var(--space-3) var(--space-5);
+    cursor: pointer;
+    transition: transform var(--motion-fast) var(--ease-standard);
+  }
+  .cart-checkout:hover { transform: translateY(-2px); }
 
   .cart-scrim {
     position: fixed;
