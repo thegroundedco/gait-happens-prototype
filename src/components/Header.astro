@@ -32,6 +32,7 @@ const megaMenus = menus.filter((m) => m.type === 'mega');
           </span>
         </a>
         <nav class="top" aria-label="Primary">
+          <span class="nav-pill" aria-hidden="true"></span>
           {menus.map((m) =>
             m.type === 'link' ? (
               <a class="top__item" href={m.href}>{m.label}</a>
@@ -80,6 +81,7 @@ const megaMenus = menus.filter((m) => m.type === 'mega');
 </header>
 <script>
   import { getCart } from '../scripts/cart.js';
+  import { gsap } from 'gsap';
 
   // Mega-menu + account/search/cart utility panels. The site uses Astro's
   // ClientRouter (view transitions), which swaps the DOM on navigation and
@@ -96,6 +98,22 @@ const megaMenus = menus.filter((m) => m.type === 'mega');
   let open = null;
   let openTrigger = null;
   let panels = new Map();
+
+  // Set true only while the Esc handler is programmatically refocusing the
+  // trigger that owned the just-closed mega — suppresses that trigger's own
+  // `focus`→show() binding (see initMegaMenus()) so Esc doesn't immediately
+  // reopen the panel it just closed. Cleared synchronously right after the
+  // `.focus()` call returns (focus fires its listeners synchronously), so it
+  // never leaks into a later, real focus-driven open (Tab navigation, etc).
+  let suppressFocusOpen = false;
+
+  // Magic-pill active-item indicator — the yellow pill that glides behind
+  // the hovered/focused top-nav item. Re-queried in initNavPill() alongside
+  // the mega-menu elements above; `pillPinned` holds the trigger the pill
+  // should stay on while a mega panel is open (set/cleared by show()/hide()
+  // below), same module-scope-state pattern as `open`/`openTrigger`.
+  let navPill = null;
+  let pillPinned = null;
 
   // Utility panels (account dropdown, search overlay, cart drawer) —
   // re-queried in initUtilPanels() alongside the mega-menu elements above.
@@ -116,27 +134,109 @@ const megaMenus = menus.filter((m) => m.type === 'mega');
   // the cart drawer.
   let cartTrigger = null;
 
+  // offset relative to nav.top (item.offsetParent is nav.top since it's
+  // positioned) — used by movePillTo() to tween the pill under an item.
+  function measure(item) {
+    return { x: item.offsetLeft, w: item.offsetWidth };
+  }
+
+  function movePillTo(item, { elastic = true } = {}) {
+    if (!navPill || !item) return;
+    const { x, w } = measure(item);
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    header?.querySelectorAll('.top__item.is-active').forEach((el) => el.classList.remove('is-active'));
+    item.classList.add('is-active');
+    gsap.to(navPill, {
+      x, width: w, autoAlpha: 1,
+      duration: reduce ? 0.001 : (elastic ? 0.5 : 0.3),
+      ease: reduce ? 'none' : (elastic ? 'back.out(1.7)' : 'power2.out'),
+      overwrite: true,
+    });
+  }
+
+  function retractPill() {
+    if (!navPill) return;
+    if (pillPinned) { movePillTo(pillPinned, { elastic: false }); return; }
+    header?.querySelectorAll('.top__item.is-active').forEach((el) => el.classList.remove('is-active'));
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    gsap.to(navPill, { autoAlpha: 0, duration: reduce ? 0.001 : 0.25, overwrite: true });
+  }
+
+  // Mega-panel morph — crossfade + staggered card animation, replacing the
+  // old instant hidden/display:none show/hide (see MegaMenu.astro's
+  // `.mega`/`.mega.is-open` CSS: opacity-driven, GSAP owns the tween).
+  // Placed just above show()/hide() since those two now call them, same
+  // placement pattern as movePillTo()/retractPill() above for Task 2.
+  const reduceMo = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function animatePanelIn(panel) {
+    panel.classList.add('is-open');
+    panel.removeAttribute('inert');
+    const cards = panel.querySelectorAll('.nav-card'); // NavCard's real root class
+    if (reduceMo()) {
+      gsap.set(panel, { autoAlpha: 1 });
+      gsap.set(cards, { autoAlpha: 1, y: 0 });
+      return;
+    }
+    gsap.to(panel, { autoAlpha: 1, duration: 0.28, overwrite: true });
+    gsap.fromTo(
+      cards,
+      { autoAlpha: 0, y: 14 },
+      { autoAlpha: 1, y: 0, duration: 0.34, stagger: 0.04, ease: 'power2.out', overwrite: true }
+    );
+  }
+
+  function animatePanelOut(panel) {
+    panel.setAttribute('inert', '');
+    panel.classList.remove('is-open');
+    if (reduceMo()) {
+      gsap.set(panel, { autoAlpha: 0 });
+      return;
+    }
+    gsap.to(panel, { autoAlpha: 0, duration: 0.2, overwrite: true });
+  }
+
   function show(id) {
     const panel = panels.get(id);
     if (!panel || !header) return;
-    // Close everything first — the currently-open mega panel (so switching
-    // from one trigger to another never leaves two panels open) AND the
-    // account/search overlays (mutual exclusion) — then open this panel.
-    closeOverlays();
-    panel.hidden = false;
+    if (open === id) return; // already open — don't re-run the open animation (would re-hide cards mid-focus)
+    // Close the account/search overlays (mutual exclusion) but NOT the mega
+    // category itself — this function handles the outgoing mega panel
+    // explicitly below (crossfade), instead of routing it through hide()
+    // via a plain closeOverlays(), so the outgoing and incoming panels can
+    // animate concurrently rather than close-then-open.
+    closeOverlays('mega');
     const trigger = header.querySelector(`[data-menu-trigger="${id}"]`);
+    if (open && open !== id) {
+      // A different mega was already open — fade it out while the new one
+      // fades in; both are async GSAP tweens started in the same tick, so
+      // they run concurrently and read as one panel morphing into the next.
+      animatePanelOut(panels.get(open));
+      header.querySelector(`[data-menu-trigger="${open}"]`)?.setAttribute('aria-expanded', 'false');
+    }
+    animatePanelIn(panel);
     trigger?.setAttribute('aria-expanded', 'true');
     open = id;
     openTrigger = trigger;
+    // Pin the magic pill to this trigger — it stays put even if the pointer
+    // leaves the nav while the mega panel is open (see retractPill()).
+    if (trigger) {
+      pillPinned = trigger;
+      movePillTo(trigger);
+    }
   }
 
   function hide() {
     if (!open || !header) return;
     const panel = panels.get(open);
-    if (panel) panel.hidden = true;
+    if (panel) animatePanelOut(panel);
     header.querySelector(`[data-menu-trigger="${open}"]`)?.setAttribute('aria-expanded', 'false');
     open = null;
     openTrigger = null;
+    // Release the pill's pin and let it retract (unless the pointer is
+    // still resting on a top item, whose own mouseenter will re-pin it).
+    pillPinned = null;
+    retractPill();
   }
 
   function setAccountOpen(next) {
@@ -228,11 +328,23 @@ const megaMenus = menus.filter((m) => m.type === 'mega');
     panels = new Map(
       [...header.querySelectorAll('[data-menu-panel]')].map((p) => [p.dataset.menuPanel, p])
     );
+    // Guard the initial state: every panel starts closed — inert, no
+    // `is-open`, opacity 0 — replacing the old default-`hidden` attribute.
+    // Each swap brings fresh (already-`inert`) panel DOM, but this also
+    // resets their GSAP-driven opacity, since MegaMenu.astro's CSS default
+    // (`opacity: 0`) only covers panels that were never animated in.
+    panels.forEach((panel) => {
+      panel.classList.remove('is-open');
+      panel.setAttribute('inert', '');
+      gsap.set(panel, { autoAlpha: 0 });
+    });
 
     triggers.forEach((t) => {
       const id = t.dataset.menuTrigger;
       t.addEventListener('mouseenter', () => show(id));
-      t.addEventListener('focus', () => show(id));
+      t.addEventListener('focus', () => {
+        if (!suppressFocusOpen) show(id);
+      });
       t.addEventListener('click', () => (open === id ? hide() : show(id)));
       // Keyboard users: focus alone opens the panel but Tab would just move
       // to the next trigger (closing it) without ever reaching the panel's
@@ -247,6 +359,23 @@ const megaMenus = menus.filter((m) => m.type === 'mega');
     });
 
     header.addEventListener('mouseleave', hide);
+  }
+
+  // Magic-pill follow logic — re-bound per DOM (element-level listeners only,
+  // no document.addEventListener here) so it rebinds cleanly on every
+  // astro:after-swap, matching initMegaMenus()'s pattern. Must run after
+  // initMegaMenus() so `header` is already set.
+  function initNavPill() {
+    if (!header) return;
+    navPill = header.querySelector('.nav-pill');
+    pillPinned = null;
+    const items = header.querySelectorAll('.top__item');
+    items.forEach((item) => {
+      item.addEventListener('mouseenter', () => movePillTo(item));
+      item.addEventListener('focus', () => movePillTo(item));
+    });
+    // Retract when the pointer leaves the whole top nav (unless a mega is pinned).
+    header.querySelector('.top')?.addEventListener('mouseleave', () => retractPill());
   }
 
   function initUtilPanels() {
@@ -296,6 +425,7 @@ const megaMenus = menus.filter((m) => m.type === 'mega');
 
   function initHeader() {
     initMegaMenus();
+    initNavPill();
     initUtilPanels();
     initMobileNav();
     renderCartBadge();
@@ -327,7 +457,12 @@ const megaMenus = menus.filter((m) => m.type === 'mega');
     setSearchOpen(false);
     setCartOpen(false);
     setMobileNavOpen(false);
+    // Suppress the trigger's own focus→show() binding for this programmatic
+    // refocus only — .focus() fires listeners synchronously, so the flag is
+    // back off before any other code runs.
+    suppressFocusOpen = true;
     returnFocusTo?.focus();
+    suppressFocusOpen = false;
   });
   document.addEventListener('click', (e) => {
     if (!header || header.contains(e.target)) return;
@@ -344,6 +479,12 @@ const megaMenus = menus.filter((m) => m.type === 'mega');
     position: sticky;
     top: 0;
     z-index: 50;
+    /* Single source of truth for mega-panel height (>=1.75x the old 250px),
+       set here so both the panels (MegaMenu.astro) and their absolute
+       positioning context (this element) share it. Tasks 2-3 (indicator,
+       morph) read the panel via the DOM, not this value directly, but this
+       is what keeps all four mega panels the same fixed height. */
+    --mega-height: 440px;
   }
 
   .navrow__inner {
@@ -392,8 +533,10 @@ const megaMenus = menus.filter((m) => m.type === 'mega');
   .logo__gait { top: 24.99%; right: 55.87%; bottom: 24.2%; left: 10.35%; }
   .logo__happens { top: 25.25%; right: 0; bottom: 9.39%; left: 45.89%; }
 
-  .top { display: flex; align-items: center; }
+  .top { position: relative; display: flex; align-items: center; }
   .top__item {
+    position: relative;
+    z-index: 1;
     font: var(--type-label);
     color: var(--color-paper);
     background: none;
@@ -401,6 +544,25 @@ const megaMenus = menus.filter((m) => m.type === 'mega');
     cursor: pointer;
     padding-block: var(--space-3);
     padding-inline: var(--space-5);
+  }
+  .top__item.is-active { color: var(--color-ink); }
+
+  /* Magic-pill active-item indicator — glides behind the hovered/focused
+     top item (see initNavPill()/movePillTo() in the script above). Sits
+     below the labels (z-index: 0 vs. .top__item's 1) and is positioned
+     relative to nav.top via the x/width GSAP tweens setting its transform. */
+  .nav-pill {
+    position: absolute;
+    left: 0;
+    top: 50%;
+    height: calc(100% - var(--space-3));
+    width: 0;
+    transform: translate(0, -50%);
+    background: var(--color-yellow);
+    border-radius: 4px;
+    opacity: 0;
+    pointer-events: none;
+    z-index: 0;
   }
 
   .util { display: flex; align-items: center; gap: var(--space-5); }

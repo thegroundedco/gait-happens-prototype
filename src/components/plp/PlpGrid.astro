@@ -2,25 +2,49 @@
 // 2-col grid of PlpCards. When `intro` is present it fills the first cell
 // (top-left); the item cards fill the remaining cells in order. Grid gap
 // is intentionally 0 — the 600px Figma cards tile edge-to-edge, borders
-// touching. Rows stretch to the tallest cell (card height), so IntroBlock
-// matches the adjacent card's height automatically.
+// touching. `grid-auto-rows: 1fr` makes EVERY row the same height (the
+// tallest row's height), so all cards — and the IntroBlock cell — are
+// uniform across the whole grid, not just within a single row. Reset to
+// natural height on the single-column mobile layout (stacked cards).
 import PlpCard from './PlpCard.astro';
 import IntroBlock from './IntroBlock.astro';
+import PromoCard from './PromoCard.astro';
 
-const { items = [], intro } = Astro.props;
+const { items = [], intro, promos = [] } = Astro.props;
+
+// Build the ordered cell sequence: the intro (if any) first, then the item
+// cards, then splice any promo/CTA cells in at their `at` index within the
+// FINAL sequence. Promos are inserted in ascending `at` order so each splice
+// lands at the intended position (later inserts account for earlier ones).
+const cells = [];
+if (intro) cells.push({ type: 'intro', ...intro });
+for (const item of items) cells.push({ type: 'item', item });
+for (const promo of [...promos].sort((a, b) => a.at - b.at)) {
+  const at = Math.min(Math.max(promo.at, 0), cells.length);
+  cells.splice(at, 0, { type: 'promo', ...promo });
+}
 ---
 <div class="plp-grid">
-  {intro && <IntroBlock heading={intro.heading} body={intro.body} />}
-  {items.map((item) => <PlpCard item={item} />)}
+  {cells.map((cell) =>
+    cell.type === 'intro' ? (
+      <IntroBlock heading={cell.heading} body={cell.body} />
+    ) : cell.type === 'promo' ? (
+      <PromoCard heading={cell.heading} body={cell.body} cta={cell.cta} />
+    ) : (
+      <PlpCard item={cell.item} />
+    )
+  )}
 </div>
 <style>
   .plp-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
+    grid-auto-rows: 1fr;
   }
   @media (max-width: 720px) {
     .plp-grid {
       grid-template-columns: 1fr;
+      grid-auto-rows: auto;
     }
   }
 </style>

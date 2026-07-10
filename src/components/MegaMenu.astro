@@ -11,7 +11,7 @@ const columns = menu.style === 'bars'
   ? Array.from({ length: 3 }, (_, c) => menu.cards.filter((_, i) => i % 3 === c))
   : null;
 ---
-<div class="mega" data-menu-panel={menu.id} id={panelId} hidden>
+<div class="mega" data-menu-panel={menu.id} id={panelId} inert>
   <div class="mega__pad">
     <div class="mega__inner">
       {columns
@@ -31,25 +31,49 @@ const columns = menu.style === 'bars'
     left: 0;
     right: 0;
     background: var(--color-paper);
+    /* Crossfade model (Task 3): panels stay in the DOM/layout and overlap,
+       so switching menus reads as one panel morphing into the next instead
+       of an instant hidden/visible flash. GSAP (Header.astro's show()/hide())
+       drives opacity via autoAlpha — CSS has no transition of its own so it
+       never fights GSAP's tween. Only the open panel (.is-open) accepts
+       pointer events; closed panels are also marked `inert` in the markup
+       above (toggled by JS) so they're out of tab order and unclickable
+       even before/between tweens. */
+    opacity: 0;
+    pointer-events: none;
+    transition: none;
   }
-  .mega[hidden] { display: none; }
+  .mega.is-open { pointer-events: auto; }
 
   .mega__pad { padding-inline: var(--space-4); }
 
   .mega__inner {
     display: flex;
-    align-items: center;
+    /* Stretch (not center): 'cards'/'white' panels have no .mega__col wrapper,
+       so their NavCard children are direct flex items here — stretch lets
+       each grow to fill the panel's full height (belt-and-suspenders with the
+       min-height below and NavCard's own height:100%, since 'bars' panels
+       already size their .mega__col children explicitly). */
+    align-items: stretch;
     justify-content: center;
     gap: var(--space-5);
     padding: var(--space-4);
     background: var(--color-ink);
+    /* Explicit (not min-) height: 'cards'/'white' panels have no .mega__col
+       wrapper, so NavCard's height:100% needs a definite containing-block
+       height to resolve against — min-height alone leaves the CSS 'height'
+       property computed as auto, which makes percentage heights on children
+       (and align-items:stretch, since the child already has a non-auto
+       cross-size value) fail to resolve. Matches .mega__col's explicit
+       height below, so 'bars' panels are unaffected. */
+    height: var(--mega-height);
   }
 
   .mega__col {
     display: flex;
     flex-direction: column;
     gap: var(--space-2);
-    height: 250px;
+    height: var(--mega-height);
     flex: 1 1 0;
   }
 </style>
