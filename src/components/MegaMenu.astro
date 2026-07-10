@@ -73,7 +73,11 @@ const columns = menu.style === 'bars'
     display: flex;
     flex-direction: column;
     gap: var(--space-2);
-    height: var(--mega-height);
+    /* Fill the panel's PADDED content box (100% of .mega__inner's explicit
+       --mega-height, minus its padding) — NOT the full --mega-height, which
+       would overflow the 16px padding and make the Resources 6-bar grid
+       spill below the ink background (taller than the other menus). */
+    height: 100%;
     flex: 1 1 0;
   }
 </style>

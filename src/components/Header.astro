@@ -98,6 +98,12 @@ const megaMenus = menus.filter((m) => m.type === 'mega');
   let open = null;
   let openTrigger = null;
   let panels = new Map();
+  // Pending "close the mega" timer. The mega stays open while the pointer is
+  // over a trigger or an open panel; moving to anything else (About, the logo,
+  // the util icons, the gaps) schedules a short-delayed close. The delay lets
+  // the pointer cross the ~16px gap between a trigger and its panel without the
+  // panel closing on the way down.
+  let closeTimer = null;
 
   // Set true only while the Esc handler is programmatically refocusing the
   // trigger that owned the just-closed mega — suppresses that trigger's own
@@ -318,6 +324,17 @@ const megaMenus = menus.filter((m) => m.type === 'mega');
     mobileTrigger?.setAttribute('aria-expanded', String(next));
   }
 
+  // Delayed close of the open mega — cancelled if the pointer returns to a
+  // trigger or an open panel, so a trigger→panel move crosses the ~16px gap
+  // without closing. Driven by the delegated navrow mouseover in initMegaMenus.
+  function scheduleClose() {
+    clearTimeout(closeTimer);
+    closeTimer = setTimeout(() => { if (open) hide(); }, 120);
+  }
+  function cancelClose() {
+    clearTimeout(closeTimer);
+  }
+
   function initMegaMenus() {
     header = document.querySelector('.site-header');
     open = null;
@@ -358,7 +375,23 @@ const megaMenus = menus.filter((m) => m.type === 'mega');
       });
     });
 
-    header.addEventListener('mouseleave', hide);
+    // Close the mega whenever the pointer is NOT over a trigger or an open
+    // panel — moving to About, the logo, the util icons, or the gaps closes
+    // it (previously only fully leaving the header did). Delegated on the
+    // whole `.navrow` so it also covers the panels (which are `.navrow`
+    // descendants but not `.navrow__inner` children); the short delay in
+    // scheduleClose() bridges the trigger→panel gap. Leaving the navrow
+    // entirely (up, or down off the panel) also schedules a close.
+    clearTimeout(closeTimer);
+    const navrow = header.querySelector('.navrow');
+    navrow?.addEventListener('mouseover', (e) => {
+      const el = e.target;
+      const keep = el instanceof Element &&
+        (el.closest('[data-menu-trigger]') || el.closest('[data-menu-panel]'));
+      if (keep) cancelClose();
+      else scheduleClose();
+    });
+    navrow?.addEventListener('mouseleave', scheduleClose);
   }
 
   // Magic-pill follow logic — re-bound per DOM (element-level listeners only,
