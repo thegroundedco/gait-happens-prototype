@@ -344,6 +344,12 @@ const megaMenus = menus.filter((m) => m.type === 'mega');
     position: sticky;
     top: 0;
     z-index: 50;
+    /* Single source of truth for mega-panel height (>=1.75x the old 250px),
+       set here so both the panels (MegaMenu.astro) and their absolute
+       positioning context (this element) share it. Tasks 2-3 (indicator,
+       morph) read the panel via the DOM, not this value directly, but this
+       is what keeps all four mega panels the same fixed height. */
+    --mega-height: 440px;
   }
 
   .navrow__inner {

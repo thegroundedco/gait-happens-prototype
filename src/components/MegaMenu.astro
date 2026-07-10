@@ -38,18 +38,31 @@ const columns = menu.style === 'bars'
 
   .mega__inner {
     display: flex;
-    align-items: center;
+    /* Stretch (not center): 'cards'/'white' panels have no .mega__col wrapper,
+       so their NavCard children are direct flex items here — stretch lets
+       each grow to fill the panel's full height (belt-and-suspenders with the
+       min-height below and NavCard's own height:100%, since 'bars' panels
+       already size their .mega__col children explicitly). */
+    align-items: stretch;
     justify-content: center;
     gap: var(--space-5);
     padding: var(--space-4);
     background: var(--color-ink);
+    /* Explicit (not min-) height: 'cards'/'white' panels have no .mega__col
+       wrapper, so NavCard's height:100% needs a definite containing-block
+       height to resolve against — min-height alone leaves the CSS 'height'
+       property computed as auto, which makes percentage heights on children
+       (and align-items:stretch, since the child already has a non-auto
+       cross-size value) fail to resolve. Matches .mega__col's explicit
+       height below, so 'bars' panels are unaffected. */
+    height: var(--mega-height);
   }
 
   .mega__col {
     display: flex;
     flex-direction: column;
     gap: var(--space-2);
-    height: 250px;
+    height: var(--mega-height);
     flex: 1 1 0;
   }
 </style>
