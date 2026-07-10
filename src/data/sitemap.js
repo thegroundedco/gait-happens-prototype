@@ -53,7 +53,7 @@ export const routes = [
   r('/collections/best-sellers', 'Shop Best Sellers', 'plp', ['Home', 'Shop', 'Best Sellers'], { status: 'built' }),
   r('/collections/featured', 'Featured Products', 'plp', ['Home', 'Shop', 'Featured Products'], { status: 'built' }),
   r('/collections/all', 'Shop All', 'plp', ['Home', 'Shop', 'All'], { status: 'built' }),
-  r('/products/toe-spacers', 'Toe Spacers', 'pdp', ['Home', 'Shop', 'Toe Spacers']),
+  r('/products/toe-spacers', 'Toe Spacers', 'pdp', ['Home', 'Shop', 'Toe Spacers'], { status: 'built' }),
   r('/products/foot-health-kit', 'The Foot Health Kit', 'pdp', ['Home', 'Shop', 'The Foot Health Kit']),
   r('/products/cork-supplement', 'Cork Supplement', 'pdp', ['Home', 'Shop', 'Cork Supplement']),
   r('/products/toe-strengtheners', 'Toe Strengtheners', 'pdp', ['Home', 'Shop', 'Toe Strengtheners']),

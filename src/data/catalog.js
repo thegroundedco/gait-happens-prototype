@@ -27,6 +27,13 @@ export const items = [
         ['Large', '13+', '11.5+', '45+', '11+'],
       ],
     },
+    pdp: {
+      crossSell: {
+        heading: 'More Resources for Your Movement Journey',
+        itemIds: ['toe-spacers', 'combating-bunions', 'fit-feet'],
+        shopAllHref: '/collections/all',
+      },
+    },
   },
   {
     id: 'foot-health-kit',
@@ -373,6 +380,13 @@ export const pressLogos = [
   'Bicycling',
   "Women's Health",
 ];
+
+// ---- PDP brand content --------------------------------------------------
+
+// TODO(Task 5): shared brand-story content (trust bar, founder note, etc.)
+// used across PDP sections. Stubbed here so Task 1's Pdp.astro composer has
+// a stable import target to extend from.
+export const pdpBrand = {};
 
 // ---- Accessors --------------------------------------------------------
 
