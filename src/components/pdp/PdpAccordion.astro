@@ -1,105 +1,85 @@
 ---
-// Product Details accordion (Size / Instructions / Research) — Task 3.
-// Figma 710:6353 (desktop, "Question" panels below the buy box) and
-// 1088:15369 (mobile, its own block after the gallery). Both frames show
-// all three rows expanded (minus icon) — matched literally, so every row
-// below defaults `open` on every breakpoint rather than following the task
-// brief's "mobile collapsed" fallback, which the brief itself qualified
-// with "or match what 1088:15369 shows" (see the task report for the full
-// reasoning).
+// Product Details accordion — built in Task 3 for Toe Spacers only (three
+// fixed rows: Size / Instructions / Research). Task 7 rolls the PDP template
+// out to 5 more products whose "Question" panels are product-specific and
+// don't map onto that fixed shape — Foot Health Kit has What's
+// Included/Finding Your Size/How To Use Your Kit; Toe Strengtheners has
+// What's Included/How To Use Them; Toe Dynamometer has Instructions/Details/
+// Evaluate Toe Strength; Cork Supplement and Mobility Ball have none at all.
+// So this component is now DATA-DRIVEN: `item.pdp.accordion` is an array of
+// rows `[{ label, content?, type? }]`.
 //
-// Native <details>/<summary> — the same accordion primitive MobileNav.astro
-// already uses for its `.m-acc` mega-menu panels (keyboard + screen-reader
-// support come from the browser for free, no script needed). The visual
-// chrome here (teal-bordered card, bold teal label, right-aligned +/− icon)
-// is specific to this Figma frame, distinct from MobileNav's plain
-// native-marker treatment — same mechanism, different skin.
+// A row with `type: 'sizechart'` renders `item.sizeChart` as a table (plus
+// the helper copy + sizing image) exactly as Task 3 built it — the one row
+// shape that needs real structured markup rather than prose. Every other
+// row renders `label` + `content`, where `content` is trusted,
+// hand-authored HTML from catalog.js via `set:html` — a paragraph, a bullet
+// list, a grid of YouTube embeds, a linked PDF, whatever that product's
+// Question panel needs. This mirrors the task brief's framing ("content …
+// may include the video-embed / citations markup") and avoids inventing a
+// bespoke `type` for every shape (list vs. text+image vs. video grid vs.
+// linked resource) four products need in different combinations.
 //
-// The +/− swap is pure CSS keyed off the `[open]` attribute, echoing how
-// ProductDetails.astro's own qty stepper uses literal +/− glyphs
-// (`−`/`+`) instead of icon images.
+// Toe Spacers' three rows were converted to this shape (Size stays
+// `type: 'sizechart'`; Instructions/Research became `content` HTML strings)
+// so its rendered output is byte-for-byte the same as before this refactor.
+// Products with no accordion (Cork Supplement, Mobility Ball) simply carry
+// no `pdp.accordion` — the `rows.length > 0` guard below means nothing
+// renders, same graceful degradation the array shape replaced.
 //
-// Each row is independently optional (same `item.x && (...)` guard idiom
-// ProductDetails.astro already uses for variants/bullets/notes) so this
-// component degrades gracefully for catalog items that don't yet carry a
-// sizeChart / pdp.accordion — every product besides Toe Spacers, today.
+// Native <details>/<summary> — same accordion primitive MobileNav.astro's
+// `.m-acc` mega-menu panels use (keyboard + screen-reader support for free,
+// no script). Every row still defaults `open`, matching every "Question"
+// panel Figma shows expanded across every product's frame (see Task 3's
+// report for the original reasoning — unchanged here).
+//
+// `content` HTML is trusted/static (authored by us in catalog.js, not user
+// input), so `set:html` is safe here — same trust boundary as any other
+// hardcoded markup in this reference build.
 const { item } = Astro.props;
+const rows = item.pdp?.accordion ?? [];
 const sizeChart = item.sizeChart;
-const instructions = item.pdp?.accordion?.instructions ?? [];
-const research = item.pdp?.accordion?.research ?? [];
-const hasAnyRow = sizeChart || instructions.length > 0 || research.length > 0;
 ---
-{hasAnyRow && (
+{rows.length > 0 && (
   <div class="pdp-accordion">
-    {sizeChart && (
+    {rows.map((row) => (
       <details class="pdp-accordion__row" open>
         <summary class="pdp-accordion__summary">
-          <span class="pdp-accordion__label">Size</span>
+          <span class="pdp-accordion__label">{row.label}</span>
           <span class="pdp-accordion__icon" aria-hidden="true"></span>
         </summary>
-        <div class="pdp-accordion__body pdp-accordion__body--size">
-          <p>If you are choosing between sizes we recommend choosing the smaller size.</p>
-          <table class="pdp-accordion__table">
-            <caption class="pdp-accordion__sr-only">{`${item.title} size chart`}</caption>
-            <thead>
-              <tr>
-                {sizeChart.columns.map((col) => <th scope="col">{col}</th>)}
-              </tr>
-            </thead>
-            <tbody>
-              {sizeChart.rows.map((row) => (
+        {row.type === 'sizechart' && sizeChart ? (
+          <div class="pdp-accordion__body pdp-accordion__body--size">
+            <p>If you are choosing between sizes we recommend choosing the smaller size.</p>
+            <table class="pdp-accordion__table">
+              <caption class="pdp-accordion__sr-only">{`${item.title} size chart`}</caption>
+              <thead>
                 <tr>
-                  {row.map((cell, i) => (i === 0 ? <th scope="row">{cell}</th> : <td>{cell}</td>))}
+                  {sizeChart.columns.map((col) => <th scope="col">{col}</th>)}
                 </tr>
-              ))}
-            </tbody>
-          </table>
-          <img
-            class="pdp-accordion__image"
-            src={item.image}
-            alt={`${item.title} sizing reference`}
-            loading="lazy"
-            width="400"
-            height="335"
-          />
-        </div>
+              </thead>
+              <tbody>
+                {sizeChart.rows.map((r) => (
+                  <tr>
+                    {r.map((cell, i) => (i === 0 ? <th scope="row">{cell}</th> : <td>{cell}</td>))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            <img
+              class="pdp-accordion__image"
+              src={item.image}
+              alt={`${item.title} sizing reference`}
+              loading="lazy"
+              width="400"
+              height="335"
+            />
+          </div>
+        ) : (
+          <div class="pdp-accordion__body" set:html={row.content} />
+        )}
       </details>
-    )}
-
-    {instructions.length > 0 && (
-      <details class="pdp-accordion__row" open>
-        <summary class="pdp-accordion__summary">
-          <span class="pdp-accordion__label">Instructions</span>
-          <span class="pdp-accordion__icon" aria-hidden="true"></span>
-        </summary>
-        <div class="pdp-accordion__body pdp-accordion__body--videos">
-          {instructions.map((video) => (
-            <div class="pdp-accordion__video">
-              <iframe
-                src={video.src}
-                title={video.title}
-                loading="lazy"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                referrerpolicy="strict-origin-when-cross-origin"
-                allowfullscreen
-              ></iframe>
-            </div>
-          ))}
-        </div>
-      </details>
-    )}
-
-    {research.length > 0 && (
-      <details class="pdp-accordion__row" open>
-        <summary class="pdp-accordion__summary">
-          <span class="pdp-accordion__label">Research</span>
-          <span class="pdp-accordion__icon" aria-hidden="true"></span>
-        </summary>
-        <div class="pdp-accordion__body pdp-accordion__body--research">
-          {research.map((citation) => <p>{citation}</p>)}
-        </div>
-      </details>
-    )}
+    ))}
   </div>
 )}
 <style>
@@ -155,17 +135,12 @@ const hasAnyRow = sizeChart || instructions.length > 0 || research.length > 0;
   .pdp-accordion__body {
     display: flex;
     flex-direction: column;
+    gap: var(--space-4);
     font: var(--type-body-sm);
     color: var(--color-ink);
   }
   .pdp-accordion__body--size {
     gap: var(--space-5);
-  }
-  .pdp-accordion__body--videos {
-    gap: var(--space-4);
-  }
-  .pdp-accordion__body--research {
-    gap: var(--space-2);
   }
 
   @media (prefers-reduced-motion: no-preference) {
@@ -228,15 +203,52 @@ const hasAnyRow = sizeChart || instructions.length > 0 || research.length > 0;
     display: block;
   }
 
-  /* ---- Instructions videos -------------------------------------------- */
+  /* ---- Generic row content --------------------------------------------
+     `row.content` is injected via `set:html`, so it isn't part of this
+     component's static template — Astro's scoped-style hashing only
+     rewrites selectors it can see at compile time, so every rule reaching
+     into that raw markup has to be `:global()` (Astro's escape hatch for
+     styling content it can't statically see, e.g. slotted/injected HTML). */
+  .pdp-accordion__body :global(p) {
+    margin: 0;
+  }
+  .pdp-accordion__body :global(ul) {
+    list-style: disc;
+    padding-left: var(--space-5);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    margin: 0;
+  }
+  .pdp-accordion__body :global(a) {
+    color: var(--color-teal);
+    text-decoration: underline;
+    word-break: break-word;
+  }
+  .pdp-accordion__body :global(img) {
+    width: 100%;
+    aspect-ratio: 400 / 335;
+    object-fit: cover;
+    display: block;
+  }
 
-  .pdp-accordion__video {
+  /* ---- Instructions videos ---------------------------------------------
+     `content` strings that embed video grids wrap each iframe in a
+     `.pdp-accordion__video` div (see catalog.js) so this component still
+     owns the aspect-ratio/positioning chrome — same idea as Task 3's
+     original bespoke video block, just reachable via :global() now. */
+  :global(.pdp-accordion__videos) {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+  :global(.pdp-accordion__video) {
     position: relative;
     width: 100%;
     max-width: 400px;
     aspect-ratio: 400 / 225;
   }
-  .pdp-accordion__video iframe {
+  :global(.pdp-accordion__video) iframe {
     position: absolute;
     inset: 0;
     width: 100%;

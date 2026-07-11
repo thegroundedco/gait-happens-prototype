@@ -54,10 +54,14 @@ export const routes = [
   r('/collections/featured', 'Featured Products', 'plp', ['Home', 'Shop', 'Featured Products'], { status: 'built' }),
   r('/collections/all', 'Shop All', 'plp', ['Home', 'Shop', 'All'], { status: 'built' }),
   r('/products/toe-spacers', 'Toe Spacers', 'pdp', ['Home', 'Shop', 'Toe Spacers'], { status: 'built' }),
-  r('/products/foot-health-kit', 'The Foot Health Kit', 'pdp', ['Home', 'Shop', 'The Foot Health Kit']),
-  r('/products/cork-supplement', 'Cork Supplement', 'pdp', ['Home', 'Shop', 'Cork Supplement']),
-  r('/products/toe-strengtheners', 'Toe Strengtheners', 'pdp', ['Home', 'Shop', 'Toe Strengtheners']),
-  r('/products/toe-dynamometer', 'Toe Dynamometer', 'pdp', ['Home', 'Shop', 'Toe Dynamometer']),
+  r('/products/foot-health-kit', 'The Foot Health Kit', 'pdp', ['Home', 'Shop', 'The Foot Health Kit'], { status: 'built' }),
+  r('/products/cork-supplement', 'Cork Supplement', 'pdp', ['Home', 'Shop', 'Cork Supplement'], { status: 'built' }),
+  r('/products/toe-strengtheners', 'Toe Strengtheners', 'pdp', ['Home', 'Shop', 'Toe Strengtheners'], { status: 'built' }),
+  r('/products/toe-dynamometer', 'Toe Dynamometer', 'pdp', ['Home', 'Shop', 'Toe Dynamometer'], { status: 'built' }),
+  // Task 7: new route — Mobility Ball had no page or catalog entry before
+  // this task (unlike the other 4 rolled-out products above, which already
+  // had placeholder routes to flip).
+  r('/products/mobility-ball', 'Mobility Ball', 'pdp', ['Home', 'Shop', 'Mobility Ball'], { status: 'built' }),
   r('/products/walk', 'WALK', 'pdp', ['Home', 'Shop', 'WALK']),
 
   // Courses

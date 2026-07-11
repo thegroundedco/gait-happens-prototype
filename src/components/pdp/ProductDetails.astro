@@ -50,7 +50,14 @@ const gallery = item.pdp?.gallery?.length ? item.pdp.gallery : [item.image];
           </div>
         </div>
 
-        <p class="pdp-details__price">{item.pdp?.priceExact ?? item.price}</p>
+        <p class="pdp-details__price">
+          <span class={item.pdp?.compareAtPrice ? 'pdp-details__price-sale' : undefined}>
+            {item.pdp?.priceExact ?? item.price}
+          </span>
+          {item.pdp?.compareAtPrice && (
+            <span class="pdp-details__price-compare">{item.pdp.compareAtPrice}</span>
+          )}
+        </p>
 
         {item.variants && (
           <div class="pdp-details__variants">
@@ -306,8 +313,23 @@ const gallery = item.pdp?.gallery?.length ? item.pdp.gallery : [item.image];
   }
 
   .pdp-details__price {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-3);
     font: var(--type-h4);
     color: var(--color-ink);
+  }
+  /* Task 7: Toe Strengtheners / Mobility Ball show a sale price (Figma
+     `--feedback-error`, #c62828 — not yet a DS token) beside a
+     strikethrough original. Toe Spacers / other single-price products never
+     set `compareAtPrice`, so this pair is inert (no red, no strike) there. */
+  .pdp-details__price-sale {
+    color: #c62828;
+  }
+  .pdp-details__price-compare {
+    font: var(--type-body-large);
+    color: var(--color-ink-70);
+    text-decoration: line-through;
   }
 
   .pdp-details__variants {
