@@ -7,10 +7,12 @@
 // ProductDetails.astro itself (see PdpAccordion.astro) rather than as a
 // separate section here, since Figma nests it in the same buy-box column.
 // Task 4 adds the 4 Column feature band directly after Product Details.
-// Later tasks (5-6) insert more PDP-specific sections above the cross-sell,
-// at the marker below.
+// Task 5 adds the Brand Section band directly after that. Later tasks (6)
+// insert more PDP-specific sections above the cross-sell, at the marker
+// below.
 import ProductDetails from './ProductDetails.astro';
 import FourColumn from './FourColumn.astro';
+import BrandSection from './BrandSection.astro';
 import CrossSell from '../plp/CrossSell.astro';
 import LogoWall from '../plp/LogoWall.astro';
 import { pressLogos } from '../../data/catalog.js';
@@ -26,8 +28,11 @@ const { item } = Astro.props;
       <FourColumn heading={item.pdp.featuresHeading} columns={item.pdp.features} />
     </div>
   )}
-  <!-- Tasks 5-6 insert more PDP sections (brand story, reviews, etc.) here,
-       above the cross-sell. -->
+  <div data-reveal>
+    <BrandSection />
+  </div>
+  <!-- Task 6 inserts more PDP sections (reviews, etc.) here, above the
+       cross-sell. -->
   <div data-reveal>
     <CrossSell crossSell={item.pdp.crossSell} />
   </div>

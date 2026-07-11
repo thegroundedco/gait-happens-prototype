@@ -443,10 +443,12 @@ export const pressLogos = [
 
 // ---- PDP brand content --------------------------------------------------
 
-// TODO(Task 5): shared brand-story content (trust bar, founder note, etc.)
-// used across PDP sections. Stubbed here so Task 1's Pdp.astro composer has
-// a stable import target to extend from.
-export const pdpBrand = {};
+// Task 5 (Brand Section band) — Figma-verbatim tagline from node 1046:19633
+// ("Brand Section PDP"). Shared default so every PDP's <BrandSection> reads
+// the same brand statement unless a product overrides it.
+export const pdpBrand = {
+  tagline: "We're a female-led group of clinicians out to change the world one human sole at a time.",
+};
 
 // ---- Accessors --------------------------------------------------------
 
