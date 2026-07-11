@@ -8,9 +8,9 @@
 // frame) is Task 3 — not built here.
 //
 // Figma's "GAIT HAPPENS" caption line above the title is rendered verbatim
-// as a single-crumb breadcrumb landmark rather than the sitewide
-// Home/Shop/Product trail (Breadcrumb.astro) — the frame shows static
-// wordmark text, not a navigational trail, so this stays Figma-accurate.
+// as static wordmark text (a plain <p>), not the sitewide Home/Shop/Product
+// breadcrumb trail (Breadcrumb.astro) — the frame shows a caption, not a
+// navigational trail, so it isn't wrapped in a `nav`/breadcrumb landmark.
 //
 // Figma's Add to Cart button is teal (--action-primary / --color-teal),
 // matching every other primary CTA on the site (plp-card__cta,
@@ -23,7 +23,7 @@ const gallery = item.pdp?.gallery?.length ? item.pdp.gallery : [item.image];
 ---
 <section class="pdp-details" data-pdp-id={item.id}>
   <div class="pdp-details__inner">
-    <nav class="pdp-details__eyebrow" aria-label="Breadcrumb"><span>Gait Happens</span></nav>
+    <p class="pdp-details__eyebrow"><span>Gait Happens</span></p>
 
     <div class="pdp-details__layout">
       <div class="pdp-details__buybox">
@@ -490,6 +490,35 @@ const gallery = item.pdp?.gallery?.length ? item.pdp.gallery : [item.image];
   @media (max-width: 1023px) {
     .pdp-details__add {
       width: 100%;
+    }
+
+    /* Buybox is a column flex container (see .pdp-details__buybox above),
+       so reordering its direct children with `order` reflows the visual
+       stack to match Figma 1017:9517 without touching the DOM: heading →
+       price → copy (description/bullets/notes) → size pills → qty/CTA.
+       Desktop keeps DOM order (heading, price, variants, purchase, copy),
+       so these overrides live only in this mobile query. */
+    .pdp-details__heading {
+      order: 1;
+    }
+    .pdp-details__price {
+      order: 2;
+    }
+    .pdp-details__copy {
+      order: 3;
+    }
+    .pdp-details__variants {
+      order: 4;
+    }
+    .pdp-details__purchase {
+      order: 5;
+    }
+
+    /* Figma 1017:9517 shows a single gallery image with no thumbnail strip
+       on mobile. Markup + init JS are left as-is (thumbs[0] still resolves
+       fine while display:none) — only the visual strip is hidden. */
+    .pdp-details__thumbs {
+      display: none;
     }
   }
 </style>
