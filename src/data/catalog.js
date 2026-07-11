@@ -147,13 +147,23 @@ export const items = [
     // star icon), read as 4.5; review count is Figma-verbatim ("(99)").
     rating: 4.5,
     reviewCount: 99,
-    // Task 7: Figma's frame shows boilerplate Small/Medium/Large size pills
-    // (copy-pasted from the Toe Spacers template, same as every other
-    // product below) but nothing in the copy, accordion, or 4 Column
-    // features ever references a size choice for the kit itself — treated
-    // as template leftover, not a real variant, per the task brief.
-    variants: null,
-    sizeChart: null,
+    // Task 7 fix (PDP review): the Small/Medium/Large size pills on node
+    // 719:6542 are NOT template leftover — the kit's own "Finding Your Size"
+    // accordion panel says "Please select your size according to the toe
+    // spacer sizing chart above" and shows the same S/M/L toe-spacer sizing
+    // table (the kit bundles toe spacers, so it inherits their sizing).
+    // Reuses the identical `sizeChart` object Toe Spacers carries above
+    // (same corrected "13 OR LARGER" row) since it's the same physical
+    // spacers being sized.
+    variants: { label: 'Size', options: ['Small', 'Medium', 'Large'] },
+    sizeChart: {
+      columns: ['Size', 'Women', 'Men', 'EU Size', 'UK Size'],
+      rows: [
+        ['Small', '6.5-9', '6-7', '37-40', '4.5-7'],
+        ['Medium', '9.5-12.5', '7.5-11', '41-44', '7.5-10.5'],
+        ['Large', '13 OR LARGER', '11.5 OR LARGER', '45 OR LARGER', '11 OR LARGER'],
+      ],
+    },
     pdp: {
       // Figma-verbatim from node 719:6542 (desktop) / 1017:9522 (mobile),
       // both frames matched. Figma's two lead paragraphs are merged into
@@ -186,9 +196,18 @@ export const items = [
       ],
       // Task 7 (data-driven accordion, see PdpAccordion.astro): 3 rows,
       // Figma-verbatim from `719:6544;309:842` / `1088:15396` — same 3 rows
-      // on both breakpoints. "Finding Your Size" is text + a sizing image
-      // (no table — unlike Toe Spacers' Size row, this one has no
-      // `type: 'sizechart'`, it just renders `content`).
+      // on both breakpoints.
+      //
+      // Task 7 fix (PDP review): "Finding Your Size" is now `type:
+      // 'sizechart'` (was plain `content` text + a generic photo, no table)
+      // — its Figma copy literally says "Please select your size according
+      // to the toe spacer sizing chart above" and shows the S/M/L table, so
+      // rendering a table-less row contradicted its own text. `type:
+      // 'sizechart'` reuses the exact same size-chart block Toe Spacers'
+      // "Size" row renders (helper copy + table, from `sizeChart` above,
+      // same component-owned pattern — see PdpAccordion.astro), which now
+      // actually shows the table the copy references instead of a generic
+      // product photo.
       accordion: [
         {
           label: "What's Included",
@@ -203,13 +222,7 @@ export const items = [
             </ul>
           `,
         },
-        {
-          label: 'Finding Your Size',
-          content: `
-            <p>Please select your size according to the toe spacer sizing chart above. If you are between sizes we recommend sizing down.</p>
-            <img class="pdp-accordion__image" src="/images/plp/foot-health-kit.jpg" alt="Foot Health Kit sizing reference" loading="lazy" />
-          `,
-        },
+        { label: 'Finding Your Size', type: 'sizechart' },
         {
           label: 'How To Use Your Kit',
           content: `
@@ -292,16 +305,30 @@ export const items = [
         { image: '/images/plp/cork-supplement.jpg', label: null, text: 'Great for those with bunions or tailors bunions' },
         { image: '/images/plp/cork-supplement.jpg', label: null, text: 'Add stiffness to your spacers to keep them in place while walking' },
       ],
-      // Task 7: no `accordion` key — Cork Supplement's desktop frame (node
-      // `721:7029`) shows a single "Shipping to Europe?" Question panel,
-      // but that panel is ABSENT on the mobile frame (`1017:9529`), which
-      // folds the same copy straight into the body text instead (see
-      // `description` above). PdpAccordion.astro has no per-breakpoint
-      // presence toggle, and the content is already surfaced in the copy
-      // block either way, so this product simply carries no `pdp.accordion`
-      // — it degrades cleanly (no accordion renders) rather than adding
-      // one-off breakpoint-conditional complexity for a single duplicated
-      // row.
+      // Task 7 fix (PDP review): restores the "Shipping to Europe?"
+      // accordion row Cork Supplement's desktop frame (node `721:7029`)
+      // shows — Figma-verbatim label + body copy, both read directly off
+      // that "Question" panel. The panel's inline "Click here" is a real
+      // `<a href="https://www.meijers.com/en_GB/shop/brands/gait-happens-58">`
+      // in Figma; `description` above renders as plain text only (no inline
+      // markup in ProductDetails.astro's copy block), so that hyperlink was
+      // being lost entirely. This `content` string carries the real `<a>` —
+      // same `content` + `set:html` pattern every other product's accordion
+      // rows already use (static catalog data, XSS-safe).
+      //
+      // Cork Supplement's mobile frame (`1017:9529`) has no accordion — it
+      // folds the same copy into the body text instead (see `description`
+      // above) — but PdpAccordion.astro has no per-breakpoint presence
+      // toggle, and rendering this FAQ (with its now-real link) at both
+      // widths is strictly better than losing the link altogether, so this
+      // row renders on mobile too.
+      accordion: [
+        {
+          label: 'Shipping to Europe?',
+          content:
+            '<p>Shipping to Europe? We currently only process orders for the UK. <a href="https://www.meijers.com/en_GB/shop/brands/gait-happens-58" target="_blank" rel="noopener">Click here</a> to shop with our European distributor. US/CA orders are unaffected.</p>',
+        },
+      ],
       reviews: {
         rating: 4.75,
         count: 12,
@@ -415,13 +442,16 @@ export const items = [
     sizeChart: null,
     pdp: {
       // Figma-verbatim from node 721:8349 (desktop) / 1017:9543 (mobile).
-      // Figma's CTA for this product reads "Notify When Available" at 30%
-      // opacity (i.e. out of stock) rather than "Add to Cart" — ProductDetails.astro
-      // doesn't have an out-of-stock/notify-me state (no other product frame
-      // needs one), and Task 7's own verification step requires "Add to Cart
-      // works on each" of the 6 built products, so this is deliberately left
-      // as the standard functional Add to Cart rather than building a new
-      // disabled-CTA variant for one row of one product.
+      // Task 7 fix (PDP review): Figma's CTA for this product reads "Notify
+      // When Available" at 30% opacity (i.e. out of stock) rather than "Add
+      // to Cart" — ProductDetails.astro's button label is now data-driven
+      // off `ctaLabel` (defaults to "Add to Cart" for every other product),
+      // so this sets the Figma-verbatim label without needing a new
+      // disabled/out-of-stock CTA state. The button stays wired to the same
+      // functional Add to Cart handler underneath (reference build — keep
+      // it simple + honest, and every product's "Add to Cart works" per the
+      // task's verification step); only the visible label changes.
+      ctaLabel: 'Notify When Available',
       priceExact: '$75.00 USD',
       description:
         "By placing the plastic card beneath the patient's toes and removing it slowly, the ToePro Strength dynamometer allows you to precisely quantify toe strength. Toe strength deficits have been proven to correlate with chronic plantar fasciitis, falls in the elderly, and impaired athletic performance.",

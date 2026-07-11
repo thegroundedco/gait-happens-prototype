@@ -86,7 +86,13 @@ const gallery = item.pdp?.gallery?.length ? item.pdp.gallery : [item.image];
               <button type="button" class="pdp-details__step" data-pdp-qty-incr aria-label="Increase quantity">+</button>
             </div>
           </div>
-          <button type="button" class="pdp-details__add" data-pdp-add>Add to Cart</button>
+          {/* Task 7 fix: CTA label is data-driven off `item.pdp.ctaLabel` — Toe
+             Dynamometer's Figma frame (721:8349) reads "Notify When Available"
+             (its out-of-stock state, 30% opacity) rather than "Add to Cart".
+             Every other product leaves `ctaLabel` unset and gets the default.
+             The button stays wired to the same functional Add-to-Cart handler
+             either way — only the label changes (see catalog.js). */}
+          <button type="button" class="pdp-details__add" data-pdp-add>{item.pdp?.ctaLabel ?? 'Add to Cart'}</button>
         </div>
 
         <div class="pdp-details__copy">
