@@ -2,8 +2,12 @@
 // PDP composer: product sections stack -> CrossSell -> LogoWall.
 // Task 1 proved the pipeline with the two sections we already had
 // (CrossSell + LogoWall, both reused from the PLP composer). Task 2 adds the
-// hero (Product Details buy box + gallery); later tasks (3-6) insert more
-// PDP-specific sections above the cross-sell, at the marker below.
+// hero (Product Details buy box + gallery); Task 3 adds the Product Details
+// accordion (size chart / instructions / research), built inside
+// ProductDetails.astro itself (see PdpAccordion.astro) rather than as a
+// separate section here, since Figma nests it in the same buy-box column.
+// Later tasks (4-6) insert more PDP-specific sections above the cross-sell,
+// at the marker below.
 import ProductDetails from './ProductDetails.astro';
 import CrossSell from '../plp/CrossSell.astro';
 import LogoWall from '../plp/LogoWall.astro';
@@ -15,9 +19,8 @@ const { item } = Astro.props;
   <div data-reveal>
     <ProductDetails item={item} />
   </div>
-  <!-- Tasks 3-6 insert more PDP sections (size chart / instructions /
-       research accordion, brand story, reviews, etc.) here, above the
-       cross-sell. -->
+  <!-- Tasks 4-6 insert more PDP sections (brand story, reviews, etc.) here,
+       above the cross-sell. -->
   <div data-reveal>
     <CrossSell crossSell={item.pdp.crossSell} />
   </div>

@@ -1,0 +1,246 @@
+---
+// Product Details accordion (Size / Instructions / Research) — Task 3.
+// Figma 710:6353 (desktop, "Question" panels below the buy box) and
+// 1088:15369 (mobile, its own block after the gallery). Both frames show
+// all three rows expanded (minus icon) — matched literally, so every row
+// below defaults `open` on every breakpoint rather than following the task
+// brief's "mobile collapsed" fallback, which the brief itself qualified
+// with "or match what 1088:15369 shows" (see the task report for the full
+// reasoning).
+//
+// Native <details>/<summary> — the same accordion primitive MobileNav.astro
+// already uses for its `.m-acc` mega-menu panels (keyboard + screen-reader
+// support come from the browser for free, no script needed). The visual
+// chrome here (teal-bordered card, bold teal label, right-aligned +/− icon)
+// is specific to this Figma frame, distinct from MobileNav's plain
+// native-marker treatment — same mechanism, different skin.
+//
+// The +/− swap is pure CSS keyed off the `[open]` attribute, echoing how
+// ProductDetails.astro's own qty stepper uses literal +/− glyphs
+// (`−`/`+`) instead of icon images.
+//
+// Each row is independently optional (same `item.x && (...)` guard idiom
+// ProductDetails.astro already uses for variants/bullets/notes) so this
+// component degrades gracefully for catalog items that don't yet carry a
+// sizeChart / pdp.accordion — every product besides Toe Spacers, today.
+const { item } = Astro.props;
+const sizeChart = item.sizeChart;
+const instructions = item.pdp?.accordion?.instructions ?? [];
+const research = item.pdp?.accordion?.research ?? [];
+const hasAnyRow = sizeChart || instructions.length > 0 || research.length > 0;
+---
+{hasAnyRow && (
+  <div class="pdp-accordion">
+    {sizeChart && (
+      <details class="pdp-accordion__row" open>
+        <summary class="pdp-accordion__summary">
+          <span class="pdp-accordion__label">Size</span>
+          <span class="pdp-accordion__icon" aria-hidden="true"></span>
+        </summary>
+        <div class="pdp-accordion__body pdp-accordion__body--size">
+          <p>If you are choosing between sizes we recommend choosing the smaller size.</p>
+          <table class="pdp-accordion__table">
+            <caption class="pdp-accordion__sr-only">{`${item.title} size chart`}</caption>
+            <thead>
+              <tr>
+                {sizeChart.columns.map((col) => <th scope="col">{col}</th>)}
+              </tr>
+            </thead>
+            <tbody>
+              {sizeChart.rows.map((row) => (
+                <tr>
+                  {row.map((cell, i) => (i === 0 ? <th scope="row">{cell}</th> : <td>{cell}</td>))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <img
+            class="pdp-accordion__image"
+            src={item.image}
+            alt={`${item.title} sizing reference`}
+            loading="lazy"
+            width="400"
+            height="335"
+          />
+        </div>
+      </details>
+    )}
+
+    {instructions.length > 0 && (
+      <details class="pdp-accordion__row" open>
+        <summary class="pdp-accordion__summary">
+          <span class="pdp-accordion__label">Instructions</span>
+          <span class="pdp-accordion__icon" aria-hidden="true"></span>
+        </summary>
+        <div class="pdp-accordion__body pdp-accordion__body--videos">
+          {instructions.map((video) => (
+            <div class="pdp-accordion__video">
+              <iframe
+                src={video.src}
+                title={video.title}
+                loading="lazy"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                referrerpolicy="strict-origin-when-cross-origin"
+                allowfullscreen
+              ></iframe>
+            </div>
+          ))}
+        </div>
+      </details>
+    )}
+
+    {research.length > 0 && (
+      <details class="pdp-accordion__row" open>
+        <summary class="pdp-accordion__summary">
+          <span class="pdp-accordion__label">Research</span>
+          <span class="pdp-accordion__icon" aria-hidden="true"></span>
+        </summary>
+        <div class="pdp-accordion__body pdp-accordion__body--research">
+          {research.map((citation) => <p>{citation}</p>)}
+        </div>
+      </details>
+    )}
+  </div>
+)}
+<style>
+  .pdp-accordion {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    width: 100%;
+  }
+
+  .pdp-accordion__row {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-5);
+    border: 1px solid var(--color-teal);
+    padding: var(--space-4) var(--space-6);
+  }
+
+  .pdp-accordion__summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-6);
+    cursor: pointer;
+    list-style: none;
+    font-family: var(--font-sans);
+    font-weight: 700;
+    font-size: 24px;
+    line-height: 1.2;
+    color: var(--color-teal);
+  }
+  .pdp-accordion__summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .pdp-accordion__icon {
+    flex-shrink: 0;
+    width: 16px;
+    height: 16px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font: 400 20px/1 var(--font-sans);
+    color: var(--color-teal);
+  }
+  .pdp-accordion__icon::before {
+    content: '+';
+  }
+  .pdp-accordion__row[open] > .pdp-accordion__summary .pdp-accordion__icon::before {
+    content: '\2212'; /* − — same glyph ProductDetails.astro's qty stepper uses */
+  }
+
+  .pdp-accordion__body {
+    display: flex;
+    flex-direction: column;
+    font: var(--type-body-sm);
+    color: var(--color-ink);
+  }
+  .pdp-accordion__body--size {
+    gap: var(--space-5);
+  }
+  .pdp-accordion__body--videos {
+    gap: var(--space-4);
+  }
+  .pdp-accordion__body--research {
+    gap: var(--space-2);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .pdp-accordion__row[open] > .pdp-accordion__body {
+      animation: pdp-accordion-reveal var(--motion-fast) var(--ease-standard);
+    }
+  }
+  @keyframes pdp-accordion-reveal {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  /* ---- Size table ---------------------------------------------------- */
+
+  .pdp-accordion__sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  .pdp-accordion__table {
+    width: 100%;
+    border-collapse: collapse;
+    font: var(--type-body-sm);
+  }
+  .pdp-accordion__table th,
+  .pdp-accordion__table td {
+    border: 1px solid var(--color-teal);
+    padding: var(--space-2) var(--space-3);
+    text-align: left;
+  }
+  .pdp-accordion__table thead th {
+    background: var(--color-teal);
+    color: var(--color-paper);
+    font: var(--type-caption);
+    letter-spacing: var(--tracking-caption);
+    text-transform: uppercase;
+  }
+  .pdp-accordion__table tbody th[scope='row'] {
+    background: var(--color-teal);
+    color: var(--color-paper);
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  .pdp-accordion__image {
+    width: 100%;
+    aspect-ratio: 400 / 335;
+    object-fit: cover;
+    display: block;
+  }
+
+  /* ---- Instructions videos -------------------------------------------- */
+
+  .pdp-accordion__video {
+    position: relative;
+    width: 100%;
+    max-width: 400px;
+    aspect-ratio: 400 / 225;
+  }
+  .pdp-accordion__video iframe {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+  }
+</style>

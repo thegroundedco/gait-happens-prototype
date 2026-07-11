@@ -15,7 +15,23 @@
 // Figma's Add to Cart button is teal (--action-primary / --color-teal),
 // matching every other primary CTA on the site (plp-card__cta,
 // quick-add-modal__add) — not yellow.
+//
+// Task 3 adds the Product Details accordion (Size chart / Instructions /
+// Research), extracted to PdpAccordion.astro to keep this file readable.
+// It's rendered as a DOM child of `.pdp-details__buybox` (matching Figma
+// 710:6353's node tree, where the accordion group is a sibling of the
+// description block inside the same 484px column) wrapped in
+// `.pdp-details__accordion` so it's independently targetable for the
+// mobile reflow below. On mobile (Figma 1088:15369), the accordion is its
+// own block *after* the gallery, not part of the buy box column — since it
+// still lives in the buybox's DOM subtree, `.pdp-details__buybox` switches
+// to `display: contents` under 1024px, promoting its children (heading,
+// price, copy, variants, purchase, and this accordion) to be direct flex
+// items of `.pdp-details__layout` alongside `.pdp-details__gallery`, so the
+// existing per-child `order` reordering (see the mobile media query below)
+// can slot the accordion in after the gallery without duplicating markup.
 import StarRating from '../plp/StarRating.astro';
+import PdpAccordion from './PdpAccordion.astro';
 
 const { item } = Astro.props;
 const firstSize = item.variants ? item.variants.options[0] : null;
@@ -74,6 +90,10 @@ const gallery = item.pdp?.gallery?.length ? item.pdp.gallery : [item.image];
             </ul>
           )}
           {item.pdp?.notes?.map((note) => <p>{note}</p>)}
+        </div>
+
+        <div class="pdp-details__accordion">
+          <PdpAccordion item={item} />
         </div>
       </div>
 
@@ -512,6 +532,26 @@ const gallery = item.pdp?.gallery?.length ? item.pdp.gallery : [item.image];
     }
     .pdp-details__purchase {
       order: 5;
+    }
+
+    /* Task 3: the accordion lives in the buybox's DOM subtree (matching
+       Figma 710:6353's desktop node tree) but Figma 1088:15369 shows it as
+       its own block *after* the gallery on mobile — a sibling of buybox,
+       not a descendant. `display: contents` removes the buybox box itself
+       from layout and promotes its children (the five ordered items above,
+       plus the accordion) to be direct flex items of `.pdp-details__layout`
+       alongside `.pdp-details__gallery`, so `order` can place the gallery
+       after them and the accordion after that, with no markup duplication.
+       Desktop never sets this (buybox stays a real box there), so the
+       accordion renders inside the 484px left column as Figma shows. */
+    .pdp-details__buybox {
+      display: contents;
+    }
+    .pdp-details__gallery {
+      order: 6;
+    }
+    .pdp-details__accordion {
+      order: 7;
     }
 
     /* Figma 1017:9517 shows a single gallery image with no thumbnail strip

@@ -61,6 +61,26 @@ export const items = [
         itemIds: ['toe-spacers', 'combating-bunions', 'fit-feet'],
         shopAllHref: '/collections/all',
       },
+      // Task 3 (Product Details accordion) — Figma-verbatim from node
+      // `710:6353` / `1088:15369`'s "Instructions"/"Research" panels. The
+      // "Size" panel needs no data of its own: it renders the size-chart
+      // table straight from `sizeChart` (above) plus boilerplate helper copy
+      // owned by PdpAccordion.astro itself.
+      accordion: {
+        // Figma's Instructions panel is literally two YouTube <iframe>
+        // embed-code snippets pasted as text (Figma can't render a live
+        // iframe on canvas). We embed the real players instead — "Reference
+        // build — keep it simple + honest" per the task brief — using these
+        // Figma-verbatim video URLs/titles.
+        instructions: [
+          { title: 'YouTube video player', src: 'https://www.youtube.com/embed/_4wcJ6-2yt4?si=CPXtN6sfZV0qW9aH' },
+          { title: 'YouTube video player', src: 'https://www.youtube.com/embed/r_Osy4NfREY?si=eaP1jy8_fEblel-r' },
+        ],
+        research: [
+          '1. Krześniak H, Truszczyńska-Baszak A. Toe Separators as a Therapeutic Tool in Physiotherapy-A Systematic Review. J Clin Med. 2024 Dec 19;13(24):7771. doi: 10.3390/jcm13247771. PMID: 39768694.',
+          '2. Aebischer AS, Duff S. Bunions: A review of management. Aust J Gen Pract. 2020 Nov;49(11):720-723. doi: 10.31128/AJGP-07-20-5541. PMID: 33123707.',
+        ],
+      },
     },
   },
   {
