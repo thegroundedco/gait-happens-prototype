@@ -1,9 +1,10 @@
 ---
 // PDP composer: product sections stack -> CrossSell -> LogoWall.
-// Task 1 proves the pipeline with the two sections we already have
-// (CrossSell + LogoWall, both reused from the PLP composer). Later tasks
-// (2-6) insert new PDP-specific sections above the cross-sell, at the
-// top-of-`.pdp` marker below.
+// Task 1 proved the pipeline with the two sections we already had
+// (CrossSell + LogoWall, both reused from the PLP composer). Task 2 adds the
+// hero (Product Details buy box + gallery); later tasks (3-6) insert more
+// PDP-specific sections above the cross-sell, at the marker below.
+import ProductDetails from './ProductDetails.astro';
 import CrossSell from '../plp/CrossSell.astro';
 import LogoWall from '../plp/LogoWall.astro';
 import { pressLogos } from '../../data/catalog.js';
@@ -11,8 +12,12 @@ import { pressLogos } from '../../data/catalog.js';
 const { item } = Astro.props;
 ---
 <div class="pdp">
-  <!-- Tasks 2-6 insert PDP sections (gallery, buy box, size chart, brand
-       story, reviews, etc.) here, above the cross-sell. -->
+  <div data-reveal>
+    <ProductDetails item={item} />
+  </div>
+  <!-- Tasks 3-6 insert more PDP sections (size chart / instructions /
+       research accordion, brand story, reviews, etc.) here, above the
+       cross-sell. -->
   <div data-reveal>
     <CrossSell crossSell={item.pdp.crossSell} />
   </div>

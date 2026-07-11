@@ -18,6 +18,9 @@ export const items = [
     image: '/images/plp/toe-spacers.jpg',
     href: '/products/toe-spacers',
     cta: 'View Product',
+    // Figma PDP hero (710:6353 / 1017:9517): 5-star rating, 270 reviews.
+    rating: 5,
+    reviewCount: 270,
     variants: { label: 'Size', options: ['Small', 'Medium', 'Large'] },
     sizeChart: {
       columns: ['Size', 'Women', 'Men', 'EU Size', 'UK Size'],
@@ -28,6 +31,31 @@ export const items = [
       ],
     },
     pdp: {
+      // Task 2 (Product Details hero) — Figma-verbatim price/description/
+      // bullets/notes from node 710:6353 (desktop) / 1017:9517 (mobile), both
+      // frames matched. `gallery` is a placeholder set (real photography
+      // later) — reuses the one PLP product shot per the task brief.
+      priceExact: '$28.00 USD',
+      description:
+        'Gait Happens Toe Spacers are designed to improve the spacing and alignment of the toes, which can help your feet be better able to assist with balance, shock absorption, and movement. The Toe Spacers assist in splaying (spreading / separating) the toes with a design that fits your daily life and can be worn on the go in proper footwear.',
+      bullets: [
+        'Support alignment of the toes and metatarsals',
+        'Promote muscle engagement of the foot intrinsics',
+        'Combat the effects of years in narrow shoes',
+        'Customizable to create a personalized fit',
+        'Can be worn in proper footwear and while on the go!',
+      ],
+      notes: [
+        'Toe spacers are also commonly known as toe spreaders or toe separators.',
+        '*Shipping available to United States, Canada, the European Union and United Kingdom',
+      ],
+      gallery: [
+        '/images/plp/toe-spacers.jpg',
+        '/images/plp/toe-spacers.jpg',
+        '/images/plp/toe-spacers.jpg',
+        '/images/plp/toe-spacers.jpg',
+        '/images/plp/toe-spacers.jpg',
+      ],
       crossSell: {
         heading: 'More Resources for Your Movement Journey',
         itemIds: ['toe-spacers', 'combating-bunions', 'fit-feet'],
