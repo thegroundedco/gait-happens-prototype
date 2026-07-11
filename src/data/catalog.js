@@ -61,6 +61,18 @@ export const items = [
         itemIds: ['toe-spacers', 'combating-bunions', 'fit-feet'],
         shopAllHref: '/collections/all',
       },
+      // Task 4 (4 Column feature band) — Figma-verbatim heading/copy from
+      // node 714:6430 (desktop) / 1017:9518 (mobile), both frames matched.
+      // Real feature photography isn't available yet, so `image` reuses the
+      // one PLP product shot for all 4 (same placeholder approach Task 2
+      // took for `gallery` above).
+      featuresHeading: 'Toe Spacer Features',
+      features: [
+        { image: '/images/plp/toe-spacers.jpg', label: null, text: 'Support alignment of the toes and metatarsals' },
+        { image: '/images/plp/toe-spacers.jpg', label: null, text: 'Promote muscle engagement of the foot intrinsics' },
+        { image: '/images/plp/toe-spacers.jpg', label: null, text: 'Customizable to create a personalized fit' },
+        { image: '/images/plp/toe-spacers.jpg', label: null, text: 'Combat the effects of years in narrow shoes' },
+      ],
       // Task 3 (Product Details accordion) — Figma-verbatim from node
       // `710:6353` / `1088:15369`'s "Instructions"/"Research" panels. The
       // "Size" panel needs no data of its own: it renders the size-chart
