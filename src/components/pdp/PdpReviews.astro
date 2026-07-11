@@ -1,0 +1,324 @@
+---
+// PDP "Customer Reviews" section (Task 6) — Figma 706:7675 (desktop) /
+// 1017:9520 (mobile), node name "Reviews Plugin Here". Unlike every other
+// PDP node pulled for this build, `get_design_context` returns a single
+// flattened image for this frame — its Figma layer is literally a
+// screenshot of a live reviews-app widget (Judge.me/Loox-style) pasted onto
+// the canvas, not real vector/type layers, so there's no structural design
+// data to extract. This component re-implements the same layout/copy/values
+// read off that screenshot using our own DS tokens instead of copying the
+// widget's raw pixels — the same "reference build, not a raw asset dump"
+// precedent Task 3 set for the Instructions panel's YouTube embed-code
+// screenshots.
+//
+// THIS IS A STATIC PLACEHOLDER for the real Shopify reviews app the dev
+// team will install later — see the HTML comment in the markup below.
+//
+// Doesn't reuse ../plp/StarRating.astro: that component hardwires its own
+// copy ("★★★★★ (count)" on one line, count in parens) for the PLP-card
+// idiom, but this section's headline is two lines ("★★★★★ 4.75 out of 5" /
+// "Based on 12 reviews ✓") and its distribution rows each need a
+// *different* number of small stars filled with no count-in-parens text
+// next to them — neither shape fits StarRating's fixed props, so the same
+// star SVG path is redrawn locally instead of bending that component's
+// contract. Color also diverges deliberately: this Figma frame's stars are
+// teal (measured ~#157A90 off the screenshot), not the --color-yellow
+// every other star rating on the site uses (PLP cards / ProductDetails
+// hero) — kept Figma-verbatim per this section rather than forced to match
+// the sitewide yellow, since the section already reads as a distinct
+// embedded widget rather than native site chrome.
+//
+// Distribution bar widths are computed as `row.count / count` (share of
+// total reviews), not `row.count / max(...)` — measured off the desktop
+// screenshot's pixel geometry (5-star bar ≈93% of the track for 11/12
+// reviews, 2-star bar ≈8% for 1/12; a max-normalized chart would render the
+// 5-star bar at a full 100%, which the screenshot does not show).
+const { reviews } = Astro.props;
+const { rating = 0, count = 0, distribution = [] } = reviews ?? {};
+const displayStars = Math.round(rating);
+const STAR_PATH =
+  'M12 .587l3.668 7.568 8.332 1.151-6.064 5.828 1.48 8.279L12 19.771l-7.416 3.642 1.48-8.279L0 9.306l8.332-1.151z';
+---
+<section class="pdp-reviews">
+  <!-- DEV: static reference placeholder standing in for the real Shopify
+       reviews app (e.g. Judge.me/Loox) — swap this whole section for the
+       live widget embed once one is installed on the storefront. The
+       rating/count/distribution/badges below are Figma-verbatim sample
+       values, not real review data. -->
+  <div class="pdp-reviews__pad">
+    <h2 class="pdp-reviews__heading">Customer Reviews</h2>
+
+    <div class="pdp-reviews__summary">
+      <div class="pdp-reviews__average">
+        <p class="pdp-reviews__sr-only">{`Rated ${rating} out of 5, based on ${count} reviews`}</p>
+        <span class="pdp-reviews__stars" aria-hidden="true">
+          {[1, 2, 3, 4, 5].map((n) => (
+            <svg
+              class={`pdp-reviews__star${n <= displayStars ? ' pdp-reviews__star--filled' : ''}`}
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+            >
+              <path d={STAR_PATH} />
+            </svg>
+          ))}
+          <span class="pdp-reviews__rating-value">{rating} out of 5</span>
+        </span>
+        <p class="pdp-reviews__count-line" aria-hidden="true">
+          Based on {count} reviews
+          <span class="pdp-reviews__tick">&#10003;</span>
+        </p>
+      </div>
+
+      <div class="pdp-reviews__divider" aria-hidden="true"></div>
+
+      <ul class="pdp-reviews__distribution">
+        {distribution.map((row) => (
+          <li class="pdp-reviews__row">
+            <span class="pdp-reviews__row-stars" aria-hidden="true">
+              {[1, 2, 3, 4, 5].map((n) => (
+                <svg
+                  class={`pdp-reviews__star pdp-reviews__star--sm${n <= row.stars ? ' pdp-reviews__star--filled' : ''}`}
+                  width="11"
+                  height="11"
+                  viewBox="0 0 24 24"
+                >
+                  <path d={STAR_PATH} />
+                </svg>
+              ))}
+            </span>
+            <span class="pdp-reviews__track">
+              <span
+                class="pdp-reviews__fill"
+                style={`width:${count > 0 ? (row.count / count) * 100 : 0}%`}
+              ></span>
+            </span>
+            <span class="pdp-reviews__row-count" aria-hidden="true">{row.count}</span>
+            <span class="pdp-reviews__sr-only">{`${row.stars} star: ${row.count} reviews`}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+
+    <div class="pdp-reviews__badges">
+      <span class="pdp-reviews__badge">Diamond Authenticity</span>
+      <span class="pdp-reviews__badge">Diamond Transparency</span>
+    </div>
+    <p class="pdp-reviews__verified">
+      Verified <span class="pdp-reviews__tick" aria-hidden="true">&#10003;</span>
+    </p>
+  </div>
+</section>
+<style>
+  .pdp-reviews {
+    background: var(--color-paper);
+  }
+
+  .pdp-reviews__pad {
+    max-width: var(--container-max);
+    margin-inline: auto;
+    padding-inline: var(--space-5);
+    padding-block: var(--space-7);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-7);
+  }
+
+  .pdp-reviews__heading {
+    font: var(--type-h4);
+    color: var(--color-ink);
+    text-align: center;
+  }
+
+  /* ---- Summary: average rating + distribution chart ------------------ */
+
+  .pdp-reviews__summary {
+    width: 100%;
+    display: flex;
+    align-items: stretch;
+    justify-content: center;
+    gap: var(--space-7);
+    padding-bottom: var(--space-6);
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .pdp-reviews__average {
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: var(--space-2);
+  }
+
+  .pdp-reviews__stars {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+  }
+
+  .pdp-reviews__star {
+    fill: none;
+    stroke: var(--color-ink-70);
+    stroke-width: 1.5;
+  }
+  .pdp-reviews__star--filled {
+    fill: var(--color-teal);
+    stroke: var(--color-teal);
+  }
+  .pdp-reviews__star--sm {
+    stroke-width: 2;
+  }
+
+  .pdp-reviews__rating-value {
+    font: var(--type-label);
+    color: var(--color-ink);
+  }
+
+  .pdp-reviews__count-line {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    font: var(--type-body-sm);
+    color: var(--color-ink-70);
+  }
+
+  .pdp-reviews__tick {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 14px;
+    height: 14px;
+    border-radius: 3px;
+    background: var(--color-teal);
+    color: var(--color-paper);
+    font-size: 10px;
+    line-height: 1;
+  }
+
+  .pdp-reviews__divider {
+    flex: 0 0 auto;
+    width: 1px;
+    background: var(--color-border);
+  }
+
+  .pdp-reviews__distribution {
+    flex: 1 1 320px;
+    max-width: 420px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: var(--space-2);
+    list-style: none;
+  }
+
+  .pdp-reviews__row {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+  }
+
+  .pdp-reviews__row-stars {
+    flex: 0 0 auto;
+    display: inline-flex;
+    gap: 1px;
+  }
+
+  .pdp-reviews__track {
+    flex: 1 1 auto;
+    height: 8px;
+    background: #f0f0f0;
+    overflow: hidden;
+  }
+
+  .pdp-reviews__fill {
+    display: block;
+    height: 100%;
+    background: var(--color-teal);
+  }
+
+  .pdp-reviews__row-count {
+    flex: 0 0 auto;
+    min-width: 1.5em;
+    text-align: right;
+    font: var(--type-caption);
+    color: var(--color-ink-70);
+  }
+
+  .pdp-reviews__sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  /* ---- Badges / verified row ------------------------------------------ */
+
+  .pdp-reviews__badges {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-4);
+  }
+
+  .pdp-reviews__badge {
+    display: inline-flex;
+    align-items: center;
+    padding: var(--space-2) var(--space-4);
+    border: 1px solid var(--color-teal);
+    color: var(--color-teal);
+    font: var(--type-caption);
+    letter-spacing: var(--tracking-caption);
+    text-transform: uppercase;
+  }
+
+  .pdp-reviews__verified {
+    font: var(--type-body-sm);
+    color: var(--color-teal);
+    text-decoration: underline;
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+  }
+
+  /* ---- Mobile (Figma 1017:9520, 390) ---------------------------------- */
+  @media (max-width: 1023px) {
+    .pdp-reviews__pad {
+      padding-inline: var(--space-5);
+      padding-block: var(--space-6);
+      gap: var(--space-5);
+    }
+    .pdp-reviews__summary {
+      gap: var(--space-4);
+      padding-bottom: var(--space-5);
+    }
+    .pdp-reviews__distribution {
+      flex-basis: 0;
+      max-width: none;
+    }
+    .pdp-reviews__badges {
+      gap: var(--space-3);
+    }
+    .pdp-reviews__badge {
+      padding: var(--space-1) var(--space-3);
+    }
+  }
+
+  @media (max-width: 560px) {
+    .pdp-reviews__summary {
+      gap: var(--space-3);
+    }
+    .pdp-reviews__average {
+      gap: var(--space-1);
+    }
+    .pdp-reviews__rating-value {
+      font: var(--type-body-sm);
+    }
+  }
+</style>

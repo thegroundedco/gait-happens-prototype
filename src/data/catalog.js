@@ -93,6 +93,25 @@ export const items = [
           '2. Aebischer AS, Duff S. Bunions: A review of management. Aust J Gen Pract. 2020 Nov;49(11):720-723. doi: 10.31128/AJGP-07-20-5541. PMID: 33123707.',
         ],
       },
+      // Task 6 (Customer Reviews placeholder band) — Figma-verbatim summary
+      // values read off node 706:7675 (desktop) / 1017:9520 (mobile). That
+      // frame is a flattened screenshot of a live reviews-app widget (not
+      // real Figma layers), so these numbers were measured off the image
+      // directly: rating/count text ("4.75 out of 5" / "Based on 12
+      // reviews") plus the 5 per-star counts read straight off the bar
+      // chart's row labels (11/0/0/1/0), which cross-foot correctly —
+      // (11*5 + 1*2) / 12 = 4.75. See PdpReviews.astro for the full note.
+      reviews: {
+        rating: 4.75,
+        count: 12,
+        distribution: [
+          { stars: 5, count: 11 },
+          { stars: 4, count: 0 },
+          { stars: 3, count: 0 },
+          { stars: 2, count: 1 },
+          { stars: 1, count: 0 },
+        ],
+      },
     },
   },
   {
