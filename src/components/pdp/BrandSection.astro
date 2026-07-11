@@ -1,0 +1,78 @@
+---
+// PDP "Brand Section" band (Task 5) — Figma 1046:19633. Full-bleed teal
+// band: centered white Gait Happens logo + a bold display tagline,
+// matching the CrossSell/FourColumn/LogoWall "full-bleed colored section +
+// __pad inner wrapper capped at --container-max" idiom.
+//
+// Logo: Figma's logo group (220x40, three sub-groups at fixed % offsets)
+// is the same mark/wordmark trio and same percentage layout Header.astro's
+// .logo__box already uses at a smaller size (148x26.929) — reusing
+// logo-mark.svg / logo-gait.svg / logo-happens.svg here rather than a new
+// asset. Those SVGs already paint `fill="var(--fill-0, white)"`, so they
+// render correctly on the teal band with no filter needed.
+//
+// Mobile: Toe Spacers Mobile (Figma 1017:9515) has no Brand Section
+// instance anywhere in its tree (Nav → Product Details → accordion
+// questions → 4 Column → Product Cards → Logo Wall — this section is
+// absent), so it renders desktop-only here, hidden below the same 1024px
+// breakpoint ProductDetails.astro/FourColumn.astro already use for PDP
+// layout changes.
+import { pdpBrand } from '../../data/catalog.js';
+
+const { tagline = pdpBrand.tagline } = Astro.props;
+---
+<section class="brand-section">
+  <div class="brand-section__pad">
+    <span class="brand-section__logo" role="img" aria-label="Gait Happens">
+      <span class="brand-section__logo-mark"><img src="/images/nav/logo-mark.svg" alt="" /></span>
+      <span class="brand-section__logo-gait"><img src="/images/nav/logo-gait.svg" alt="" /></span>
+      <span class="brand-section__logo-happens"><img src="/images/nav/logo-happens.svg" alt="" /></span>
+    </span>
+    <p class="brand-section__tagline">{tagline}</p>
+  </div>
+</section>
+<style>
+  .brand-section {
+    background: var(--color-teal);
+  }
+
+  .brand-section__pad {
+    max-width: var(--container-max);
+    margin-inline: auto;
+    padding-inline: var(--space-7);
+    /* Figma: --space-96 (96px) — no equivalent step in the 4px token scale
+       (space-8 tops out at 64px), so this is component-intrinsic, same
+       precedent as FourColumn's non-token 12px label size. */
+    padding-block: 96px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-5);
+  }
+
+  /* Logo box: same 3-piece mark/wordmark composition and percentage
+     positions as Header.astro's .logo__box, scaled to Figma's 220x40. */
+  .brand-section__logo {
+    position: relative;
+    display: block;
+    width: 220px;
+    height: 40px;
+  }
+  .brand-section__logo span { position: absolute; display: block; }
+  .brand-section__logo img { width: 100%; height: 100%; display: block; }
+  .brand-section__logo-mark { top: 0; right: 92.61%; bottom: 0.02%; left: 0; }
+  .brand-section__logo-gait { top: 24.99%; right: 55.87%; bottom: 24.2%; left: 10.35%; }
+  .brand-section__logo-happens { top: 25.25%; right: 0; bottom: 9.39%; left: 45.89%; }
+
+  .brand-section__tagline {
+    font: var(--type-display);
+    line-height: 1;
+    color: var(--color-paper);
+    text-align: center;
+  }
+
+  /* Desktop-only — see the mobile-omission note above. */
+  @media (max-width: 1023px) {
+    .brand-section { display: none; }
+  }
+</style>

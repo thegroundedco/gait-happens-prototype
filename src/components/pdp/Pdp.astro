@@ -1,0 +1,47 @@
+---
+// PDP composer: product sections stack -> CrossSell -> LogoWall.
+// Task 1 proved the pipeline with the two sections we already had
+// (CrossSell + LogoWall, both reused from the PLP composer). Task 2 adds the
+// hero (Product Details buy box + gallery); Task 3 adds the Product Details
+// accordion (size chart / instructions / research), built inside
+// ProductDetails.astro itself (see PdpAccordion.astro) rather than as a
+// separate section here, since Figma nests it in the same buy-box column.
+// Task 4 adds the 4 Column feature band directly after Product Details.
+// Task 5 adds the Brand Section band directly after that. Task 6 adds the
+// Customer Reviews placeholder, between CrossSell and LogoWall — the
+// Figma stack order is Product Details -> 4 Column -> Brand -> Product
+// Cards (cross-sell) -> Reviews -> Logo Wall.
+import ProductDetails from './ProductDetails.astro';
+import FourColumn from './FourColumn.astro';
+import BrandSection from './BrandSection.astro';
+import PdpReviews from './PdpReviews.astro';
+import CrossSell from '../plp/CrossSell.astro';
+import LogoWall from '../plp/LogoWall.astro';
+import { pressLogos } from '../../data/catalog.js';
+
+const { item } = Astro.props;
+---
+<div class="pdp">
+  <div data-reveal>
+    <ProductDetails item={item} />
+  </div>
+  {item.pdp?.features?.length > 0 && (
+    <div data-reveal>
+      <FourColumn heading={item.pdp.featuresHeading} columns={item.pdp.features} />
+    </div>
+  )}
+  <div data-reveal>
+    <BrandSection />
+  </div>
+  <div data-reveal>
+    <CrossSell crossSell={item.pdp.crossSell} />
+  </div>
+  {item.pdp?.reviews && (
+    <div data-reveal>
+      <PdpReviews reviews={item.pdp.reviews} />
+    </div>
+  )}
+  <div data-reveal>
+    <LogoWall logos={pressLogos} />
+  </div>
+</div>

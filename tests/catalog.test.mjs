@@ -29,3 +29,31 @@ test('getCollection / getItem work', () => {
   assert.ok(getCollection('/collections/all'));
   assert.equal(getCollection('/nope'), undefined);
 });
+
+// Task 7: guards a half-populated PDP rollout — every product route the
+// sitemap marks `built` must actually carry the `pdp` block ProductDetails/
+// FourColumn/PdpReviews/CrossSell all read from, and that block's own
+// cross-references (crossSell.itemIds, crossSell.shopAllHref) must resolve
+// to real items/routes, same as the top-level assertions above.
+test('every built product route has a pdp block whose crossSell resolves', () => {
+  const builtProductPaths = new Set(
+    routes.filter(r => r.status === 'built' && r.kind === 'pdp').map(r => r.path)
+  );
+  const productItems = items.filter(it => it.kind === 'product' && builtProductPaths.has(it.href));
+
+  // Sanity check the filter itself actually found the rolled-out products —
+  // an empty set here would make every assertion below vacuously pass.
+  assert.ok(productItems.length >= 6, `expected >=6 built product items, found ${productItems.length}`);
+
+  for (const it of productItems) {
+    assert.ok(it.pdp, `built product missing pdp block: ${it.id}`);
+    assert.ok(it.pdp.crossSell, `built product pdp missing crossSell: ${it.id}`);
+    for (const id of it.pdp.crossSell.itemIds) {
+      assert.ok(getItem(id), `${it.id} pdp.crossSell bad itemId: ${id}`);
+    }
+    assert.ok(
+      routePaths.has(it.pdp.crossSell.shopAllHref),
+      `${it.id} pdp.crossSell.shopAllHref not a route: ${it.pdp.crossSell.shopAllHref}`
+    );
+  }
+});

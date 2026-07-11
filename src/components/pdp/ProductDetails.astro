@@ -1,0 +1,592 @@
+---
+// Product Details hero (Task 2) — Figma 710:6353 (desktop, ≥1024) /
+// 1017:9517 (mobile, 390). Left column: eyebrow, title, StarRating (reused
+// from ../plp/StarRating.astro), price-with-cents, size pills, qty stepper +
+// Add to Cart, description + benefit bullets. Right column: main image +
+// thumbnail strip (gallery swap). The accordion under the buy box (Size
+// chart / Instructions / Research "Question" panels visible in the Figma
+// frame) is Task 3 — not built here.
+//
+// Figma's "GAIT HAPPENS" caption line above the title is rendered verbatim
+// as static wordmark text (a plain <p>), not the sitewide Home/Shop/Product
+// breadcrumb trail (Breadcrumb.astro) — the frame shows a caption, not a
+// navigational trail, so it isn't wrapped in a `nav`/breadcrumb landmark.
+//
+// Figma's Add to Cart button is teal (--action-primary / --color-teal),
+// matching every other primary CTA on the site (plp-card__cta,
+// quick-add-modal__add) — not yellow.
+//
+// Task 3 adds the Product Details accordion (Size chart / Instructions /
+// Research), extracted to PdpAccordion.astro to keep this file readable.
+// It's rendered as a DOM child of `.pdp-details__buybox` (matching Figma
+// 710:6353's node tree, where the accordion group is a sibling of the
+// description block inside the same 484px column) wrapped in
+// `.pdp-details__accordion` so it's independently targetable for the
+// mobile reflow below. On mobile (Figma 1088:15369), the accordion is its
+// own block *after* the gallery, not part of the buy box column — since it
+// still lives in the buybox's DOM subtree, `.pdp-details__buybox` switches
+// to `display: contents` under 1024px, promoting its children (heading,
+// price, copy, variants, purchase, and this accordion) to be direct flex
+// items of `.pdp-details__layout` alongside `.pdp-details__gallery`, so the
+// existing per-child `order` reordering (see the mobile media query below)
+// can slot the accordion in after the gallery without duplicating markup.
+import StarRating from '../plp/StarRating.astro';
+import PdpAccordion from './PdpAccordion.astro';
+
+const { item } = Astro.props;
+const firstSize = item.variants ? item.variants.options[0] : null;
+const gallery = item.pdp?.gallery?.length ? item.pdp.gallery : [item.image];
+---
+<section class="pdp-details" data-pdp-id={item.id}>
+  <div class="pdp-details__inner">
+    <p class="pdp-details__eyebrow"><span>Gait Happens</span></p>
+
+    <div class="pdp-details__layout">
+      <div class="pdp-details__buybox">
+        <div class="pdp-details__heading">
+          <h1 class="pdp-details__title">{item.title}</h1>
+          <div class="pdp-details__rating">
+            <StarRating rating={item.rating ?? 0} count={item.reviewCount ?? 0} />
+          </div>
+        </div>
+
+        <p class="pdp-details__price">
+          <span class={item.pdp?.compareAtPrice ? 'pdp-details__price-sale' : undefined}>
+            {item.pdp?.priceExact ?? item.price}
+          </span>
+          {item.pdp?.compareAtPrice && (
+            <span class="pdp-details__price-compare">{item.pdp.compareAtPrice}</span>
+          )}
+        </p>
+
+        {item.variants && (
+          <div class="pdp-details__variants">
+            <span class="pdp-details__variants-label">{item.variants.label}</span>
+            <div class="pdp-details__pills" role="group" aria-label={item.variants.label}>
+              {item.variants.options.map((opt) => (
+                <button
+                  type="button"
+                  class="pdp-details__pill"
+                  data-pdp-size={opt}
+                  aria-pressed={opt === firstSize ? 'true' : 'false'}
+                >
+                  {opt}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        <div class="pdp-details__purchase">
+          <div class="pdp-details__qty">
+            <span class="pdp-details__qty-label" id="pdp-qty-label">Quantity</span>
+            <div class="pdp-details__stepper" role="group" aria-labelledby="pdp-qty-label">
+              <button type="button" class="pdp-details__step" data-pdp-qty-decr aria-label="Decrease quantity">−</button>
+              <span class="pdp-details__qty-value" data-pdp-qty-value aria-live="polite">1</span>
+              <button type="button" class="pdp-details__step" data-pdp-qty-incr aria-label="Increase quantity">+</button>
+            </div>
+          </div>
+          {/* Task 7 fix: CTA label is data-driven off `item.pdp.ctaLabel` — Toe
+             Dynamometer's Figma frame (721:8349) reads "Notify When Available"
+             (its out-of-stock state, 30% opacity) rather than "Add to Cart".
+             Every other product leaves `ctaLabel` unset and gets the default.
+             The button stays wired to the same functional Add-to-Cart handler
+             either way — only the label changes (see catalog.js). */}
+          <button type="button" class="pdp-details__add" data-pdp-add>{item.pdp?.ctaLabel ?? 'Add to Cart'}</button>
+        </div>
+
+        <div class="pdp-details__copy">
+          <p>{item.pdp?.description}</p>
+          {item.pdp?.bullets?.length > 0 && (
+            <ul>
+              {item.pdp.bullets.map((bullet) => <li>{bullet}</li>)}
+            </ul>
+          )}
+          {item.pdp?.notes?.map((note) => <p>{note}</p>)}
+        </div>
+
+        <div class="pdp-details__accordion">
+          <PdpAccordion item={item} />
+        </div>
+      </div>
+
+      <div class="pdp-details__gallery">
+        <div class="pdp-details__media">
+          <img data-pdp-main-image src={gallery[0]} alt={item.title} width="556" height="435" />
+        </div>
+        <div class="pdp-details__thumbs" role="group" aria-label="Product images">
+          {gallery.map((src, i) => (
+            <button
+              type="button"
+              class="pdp-details__thumb"
+              data-pdp-thumb={src}
+              aria-pressed={i === 0 ? 'true' : 'false'}
+              aria-label={`Show product image ${i + 1}`}
+            >
+              <img src={src} alt="" loading="lazy" />
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<script>
+  // Buy box + gallery interaction — co-located, leak-free (mirrors
+  // QuickAddModal.astro / Header.astro): state lives in module-scope
+  // variables (never cached element refs), every DOM lookup is done fresh at
+  // the moment it's needed, and the entire interactive surface (size pills,
+  // qty stepper, Add to Cart, thumbnails) is handled by ONE delegated click
+  // listener bound once at module scope — nothing to leak or go stale when
+  // Astro's ClientRouter swaps the DOM on navigation. Init runs on initial
+  // load AND on `astro:after-swap` to re-seed state (pre-selected size, qty
+  // reset to 1, pressed states) for whichever PDP the swap navigated to.
+  //
+  // Real <button>s for size pills / thumbnails mean Enter/Space activation
+  // is native — no separate keydown handling is needed for those.
+  import { getItem } from '../../data/catalog.js';
+  import { addLine } from '../../scripts/cart.js';
+
+  const state = { size: null, qty: 1 };
+
+  function root() {
+    return document.querySelector('[data-pdp-id]');
+  }
+
+  function currentItem() {
+    const r = root();
+    return r ? getItem(r.getAttribute('data-pdp-id')) : null;
+  }
+
+  function renderQty() {
+    const el = document.querySelector('[data-pdp-qty-value]');
+    if (el) el.textContent = String(state.qty);
+  }
+
+  function setQty(n) {
+    state.qty = Math.max(1, n);
+    renderQty();
+  }
+
+  function renderSizePressedState() {
+    document.querySelectorAll('[data-pdp-size]').forEach((btn) => {
+      btn.setAttribute('aria-pressed', String(btn.getAttribute('data-pdp-size') === state.size));
+    });
+  }
+
+  function selectSize(option) {
+    state.size = option;
+    renderSizePressedState();
+  }
+
+  // Swaps the main image. Under prefers-reduced-motion the swap is instant;
+  // otherwise a brief opacity fade (via the `is-swapping` class, matching
+  // --motion-fast) softens the change instead of an abrupt pop.
+  function selectThumb(src, btn) {
+    const img = document.querySelector('[data-pdp-main-image]');
+    document.querySelectorAll('[data-pdp-thumb]').forEach((b) => b.setAttribute('aria-pressed', String(b === btn)));
+    if (!img || img.getAttribute('src') === src) return;
+
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduced) {
+      img.setAttribute('src', src);
+      return;
+    }
+    img.classList.add('is-swapping');
+    window.setTimeout(() => {
+      img.setAttribute('src', src);
+      img.classList.remove('is-swapping');
+    }, 180);
+  }
+
+  function submitAddToCart() {
+    const item = currentItem();
+    if (!item) return;
+
+    addLine({
+      id: item.id,
+      title: item.title,
+      variant: state.size ?? null,
+      price: item.price ?? item.priceRange,
+      qty: state.qty,
+      image: item.image,
+      href: item.href,
+    });
+
+    // Open the cart drawer via its existing header trigger rather than
+    // duplicating CartDrawer's open logic (same approach as
+    // QuickAddModal.astro's submitAddToCart) — addLine()'s `cart:change`
+    // event has already refreshed the drawer contents + badge.
+    document.querySelector('[data-util="cart"]')?.click();
+  }
+
+  function initProductDetails() {
+    const item = currentItem();
+    state.size = item?.variants ? item.variants.options[0] : null;
+    state.qty = 1;
+    renderQty();
+    renderSizePressedState();
+
+    // Defensively resync the gallery to its first image/pressed state — a
+    // navigation could otherwise land mid-fade from a prior page's swap.
+    const thumbs = document.querySelectorAll('[data-pdp-thumb]');
+    const img = document.querySelector('[data-pdp-main-image]');
+    if (img && thumbs[0]) {
+      img.classList.remove('is-swapping');
+      img.setAttribute('src', thumbs[0].getAttribute('data-pdp-thumb'));
+    }
+    thumbs.forEach((b, i) => b.setAttribute('aria-pressed', String(i === 0)));
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initProductDetails);
+  } else {
+    initProductDetails();
+  }
+  document.addEventListener('astro:after-swap', initProductDetails);
+
+  document.addEventListener('click', (e) => {
+    const target = e.target;
+    if (!(target instanceof Element)) return;
+
+    const sizeBtn = target.closest('[data-pdp-size]');
+    if (sizeBtn) {
+      selectSize(sizeBtn.getAttribute('data-pdp-size'));
+      return;
+    }
+    if (target.closest('[data-pdp-qty-incr]')) {
+      setQty(state.qty + 1);
+      return;
+    }
+    if (target.closest('[data-pdp-qty-decr]')) {
+      setQty(state.qty - 1);
+      return;
+    }
+    const thumbBtn = target.closest('[data-pdp-thumb]');
+    if (thumbBtn) {
+      selectThumb(thumbBtn.getAttribute('data-pdp-thumb'), thumbBtn);
+      return;
+    }
+    if (target.closest('[data-pdp-add]')) {
+      submitAddToCart();
+      return;
+    }
+  });
+</script>
+<style>
+  .pdp-details__inner {
+    max-width: var(--container-max);
+    margin-inline: auto;
+    padding-block: var(--space-7);
+    padding-inline: var(--space-5);
+    display: grid;
+    gap: var(--space-4);
+  }
+
+  .pdp-details__eyebrow {
+    font: var(--type-caption);
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-caption);
+    color: var(--color-ink);
+  }
+  .pdp-details__eyebrow span { display: inline-block; }
+
+  .pdp-details__layout {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-6);
+  }
+
+  /* ---- Buy box ---------------------------------------------------- */
+
+  .pdp-details__buybox {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-6);
+  }
+
+  .pdp-details__heading {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+  .pdp-details__title {
+    font: var(--type-h3);
+    color: var(--color-ink);
+  }
+  .pdp-details__rating {
+    display: flex;
+  }
+
+  .pdp-details__price {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-3);
+    font: var(--type-h4);
+    color: var(--color-ink);
+  }
+  /* Task 7: Toe Strengtheners / Mobility Ball show a sale price (Figma
+     `--feedback-error`, #c62828 — not yet a DS token) beside a
+     strikethrough original. Toe Spacers / other single-price products never
+     set `compareAtPrice`, so this pair is inert (no red, no strike) there. */
+  .pdp-details__price-sale {
+    color: #c62828;
+  }
+  .pdp-details__price-compare {
+    font: var(--type-body-large);
+    color: var(--color-ink-70);
+    text-decoration: line-through;
+  }
+
+  .pdp-details__variants {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+  .pdp-details__variants-label {
+    font: var(--type-caption);
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-caption);
+    color: var(--color-ink);
+  }
+  .pdp-details__pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+  .pdp-details__pill {
+    border: 1px solid var(--color-teal);
+    background: var(--color-paper);
+    color: var(--color-teal);
+    font: var(--type-cta);
+    padding: var(--space-3) var(--space-5);
+    cursor: pointer;
+    transition:
+      background var(--motion-fast) var(--ease-standard),
+      color var(--motion-fast) var(--ease-standard);
+  }
+  .pdp-details__pill[aria-pressed="true"] {
+    background: var(--color-teal);
+    color: var(--color-paper);
+  }
+
+  .pdp-details__purchase {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+  .pdp-details__qty {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+  .pdp-details__qty-label {
+    font: var(--type-caption);
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-caption);
+    color: var(--color-ink);
+  }
+  .pdp-details__stepper {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
+    width: 168px;
+    height: 46px;
+    padding: var(--space-3) var(--space-4);
+    border: 1px solid var(--color-border);
+    background: var(--color-paper);
+  }
+  .pdp-details__step {
+    width: 20px;
+    height: 20px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: 0;
+    padding: 0;
+    cursor: pointer;
+    font: var(--type-body-large);
+    line-height: 1;
+    color: var(--color-ink);
+  }
+  .pdp-details__qty-value {
+    font: var(--type-body-large);
+    color: var(--color-ink);
+  }
+
+  .pdp-details__add {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--color-teal);
+    color: var(--color-paper);
+    font: var(--type-button);
+    padding: var(--space-4) 20px;
+    border: 0;
+    cursor: pointer;
+    transition: transform var(--motion-fast) var(--ease-standard);
+  }
+  .pdp-details__add:hover { transform: translateY(-2px); }
+
+  .pdp-details__copy {
+    font: var(--type-body-sm);
+    color: var(--color-ink);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+  .pdp-details__copy ul {
+    padding-left: var(--space-5);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+
+  /* ---- Gallery ------------------------------------------------------ */
+
+  .pdp-details__gallery {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+  .pdp-details__media {
+    width: 100%;
+    aspect-ratio: 338 / 342;
+    overflow: hidden;
+    background: var(--color-border);
+  }
+  .pdp-details__media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: opacity var(--motion-fast) var(--ease-standard);
+  }
+  .pdp-details__media img.is-swapping { opacity: 0; }
+
+  .pdp-details__thumbs {
+    display: flex;
+    gap: var(--space-3);
+    overflow-x: auto;
+  }
+  .pdp-details__thumb {
+    flex: 1 0 72px;
+    aspect-ratio: 1 / 1;
+    background: none;
+    border: 1px solid transparent;
+    padding: 0;
+    cursor: pointer;
+    overflow: hidden;
+    transition: border-color var(--motion-fast) var(--ease-standard);
+  }
+  .pdp-details__thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .pdp-details__thumb[aria-pressed="true"] {
+    border-color: var(--color-teal);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .pdp-details__media img { transition: none; }
+    .pdp-details__add:hover { transform: none; }
+  }
+
+  /* ---- Desktop (Figma 710:6353, ≥1024) ------------------------------ */
+  @media (min-width: 1024px) {
+    .pdp-details__layout {
+      flex-direction: row;
+      align-items: flex-start;
+      gap: var(--space-8);
+    }
+    .pdp-details__buybox {
+      flex: 0 0 484px;
+      max-width: 484px;
+    }
+    .pdp-details__gallery {
+      flex: 1 0 0;
+    }
+    .pdp-details__price {
+      width: 300px;
+    }
+    .pdp-details__purchase {
+      flex-direction: row;
+      align-items: flex-end;
+      gap: var(--space-6);
+    }
+    .pdp-details__add {
+      width: auto;
+    }
+    .pdp-details__media {
+      aspect-ratio: 556 / 435;
+    }
+    .pdp-details__thumbs {
+      overflow-x: visible;
+    }
+    .pdp-details__thumb {
+      flex: 1 0 0;
+      aspect-ratio: auto;
+      height: 98px;
+    }
+  }
+
+  /* Mobile (Figma 1017:9517, 390): pills/stepper stay their intrinsic size,
+     Add to Cart stretches full-width beneath the stepper. */
+  @media (max-width: 1023px) {
+    .pdp-details__add {
+      width: 100%;
+    }
+
+    /* Buybox is a column flex container (see .pdp-details__buybox above),
+       so reordering its direct children with `order` reflows the visual
+       stack to match Figma 1017:9517 without touching the DOM: heading →
+       price → copy (description/bullets/notes) → size pills → qty/CTA.
+       Desktop keeps DOM order (heading, price, variants, purchase, copy),
+       so these overrides live only in this mobile query. */
+    .pdp-details__heading {
+      order: 1;
+    }
+    .pdp-details__price {
+      order: 2;
+    }
+    .pdp-details__copy {
+      order: 3;
+    }
+    .pdp-details__variants {
+      order: 4;
+    }
+    .pdp-details__purchase {
+      order: 5;
+    }
+
+    /* Task 3: the accordion lives in the buybox's DOM subtree (matching
+       Figma 710:6353's desktop node tree) but Figma 1088:15369 shows it as
+       its own block *after* the gallery on mobile — a sibling of buybox,
+       not a descendant. `display: contents` removes the buybox box itself
+       from layout and promotes its children (the five ordered items above,
+       plus the accordion) to be direct flex items of `.pdp-details__layout`
+       alongside `.pdp-details__gallery`, so `order` can place the gallery
+       after them and the accordion after that, with no markup duplication.
+       Desktop never sets this (buybox stays a real box there), so the
+       accordion renders inside the 484px left column as Figma shows. */
+    .pdp-details__buybox {
+      display: contents;
+    }
+    .pdp-details__gallery {
+      order: 6;
+    }
+    .pdp-details__accordion {
+      order: 7;
+    }
+
+    /* Figma 1017:9517 shows a single gallery image with no thumbnail strip
+       on mobile. Markup + init JS are left as-is (thumbs[0] still resolves
+       fine while display:none) — only the visual strip is hidden. */
+    .pdp-details__thumbs {
+      display: none;
+    }
+  }
+</style>
