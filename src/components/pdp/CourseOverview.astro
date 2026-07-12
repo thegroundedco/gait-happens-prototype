@@ -1,0 +1,199 @@
+---
+// Course Overview section (Task 3, Course PDP Chunk A) — Figma 675:4354
+// (desktop, ≥1024, file FX7PDNvhZwyozODaq8Q8i7) / 1109:14378 (mobile — the
+// "Sole Switch Pro Page" > "Course Overview" instance inside the
+// professional-courses mobile frame 1109:14374). Prop is `{ item }` (same
+// shape as CourseDetails.astro), reading `item.pdp.overview`.
+//
+// `item.pdp.overview` = `{ image, body, details: [{ label, value }] }`
+// (this task's brief-mandated shape). Mapping that onto the frame's actual
+// content: the 5 short label/value pairs (Course Length, Evidence Based,
+// Course Structure, Continuing Education Credit, and — despite its longer
+// sentence-length value — Audience) are `details`; the closing "Course
+// Concepts" paragraph is `body`, since it's the one piece of free-running
+// descriptive copy rather than a terse label/value fact. The "Course
+// Overview" heading itself isn't part of the data shape (no `heading` field
+// in the brief's spec) — it's static markup here, verbatim on both frames.
+//
+// Desktop (675:4354) and mobile (1109:14378) DISAGREE on the details set,
+// not just wording: desktop's 3rd/4th items read "Course Structure" /
+// "Continuing Education Credit" ("Online on demand" / "Yes"); mobile's
+// equivalent slots read "Course Format" / "Course Style" ("Online on
+// demand" / "Video lecture") — a genuinely different 4th fact, not a label
+// rename. Mobile's Audience value also differs from desktop's ("Anyone
+// looking to understand how to choose healthy shoes for themselves" vs.
+// "Healthcare professionals looking to improve their footwear
+// recommendations for clients and patients."). Since `details` is a single
+// array with no separate desktop/mobile slot, desktop 675:4354 is kept as
+// the one canonical source — same "pull desktop first" precedent
+// CourseDetails.astro's `description` field set — flagged here rather than
+// silently merged or guessed. See catalog.js's `overview` comment for the
+// Figma-verbatim desktop values actually used.
+//
+// Layout: markup order matches mobile's literal visual order (heading ->
+// details grid -> image -> body paragraph, per 1109:14378's screenshot).
+// Desktop instead runs the image full-height alongside a right column
+// (heading/details/body stacked in their existing DOM order) — reproduced
+// with an explicit CSS Grid placement (`grid-row: 1 / -1` on the media box)
+// rather than duplicating markup per breakpoint, since the two frames
+// genuinely interleave the image at different points in the content flow
+// (mid-stack on mobile, full side panel on desktop) — a plain flex reorder
+// can't express that.
+//
+// Detail grid gap is a literal --space-5 (24px) at BOTH breakpoints — Figma
+// measures the same 24px gap for every row/column split in both frames. The
+// internal label-to-value gap inside each detail item does genuinely differ
+// though: --space-2 (8px) on mobile vs --space-4 (16px) on desktop, per each
+// frame's own measured value.
+//
+// Detail labels use --type-label (600/16px) + --color-teal — an exact match
+// for mobile's own token binding (var(--text-label)). Desktop's pulled code
+// shows an unbound literal Bold(700)/16px instead, but every other section
+// in this codebase (CourseDetails, FourColumn, etc.) keeps a single type
+// token consistent across both breakpoints rather than introducing a
+// one-off desktop-only weight, so --type-label is used here too.
+//
+// Detail values, Audience, and the Course Concepts body all use
+// --color-ink. Desktop's pulled code binds the short detail values to the
+// ink token but renders Audience/Course Concepts as an unbound literal
+// "black" instead — read as a Figma authoring inconsistency (ink #231F20 vs
+// true #000 is imperceptible, and no other component here introduces a raw
+// black), so ink is used uniformly.
+//
+// No dedicated course-overview photography exists (this course has never
+// had a PDP before) — `image` reuses the same PLP course shot every other
+// slot on this page already reuses (see catalog.js's `features` comment).
+// Desktop's frame renders its image via an absolutely-positioned crop
+// (213.88%/-90.73% offsets) — that's just Figma's internal expression of an
+// object-fit:cover crop inside a flex-1/self-stretch panel, reproduced here
+// as a plain overflow:hidden + object-fit:cover box (same idiom
+// ProductDetails' gallery and FourColumn's card media already use), not the
+// literal percentages. Mobile's image is a simple aspect-ratio (320/358)
+// box using the same technique.
+//
+// Heading size: mobile's pulled code shows text-h3 resolving to 24px vs
+// desktop's 32px. This repo's tokens.css has one non-responsive --type-h3
+// (32px) and every sibling course section (CourseDetails, FourColumn) uses
+// it unmodified at both breakpoints — same here, no mobile override added.
+const { item } = Astro.props;
+const overview = item.pdp?.overview;
+---
+{overview && (
+  <section class="course-overview" data-pdp-id={item.id}>
+    <div class="course-overview__inner">
+      <h2 class="course-overview__heading">Course Overview</h2>
+
+      <div class="course-overview__details">
+        {overview.details?.map((detail) => (
+          <div class="course-overview__detail">
+            <p class="course-overview__detail-label">{detail.label}</p>
+            <p class="course-overview__detail-value">{detail.value}</p>
+          </div>
+        ))}
+      </div>
+
+      <div class="course-overview__media">
+        <img src={overview.image} alt="" loading="lazy" />
+      </div>
+
+      {overview.body && <p class="course-overview__body">{overview.body}</p>}
+    </div>
+  </section>
+)}
+<style>
+  .course-overview__inner {
+    max-width: var(--container-max);
+    margin-inline: auto;
+    padding-inline: var(--space-5);
+    padding-block: var(--space-7);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-5);
+  }
+
+  .course-overview__heading {
+    font: var(--type-h3);
+    color: var(--color-ink);
+  }
+
+  .course-overview__details {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-5);
+  }
+  /* Audience is always the last detail — its value is a full sentence, not
+     a terse fact, and both frames give it the full row width. */
+  .course-overview__detail:last-child {
+    grid-column: 1 / -1;
+  }
+  .course-overview__detail {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+  .course-overview__detail-label {
+    font: var(--type-label);
+    color: var(--color-teal);
+  }
+  .course-overview__detail-value {
+    font: var(--type-body-sm);
+    color: var(--color-ink);
+  }
+
+  .course-overview__media {
+    width: 100%;
+    aspect-ratio: 320 / 358;
+    overflow: hidden;
+    background: var(--color-border);
+  }
+  .course-overview__media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .course-overview__body {
+    font: var(--type-body-sm);
+    color: var(--color-ink);
+  }
+
+  /* ---- Desktop (Figma 675:4354, ≥1024) -------------------------------- */
+  @media (min-width: 1024px) {
+    .course-overview__inner {
+      display: grid;
+      /* 651px content column measured off the 1200-wide frame (48 pad each
+         side + 48 gap + 651 = 1200 - image's own flexible width) — same
+         "literal px content column" idiom CourseDetails' 484px buybox
+         uses. */
+      grid-template-columns: 1fr 651px;
+      gap: var(--space-7);
+      padding-inline: var(--space-7);
+    }
+    .course-overview__heading {
+      grid-column: 2;
+      grid-row: 1;
+    }
+    .course-overview__details {
+      grid-column: 2;
+      grid-row: 2;
+      grid-template-columns: repeat(3, 1fr);
+    }
+    .course-overview__detail {
+      gap: var(--space-4);
+    }
+    .course-overview__detail:last-child {
+      grid-column: span 2;
+    }
+    .course-overview__media {
+      grid-column: 1;
+      grid-row: 1 / -1;
+      align-self: stretch;
+      height: 100%;
+      aspect-ratio: auto;
+    }
+    .course-overview__body {
+      grid-column: 2;
+      grid-row: 3;
+    }
+  }
+</style>

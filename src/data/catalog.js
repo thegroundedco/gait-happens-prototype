@@ -821,6 +821,34 @@ export const items = [
       // photography yet). Task 7 ("Your Instructors") owns real bios/photos
       // further down the page.
       instructorsByline: 'Course By: Dr. Conley and Dr. Riley',
+      // Task 3 (Course Overview) — Figma 675:4354 (desktop, file
+      // FX7PDNvhZwyozODaq8Q8i7) kept as the canonical source for `details`;
+      // see CourseOverview.astro's header comment for why (mobile node
+      // 1109:14378 disagrees on the 3rd/4th facts AND the Audience wording,
+      // and `details` has no separate desktop/mobile slot). `body` is the
+      // frame's closing "Course Concepts" paragraph — identical on both
+      // desktop and mobile screenshots, trailing whitespace trimmed (a text
+      // node artifact, not wording).
+      //
+      // No dedicated course-overview photography exists (this course has
+      // never had a PDP before) — `image` reuses the same PLP course shot
+      // every other slot on this page already reuses (see the `features`
+      // comment below).
+      overview: {
+        image: '/images/plp/sole-switch-pro.jpg',
+        details: [
+          { label: 'Course Length', value: '2 Hours 13 Minutes' },
+          { label: 'Evidence Based', value: 'Yes' },
+          { label: 'Course Structure', value: 'Online on demand' },
+          { label: 'Continuing Education Credit', value: 'Yes' },
+          {
+            label: 'Audience',
+            value:
+              'Healthcare professionals looking to improve their footwear recommendations for clients and patients.',
+          },
+        ],
+        body: 'Understanding the key features of shoes, the concept of the shoe spectrum and where to sit on the spectrum, finding your baseline and learning what shoes are appropriate for you, transition strategies, and a PDF shoe guide.',
+      },
       // 4 Column feature band — Figma-verbatim heading + 4 blurbs from the
       // "What to Expect" frame, node 675:4355 (file FX7PDNvhZwyozODaq8Q8i7).
       // That frame's own heading literally reads "...Sole Switch Course"
