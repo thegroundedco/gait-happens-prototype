@@ -11,9 +11,13 @@
 // Course Structure, Continuing Education Credit, and — despite its longer
 // sentence-length value — Audience) are `details`; the closing "Course
 // Concepts" paragraph is `body`, since it's the one piece of free-running
-// descriptive copy rather than a terse label/value fact. The "Course
-// Overview" heading itself isn't part of the data shape (no `heading` field
-// in the brief's spec) — it's static markup here, verbatim on both frames.
+// descriptive copy rather than a terse label/value fact. Both frames put a
+// teal "Course Concepts" LABEL above that paragraph (styled like a detail
+// label); it renders here as static markup (like the "Course Overview"
+// heading) since the brief's data shape has no field for the body's label
+// and the text is verbatim on both frames. The "Course Overview" heading
+// likewise isn't part of the data shape (no `heading` field in the brief's
+// spec) — static markup here, verbatim on both frames.
 //
 // Desktop (675:4354) and mobile (1109:14378) DISAGREE on the details set,
 // not just wording: desktop's 3rd/4th items read "Course Structure" /
@@ -96,7 +100,12 @@ const overview = item.pdp?.overview;
         <img src={overview.image} alt="" loading="lazy" />
       </div>
 
-      {overview.body && <p class="course-overview__body">{overview.body}</p>}
+      {overview.body && (
+        <div class="course-overview__concepts">
+          <p class="course-overview__detail-label">Course Concepts</p>
+          <p class="course-overview__body">{overview.body}</p>
+        </div>
+      )}
     </div>
   </section>
 )}
@@ -152,6 +161,15 @@ const overview = item.pdp?.overview;
     object-fit: cover;
   }
 
+  /* "Course Concepts" is a teal label + long-form paragraph — same
+     label/value shape as a detail item (8px gap mobile / 16px desktop),
+     reproducing the labeled closing block both frames show. The label text
+     is static (verbatim on both frames), like the "Course Overview" heading. */
+  .course-overview__concepts {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
   .course-overview__body {
     font: var(--type-body-sm);
     color: var(--color-ink);
@@ -166,7 +184,11 @@ const overview = item.pdp?.overview;
          "literal px content column" idiom CourseDetails' 484px buybox
          uses. */
       grid-template-columns: 1fr 651px;
-      gap: var(--space-7);
+      /* 48px between image and content column (Figma's frame gap), but the
+         internal content rows (heading -> details -> concepts) are a uniform
+         24px per the frame — hence the split, not a single --space-7. */
+      column-gap: var(--space-7);
+      row-gap: var(--space-5);
       padding-inline: var(--space-7);
     }
     .course-overview__heading {
@@ -191,9 +213,10 @@ const overview = item.pdp?.overview;
       height: 100%;
       aspect-ratio: auto;
     }
-    .course-overview__body {
+    .course-overview__concepts {
       grid-column: 2;
       grid-row: 3;
+      gap: var(--space-4);
     }
   }
 </style>
