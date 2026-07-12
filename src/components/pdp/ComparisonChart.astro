@@ -248,10 +248,19 @@ const comparison = item.pdp?.comparison;
   .comparison-chart__table tbody tr {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    column-gap: var(--space-5);
+    /* `gap` (not just column-gap): the row-header spans both columns on row 1
+       and the two values auto-flow to row 2, so the frame's 24px label->values
+       vertical gap needs an explicit row-gap too. On desktop the row is
+       overridden to display:flex (single line) where row-gap is inert. */
+    gap: var(--space-5);
     /* literal — see header comment (no divider token in tokens.css) */
     border-bottom: 1px solid rgba(255, 255, 255, 0.3);
     padding-block: var(--space-4);
+  }
+  /* Mobile's frame draws a divider before each row and NONE after the last
+     row (no trailing line before the CTA); desktop re-adds it below. */
+  .comparison-chart__table tbody tr:last-child {
+    border-bottom: 0;
   }
 
   .comparison-chart__table thead th[scope='col'] {
@@ -333,6 +342,11 @@ const comparison = item.pdp?.comparison;
          the label ever touching the value pair on an unusually narrow
          desktop viewport. */
       gap: var(--space-5);
+    }
+    /* Desktop's frame DOES keep a trailing line after the last row (Course
+       Price) before the CTA — mobile removed it above. */
+    .comparison-chart__table tbody tr:last-child {
+      border-bottom: 1px solid rgba(255, 255, 255, 0.3);
     }
     .comparison-chart__table tbody th[scope='row'] {
       grid-column: unset;
