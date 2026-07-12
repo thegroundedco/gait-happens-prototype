@@ -20,13 +20,15 @@
 // empty `data-reveal` wrapper either, matching the pre-refactor
 // `{condition && (<div data-reveal>...)}` output byte-for-byte.
 //
-// A `type` with no registry entry (the course sections Tasks 2-7 haven't
-// built yet: course-details, course-overview, youll-stop-and-instead,
-// comparison-chart, testimonial, your-instructors, faqs) renders nothing —
-// no crash, no markup, just a dev-only console.warn — so a course item can
-// list its full intended section order today and have the not-yet-built
-// slots fill in silently as later tasks add registry entries.
+// A `type` with no registry entry (the course sections Tasks 3-7 haven't
+// built yet: course-overview, youll-stop-and-instead, comparison-chart,
+// testimonial, your-instructors, faqs) renders nothing — no crash, no
+// markup, just a dev-only console.warn — so a course item can list its full
+// intended section order today and have the not-yet-built slots fill in
+// silently as later tasks add registry entries. Task 2 added
+// `course-details` (the course hero, CourseDetails.astro) below.
 import ProductDetails from './ProductDetails.astro';
+import CourseDetails from './CourseDetails.astro';
 import FourColumn from './FourColumn.astro';
 import BrandSection from './BrandSection.astro';
 import PdpReviews from './PdpReviews.astro';
@@ -43,6 +45,10 @@ const { item } = Astro.props;
 const REGISTRY = {
   'product-details': {
     Component: ProductDetails,
+    props: (item) => ({ item }),
+  },
+  'course-details': {
+    Component: CourseDetails,
     props: (item) => ({ item }),
   },
   'four-column': {

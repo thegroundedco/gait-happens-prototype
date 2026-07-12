@@ -1,0 +1,324 @@
+---
+// Course Details hero (Task 2, Course PDP Chunk A) — Figma 675:4353
+// (desktop, ≥1024, file FX7PDNvhZwyozODaq8Q8i7) / 1109:14377 (mobile — the
+// "Sole Switch Pro Page" > "Course Details" instance inside the
+// professional-courses mobile frame 1109:14374). Same buybox-left /
+// visual-right SHAPE as ../pdp/ProductDetails.astro (eyebrow, title,
+// StarRating, price, CTA row, short copy) and reuses that section's exact
+// eyebrow markup + StarRating import, but two real content differences —
+// both intentional, not oversights:
+//
+// 1. The right column is a branded teal course card ("SoleSwitch / Pro
+//    Course" + a "For Health Professionals" tag), not an image gallery.
+//    Figma's own layer for this card is a single flattened raster image
+//    (`imgRectangle41` in get_design_context's output) — no real text/fill
+//    layers to read — the same situation PdpReviews.astro hit for its
+//    screenshot-only "Reviews Plugin" frame. Per that precedent
+//    ("reference build, not a raw asset dump"), the card is rebuilt here as
+//    real markup + DS tokens (teal background, bold display title, yellow
+//    tag), reading the visible pixels/text off the screenshot rather than
+//    embedding a copy of the PNG. `titleLines` is an array (not a single
+//    wrapped string) so the exact Figma line break ("SoleSwitch" / "Pro
+//    Course" — identical on both desktop and mobile screenshots, so it's a
+//    deliberate break, not width-dependent reflow) renders reliably instead
+//    of depending on font-metric-sensitive text wrapping.
+//
+// 2. Figma's buy box literally reuses the PRODUCT hero's cart affordances —
+//    a two-pill course-tier toggle ("Sole Switch Basic" outline / "Sole
+//    Switch Pro" filled-selected) plus a quantity stepper + "Add to Cart"
+//    button. Sole Switch Pro is fulfilled on Kajabi, not the Shopify cart,
+//    so per this task's brief the purchase flow is remapped rather than
+//    copied literally:
+//    - The filled "Add to Cart" button becomes this hero's PRIMARY CTA, an
+//      outbound "Enroll Now" link to `item.pdp.enrollHref`
+//      (target="_blank", rel="noopener noreferrer") — no cart.js import, no
+//      quantity stepper (Kajabi enrollment isn't a quantity purchase).
+//    - The outline "Sole Switch Basic" pill becomes the SECONDARY CTA, kept
+//      as a real link (its Figma label, verbatim) to the Basic-tier course
+//      page (`/courses/sole-switch`, an existing placeholder route — see
+//      sitemap.js).
+//    - The filled "Sole Switch Pro" pill is dropped: it's the tier already
+//      being viewed on this exact page, so keeping it as a 3rd
+//      button-styled element would both be redundant with the primary
+//      Enroll CTA and exceed the brief's explicit "two CTAs" instruction.
+//    See coursepdp-task-2-report.md for the full reasoning + screenshots.
+//
+// `item.pdp.heroTitle` overrides the catalog's shorter `item.title` for
+// just this <h1> (Figma reads "Sole Switch Pro Course", the catalog's
+// `title` is "Sole Switch Pro" — used elsewhere for nav/breadcrumbs/PLP
+// cards/page <title>, so it's left alone) — same targeted-override pattern
+// as ProductDetails' `item.pdp.ctaLabel`. `item.rating`/`item.reviewCount`
+// are sourced top-level exactly like ProductDetails does (mirrored per the
+// task brief), not duplicated under `pdp`.
+//
+// No client script: every interactive element here is a plain <a> (real
+// navigation), so there's nothing to init/leak. `data-pdp-id` is kept on
+// the <section> for parity with ProductDetails/debugging only.
+import StarRating from '../plp/StarRating.astro';
+
+const { item } = Astro.props;
+---
+<section class="course-details" data-pdp-id={item.id}>
+  <div class="course-details__inner">
+    <p class="course-details__eyebrow"><span>Gait Happens</span></p>
+
+    <div class="course-details__layout">
+      <div class="course-details__buybox">
+        <div class="course-details__heading">
+          <h1 class="course-details__title">{item.pdp?.heroTitle ?? item.title}</h1>
+          <div class="course-details__rating">
+            <StarRating rating={item.rating ?? 0} count={item.reviewCount ?? 0} />
+          </div>
+        </div>
+
+        <p class="course-details__price">{item.pdp?.priceExact ?? item.price}</p>
+
+        {item.pdp?.description && <p class="course-details__intro">{item.pdp.description}</p>}
+
+        <div class="course-details__tier">
+          <span class="course-details__tier-label">Select your course</span>
+          {item.pdp?.secondaryCta && (
+            <a class="course-details__pill" href={item.pdp.secondaryCta.href}>
+              {item.pdp.secondaryCta.label}
+            </a>
+          )}
+        </div>
+
+        <a
+          class="course-details__enroll"
+          href={item.pdp?.enrollHref ?? '#'}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          {item.pdp?.enrollLabel ?? 'Enroll Now'}
+        </a>
+
+        {item.pdp?.instructorsByline && (
+          <div class="course-details__instructors">
+            <span class="course-details__avatar" aria-hidden="true"></span>
+            <span class="course-details__avatar" aria-hidden="true"></span>
+            <p class="course-details__instructors-text">{item.pdp.instructorsByline}</p>
+          </div>
+        )}
+      </div>
+
+      {item.pdp?.courseCard && (
+        <div class="course-details__card">
+          <p class="course-details__card-title">
+            {item.pdp.courseCard.titleLines.map((line) => <span>{line}</span>)}
+          </p>
+          <span class="course-details__card-tag">{item.pdp.courseCard.tag}</span>
+        </div>
+      )}
+    </div>
+  </div>
+</section>
+<style>
+  .course-details__inner {
+    max-width: var(--container-max);
+    margin-inline: auto;
+    padding-block: var(--space-7);
+    padding-inline: var(--space-5);
+    display: grid;
+    gap: var(--space-4);
+  }
+
+  /* Same eyebrow markup/styling as ProductDetails.astro — Figma shows a
+     plain caption ("GAIT HAPPENS"), not a navigational breadcrumb trail. */
+  .course-details__eyebrow {
+    font: var(--type-caption);
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-caption);
+    color: var(--color-ink);
+  }
+  .course-details__eyebrow span { display: inline-block; }
+
+  .course-details__layout {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-6);
+  }
+
+  /* ---- Buy box ---------------------------------------------------- */
+
+  .course-details__buybox {
+    display: flex;
+    flex-direction: column;
+    /* Figma's own buybox column gap (675:4353) is a uniform --space-5 (24px)
+       between every child, unlike ProductDetails' --space-6 — kept
+       frame-specific per the pulled design context. */
+    gap: var(--space-5);
+  }
+
+  .course-details__heading {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+  .course-details__title {
+    font: var(--type-h3);
+    color: var(--color-ink);
+  }
+  .course-details__rating {
+    display: flex;
+  }
+
+  .course-details__price {
+    font: var(--type-h4);
+    color: var(--color-ink);
+  }
+
+  .course-details__intro {
+    font: var(--type-body-sm);
+    color: var(--color-ink);
+  }
+
+  .course-details__tier {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+  .course-details__tier-label {
+    font: var(--type-caption);
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-caption);
+    color: var(--color-ink);
+  }
+
+  /* Secondary CTA — outline pill, matches ProductDetails' unselected size
+     pill exactly (border-teal / paper bg / teal text). */
+  .course-details__pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: fit-content;
+    border: 1px solid var(--color-teal);
+    background: var(--color-paper);
+    color: var(--color-teal);
+    font: var(--type-cta);
+    padding: var(--space-3) var(--space-5);
+    text-decoration: none;
+    transition: transform var(--motion-fast) var(--ease-standard);
+  }
+
+  /* Primary CTA — Enroll (external, Kajabi). Same teal-filled styling as
+     ProductDetails' Add to Cart button (this frame's colors match — teal,
+     not yellow, confirmed via the pulled screenshot, not assumed). */
+  .course-details__enroll {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    background: var(--color-teal);
+    color: var(--color-paper);
+    font: var(--type-button);
+    padding: var(--space-4) 20px;
+    text-decoration: none;
+    transition: transform var(--motion-fast) var(--ease-standard);
+  }
+
+  .course-details__pill:hover,
+  .course-details__enroll:hover {
+    transform: translateY(-2px);
+  }
+
+  .course-details__instructors {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+  }
+  /* Flat placeholder circles — no real instructor photography yet; Task 7
+     ("Your Instructors") owns real bios/photos further down the page. Fill
+     reuses --color-border, the same "no photography yet" placeholder token
+     ProductDetails' gallery media background already uses. */
+  .course-details__avatar {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: var(--color-border);
+    flex: 0 0 auto;
+  }
+  .course-details__instructors-text {
+    font: var(--type-body-sm);
+    color: var(--color-ink);
+  }
+
+  /* ---- Branded course card (right column) ---------------------------- */
+
+  .course-details__card {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    gap: var(--space-4);
+    /* --space-5 (not --space-7) on mobile: the card is a literal fixed
+       210px-tall block there (Figma 1109:14377;181:674), and the 2-line
+       --type-display title + tag pill need ~137px — --space-7 (48px, 96px
+       total) would leave only 114px and risk overflowing that fixed height.
+       Desktop has far more room (see aspect-ratio below) so it switches to
+       the frame's literal --space-7 padding. */
+    padding: var(--space-5);
+    background: var(--color-teal);
+    height: 210px;
+  }
+  .course-details__card-title {
+    display: flex;
+    flex-direction: column;
+    font: var(--type-display);
+    color: var(--color-paper);
+    text-transform: uppercase;
+    line-height: 1.05;
+  }
+  .course-details__card-tag {
+    display: inline-block;
+    width: fit-content;
+    background: var(--color-yellow);
+    color: var(--color-ink);
+    font: var(--type-label);
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-caption);
+    padding: var(--space-2) var(--space-4);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .course-details__pill:hover,
+    .course-details__enroll:hover {
+      transform: none;
+    }
+  }
+
+  /* ---- Desktop (Figma 675:4353, ≥1024) ------------------------------- */
+  @media (min-width: 1024px) {
+    .course-details__layout {
+      flex-direction: row;
+      align-items: flex-start;
+      gap: var(--space-8);
+    }
+    .course-details__buybox {
+      flex: 0 0 484px;
+      max-width: 484px;
+    }
+    .course-details__pill,
+    .course-details__enroll {
+      width: fit-content;
+    }
+    .course-details__card {
+      flex: 1 0 0;
+      align-self: stretch;
+      /* Card geometry measured off the 675:4353 frame itself: 1200 canvas −
+         2×48 padding − 484 buybox − 64 gap = 556 wide; content-row height
+         ≈399 (531 frame − 2×48 padding − eyebrow row). Fixed aspect-ratio
+         (not the mobile fixed height) keeps the card proportional as the
+         real container grows past Figma's 1200 canvas up to --container-max
+         (1440) — same flexible-width/fixed-ratio approach ProductDetails'
+         gallery media uses. */
+      height: auto;
+      aspect-ratio: 556 / 399;
+      /* Desktop has ample height (≥399px) for the frame's own --space-7
+         (48px) padding — mobile's smaller --space-5 above is a fixed-height
+         fit constraint, not a desktop concern. */
+      padding: var(--space-7);
+    }
+  }
+</style>

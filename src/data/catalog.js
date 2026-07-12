@@ -732,6 +732,15 @@ export const items = [
     image: '/images/plp/sole-switch-pro.jpg',
     href: '/courses/sole-switch-pro',
     cta: 'View Course',
+    // Task 2 (Course Details hero, 675:4353): 5-star rating, 5 reviews —
+    // sourced top-level exactly like every product's PDP hero (see e.g. Toe
+    // Spacers' `rating`/`reviewCount` comment above), not duplicated under
+    // `pdp`. This also turns rating on for this item's PLP card (PlpCard.astro
+    // only renders `<StarRating>` when `item.rating` is set) — an intentional
+    // side effect of reusing the single top-level field, not a separate PLP
+    // change.
+    rating: 5,
+    reviewCount: 5,
     variants: null,
     sizeChart: null,
     // Task 1 (Course PDP Chunk A) — scaffolds the Sole Switch Pro course
@@ -759,6 +768,59 @@ export const items = [
         'pdp-reviews',
         'logo-wall',
       ],
+      // Task 2 (Course Details hero) — Figma-verbatim price/copy/CTA labels
+      // from node 675:4353 (desktop) / 1109:14377 (mobile — the "Sole Switch
+      // Pro Page" > "Course Details" instance under the professional-courses
+      // mobile frame 1109:14374). See CourseDetails.astro's header comment
+      // for the cart->enroll CTA remap this task's brief mandated.
+      //
+      // `heroTitle` overrides the catalog's shorter `title` ("Sole Switch
+      // Pro") for just the hero <h1> — the frame reads "Sole Switch Pro
+      // Course"; `title` itself is left alone since nav/breadcrumbs/PLP
+      // cards/the page <title> all read it too.
+      heroTitle: 'Sole Switch Pro Course',
+      // `priceExact` intentionally differs from the top-level `price` ($59,
+      // marked "(sample)") above — same "PDP hero shows the Figma-verbatim
+      // exact price, top-level `price` is the separate PLP-card sample"
+      // split every product's catalog entry already has (see Toe
+      // Strengtheners' sale-price case) — flagged here, not silently
+      // reconciled.
+      priceExact: '$150.00 USD',
+      // Desktop's intro paragraph is grammatically clean ("...to give you
+      // better, more individualized..."); the mobile frame's copy has an
+      // apparent authoring typo ("...to give you make better..."). Since
+      // this is a single field rendered at both breakpoints (no separate
+      // mobile copy slot), the desktop frame's text was kept as the one
+      // canonical source, per this task's "pull desktop first" directive —
+      // flagged, not silently "corrected" into a third wording.
+      description:
+        'A two-hour online course to give you better, more individualized, footwear recommendations for your clients.',
+      // Primary CTA (enroll, external — see CourseDetails.astro). Realistic
+      // Kajabi placeholder URL; swap for the real offer/checkout URL once
+      // the course is live on Kajabi.
+      enrollHref: 'https://gaithappens.mykajabi.com/offers/sole-switch-pro-course',
+      enrollLabel: 'Enroll Now',
+      // Secondary CTA — Figma's outline "Sole Switch Basic" pill, kept as a
+      // real link (verbatim label) to the Basic-tier course's own page
+      // (`/courses/sole-switch`, an existing placeholder route — see
+      // sitemap.js). The Figma frame's second, filled "Sole Switch Pro"
+      // pill is NOT reproduced as a 3rd element — see CourseDetails.astro's
+      // header comment for why.
+      secondaryCta: { label: 'Sole Switch Basic', href: '/courses/sole-switch' },
+      // Branded teal card (right column) — Figma-verbatim text read off the
+      // frame's flattened screenshot (see CourseDetails.astro's header
+      // comment: no real text layers to pull structurally). `titleLines` is
+      // an array so the exact 2-line break shown in both the desktop and
+      // mobile screenshots renders reliably.
+      courseCard: {
+        titleLines: ['SoleSwitch', 'Pro Course'],
+        tag: 'For Health Professionals',
+      },
+      // Decorative byline under the CTAs — Figma-verbatim text; the 2
+      // avatar circles are flat placeholders (no real instructor
+      // photography yet). Task 7 ("Your Instructors") owns real bios/photos
+      // further down the page.
+      instructorsByline: 'Course By: Dr. Conley and Dr. Riley',
       // 4 Column feature band — Figma-verbatim heading + 4 blurbs from the
       // "What to Expect" frame, node 675:4355 (file FX7PDNvhZwyozODaq8Q8i7).
       // That frame's own heading literally reads "...Sole Switch Course"
