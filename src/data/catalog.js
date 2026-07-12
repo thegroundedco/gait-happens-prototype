@@ -888,6 +888,29 @@ export const items = [
           text: 'When the toes can properly splay, our foot and ankle muscles engage,',
         },
       ],
+      // Task 4 ("You'll Stop and Instead" band) — Figma-verbatim copy from
+      // node 675:4356 (desktop, file FX7PDNvhZwyozODaq8Q8i7) / 1109:14380
+      // (mobile — the "Sole Switch Pro Page" > "You'll Stop and Instead"
+      // instance inside the professional-courses mobile frame 1109:14374).
+      // Both frames pair the SAME lead-in/body text (mobile only differs by
+      // a CSS-only capitalize transform — see YoullStopAndInstead.astro's
+      // header comment), so there's no desktop/mobile wording disagreement
+      // to flag here, unlike `overview` above. `lead` is the frame's own
+      // short framing phrase ("You'll stop" / "and instead you'll"); `body`
+      // is the course-specific pain point / benefit sentence completing it.
+      // Trailing whitespace on the "instead" body (a text-node artifact in
+      // Figma's pulled code, not wording) is trimmed, same precedent as
+      // `overview.body` above.
+      youllStop: {
+        stop: {
+          lead: "You'll stop",
+          body: 'feeling frustrated by confusing shoe feature terminology',
+        },
+        instead: {
+          lead: "and instead you'll",
+          body: 'gain confidence in your ability to look for key features when shoe shopping.',
+        },
+      },
       // Cross-sell band — Figma-verbatim heading from the "Product Cards"
       // frame, node 1021:14005. That frame's 3 cards ("Functional Gait
       // Assessment 1", "Gait Foundations Course", "Gait Happens Trainer
