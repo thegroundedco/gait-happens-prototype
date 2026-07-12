@@ -29,9 +29,9 @@
 //
 // Native <details>/<summary> — same accordion primitive MobileNav.astro's
 // `.m-acc` mega-menu panels use (keyboard + screen-reader support for free,
-// no script). Every row still defaults `open`, matching every "Question"
-// panel Figma shows expanded across every product's frame (see Task 3's
-// report for the original reasoning — unchanged here).
+// no script). Rows default COLLAPSED (no `open` attribute) per user request —
+// the `+`/`−` summary icon reflects the state, and the Figma frames only
+// showed them expanded to preview the content, not as the default state.
 //
 // `content` HTML is trusted/static (authored by us in catalog.js, not user
 // input), so `set:html` is safe here — same trust boundary as any other
@@ -43,7 +43,7 @@ const sizeChart = item.sizeChart;
 {rows.length > 0 && (
   <div class="pdp-accordion">
     {rows.map((row) => (
-      <details class="pdp-accordion__row" open>
+      <details class="pdp-accordion__row">
         <summary class="pdp-accordion__summary">
           <span class="pdp-accordion__label">{row.label}</span>
           <span class="pdp-accordion__icon" aria-hidden="true"></span>
