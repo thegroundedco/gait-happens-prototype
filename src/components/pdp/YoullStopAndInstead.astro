@@ -19,19 +19,14 @@
 // top-level shape, each half's own object holding its full text.
 //
 // Desktop (675:4356) lays the two halves out as a row (Figma's own
-// `justify-content: space-between`, bottom-aligned via the row's own
-// `items-end`). Figma's pulled code additionally wraps just the "stop"
-// half in an extra fixed-height (301px) box with `items-center`,
-// vertically centering it well above the row's baseline — but the whole
-// band's Figma instance is ALSO an explicit fixed 429px tall, far taller
-// than either half's actual text content (~130-160px) requires. Read
-// together this reads as a manually-resized frame (leftover empty space),
-// not a deliberate design device — reproducing it literally would need a
-// hardcoded pixel height that breaks the moment either half's copy changes
-// length. Only the row's real, meaningful property (`items-end`,
-// bottom-align) is kept here; the inner fixed-height/centered wrapper is
-// dropped. The two halves' differing body-copy line count still produces a
-// similar (smaller, content-driven) offset without any hardcoded height.
+// `justify-content: space-between`). The frame is a deliberate diagonal
+// composition: the "stop" half is anchored to the TOP of the band and the
+// "instead" half to the BOTTOM (the band's 64px top/bottom paddings are
+// both clean --space-8 multiples, so the taller-than-content 429px height
+// is design intent, not a resized-frame artifact). Reproduced WITHOUT a
+// hardcoded height: the row's `align-items: flex-end` bottom-anchors
+// "instead", and `align-self: flex-start` on `.youll-stop__panel--stop`
+// top-anchors "stop" — so the offset survives any copy-length change.
 //
 // Mobile (1109:14380) stacks the two halves in a plain column (gap
 // --space-6/32px, matching Figma's own `gap-32`), each half left-aligned
@@ -69,11 +64,11 @@ const youllStop = item.pdp?.youllStop;
     <div class="youll-stop__inner">
       <div class="youll-stop__row">
         <div class="youll-stop__panel youll-stop__panel--stop">
-          <p class="youll-stop__lead">{youllStop.stop.lead}</p>
+          <h3 class="youll-stop__lead">{youllStop.stop.lead}</h3>
           <p class="youll-stop__body">{youllStop.stop.body}</p>
         </div>
         <div class="youll-stop__panel youll-stop__panel--instead">
-          <p class="youll-stop__lead">{youllStop.instead.lead}</p>
+          <h3 class="youll-stop__lead">{youllStop.instead.lead}</h3>
           <p class="youll-stop__body">{youllStop.instead.body}</p>
         </div>
       </div>
@@ -132,6 +127,16 @@ const youllStop = item.pdp?.youllStop;
          stretched) so the row's `space-between` absorbs the remaining
          width as a gap, matching the frame's two fixed-width columns. */
       flex: 0 1 424px;
+    }
+    /* Figma's frame anchors the "stop" half to the TOP and the "instead"
+       half to the BOTTOM of the band (a deliberate diagonal composition —
+       both the row's 64px paddings are clean --space-8 multiples, so the
+       429px height is intent, not a resize artifact). The row's
+       `align-items: flex-end` already bottom-anchors "instead"; this
+       top-anchors "stop" — reproducing the offset without a hardcoded
+       height, so it survives copy-length changes. */
+    .youll-stop__panel--stop {
+      align-self: flex-start;
     }
   }
 
