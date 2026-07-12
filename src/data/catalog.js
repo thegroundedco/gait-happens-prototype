@@ -746,14 +746,14 @@ export const items = [
     // Task 1 (Course PDP Chunk A) — scaffolds the Sole Switch Pro course
     // PDP on the same data-driven Pdp.astro composer the 6 products use
     // (see their `sections` comments above). This 11-entry list is the
-    // FULL intended course-page section order. As of Task 5: `four-column`,
+    // FULL intended course-page section order. As of Task 6: `four-column`,
     // `cross-sell`, `pdp-reviews`, `logo-wall` (reused-from-products),
-    // `course-details`, `course-overview`, `youll-stop-and-instead`, and
-    // `comparison-chart` (course-only, built by Tasks 2-5) all have data
-    // below and a Pdp.astro REGISTRY entry — the remaining course-only
-    // types (`testimonial`, `your-instructors`, `faqs`) still have neither,
-    // so Pdp.astro renders nothing for them (dev-only console.warn, no
-    // crash) until Tasks 6-7 add their components + data.
+    // `course-details`, `course-overview`, `youll-stop-and-instead`,
+    // `comparison-chart`, and `testimonial` (course-only, built by Tasks
+    // 2-6) all have data below and a Pdp.astro REGISTRY entry — the
+    // remaining course-only types (`your-instructors`, `faqs`) still have
+    // neither, so Pdp.astro renders nothing for them (dev-only
+    // console.warn, no crash) until Task 7 adds their components + data.
     pdp: {
       sections: [
         'course-details',
@@ -941,6 +941,32 @@ export const items = [
           { label: 'Continuing Education Credit', values: ['No', 'Yes'] },
           { label: 'Course Price', values: ['$50', '$150'] },
         ],
+      },
+      // Task 6 (Testimonial band) — Figma-verbatim from node 1106:15576
+      // (desktop, file FX7PDNvhZwyozODaq8Q8i7) / 1109:14382 (mobile — the
+      // "Sole Switch Pro Page" > "Testimonial" instance inside the
+      // professional-courses mobile frame 1109:14374). Both frames show the
+      // identical single testimonial (same quote, same author, same 5-star
+      // rating) — no desktop/mobile disagreement to flag here.
+      //
+      // `quote` is an array of paragraph strings (one per `<p>` in the
+      // pulled Figma code); the first paragraph's embedded `\n` reproduces
+      // a genuine, deliberate `<br>` between two sentences in the source
+      // (present at both the 916px desktop card and the 342px mobile card,
+      // so it's real data, not width-based reflow) — see
+      // Testimonial.astro's header comment. `role` has no value in either
+      // frame (Phyllis' attribution is name-only, no title/role line) —
+      // kept `null` rather than omitted, since it's part of this task's
+      // brief-mandated `{ quote, author, role, rating }` shape.
+      testimonial: {
+        quote: [
+          "This course put me on track for many positive changes in my foot health and strength!\nI also did Movement RX and also bought the Basic Foot health kit and have benefited in so many ways!",
+          'I am pain free and have stronger feet and up the chain benefits!',
+          'LOVE GAIT HAPPENS and follow along in podcasts, IG and YouTube!',
+        ],
+        author: 'Phyllis',
+        role: null,
+        rating: 5,
       },
       // Cross-sell band — Figma-verbatim heading from the "Product Cards"
       // frame, node 1021:14005. That frame's 3 cards ("Functional Gait

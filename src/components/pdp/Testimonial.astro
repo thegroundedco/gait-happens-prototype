@@ -1,0 +1,310 @@
+---
+// Testimonial band (Task 6, Course PDP Chunk A) — Figma desktop 1106:15576
+// (file FX7PDNvhZwyozODaq8Q8i7) / mobile 1109:14382 (the "Sole Switch Pro
+// Page" > "Testimonial" instance inside the professional-courses mobile
+// frame 1109:14374). Prop is `{ item }` (same shape as CourseOverview /
+// YoullStopAndInstead / ComparisonChart), reading `item.pdp.testimonial`.
+// Deliberately generic — nothing course-specific is hardcoded — so it can
+// also serve the deferred Walk product PDP later without changes.
+//
+// `item.pdp.testimonial` = `{ quote, author, role, rating }`, this task's
+// brief-mandated single-testimonial shape (an array is also accepted, see
+// below, for a future carousel — but Sole Switch Pro only has one
+// testimonial, so nothing here builds carousel logic). `quote` is an array
+// of paragraph strings, one per `<p>` in the pulled Figma code, not a
+// single string: the frame's first paragraph has a genuine, DELIBERATE
+// internal line break (`<br aria-hidden />` in the pulled code) between two
+// sentences — it lands on both the 916px-wide desktop card AND the 342px
+// mobile card, so it isn't a width-based reflow artifact, it's real data.
+// That literal break is kept as a `\n` inside the one paragraph string and
+// rendered as a `<br>` below (same "deliberate break kept as data, not
+// markup" precedent CourseDetails.astro's `courseCard.titleLines` set).
+// `role` is part of the shape per the brief but is `null` here — Phyllis'
+// attribution in both frames is name-only, no title/role line — and the
+// markup only renders a role line when one is present, same optional-field
+// guard every other section here uses (e.g. `item.pdp.description`).
+//
+// ---- Star row: NOT a reuse of ../plp/StarRating.astro -------------------
+// CourseDetails.astro reuses StarRating for its own rating row; this
+// component deliberately does not, for two real reasons the pulled Figma
+// code confirms:
+//   1. StarRating always renders a visible "(count)" chip next to the
+//      stars and an sr-only "...N reviews" string. This frame shows
+//      neither — just 5 plain stars, no count anywhere — so reusing it
+//      as-is would add UI this design doesn't have.
+//   2. StarRating fills its "on" stars with `--color-yellow` — invisible
+//      against THIS section's `--color-yellow` band background. The
+//      pulled code confirms the frame's own stars are flattened to a
+//      single white raster, i.e. genuinely a different color per frame,
+//      not an oversight.
+// So the star row here is bespoke markup: 5 inline SVGs reusing
+// StarRating's own star path (for visual consistency across the site)
+// filled `--color-paper` (white), with a standalone visually-hidden
+// "Rated N out of 5 stars" string for the accessible label (no review
+// count concept applies to a single testimonial).
+//
+// ---- Carousel arrows: static placeholders, not a real slider ------------
+// Both frames show prev/next arrow affordances (desktop: flanking the
+// card; mobile: stacked below it). Per this task's brief a real slider is
+// DEFERRED — there's only one testimonial in the data today, nothing to
+// page between — so the arrows render as pure decoration: an
+// `aria-hidden="true"` wrapper around plain, non-interactive `<span>`s,
+// NOT `<button>`s. A `<button>`, even `disabled`, still promises "this is
+// a control" to some assistive tech (added to a rotor/buttons list,
+// announced as unavailable) — for markup that currently does nothing and
+// isn't even styled to LOOK disabled (Figma renders them fully opaque, no
+// dimming), that would be a false affordance. A plain hidden decorative
+// element matches what sighted users see too: static artwork with no
+// hover/focus treatment, same as it reads to a screen reader (nothing).
+// No `cursor: pointer` either, for the same reason. When a real slider is
+// built (its own task), swap these for real `<button aria-label="Previous
+// testimonial">` / `aria-label="Next testimonial"` elements wired to
+// prev/next state; that slider must be keyboard-operable, respect
+// `prefers-reduced-motion` for any transition, and initialize via this
+// project's init-on-load / `astro:after-swap` pattern (listeners attached
+// once at module scope) so it doesn't leak across Astro page transitions.
+// This task adds no client `<script>` at all — every element here is
+// inert markup, so there is nothing to init or leak.
+//
+// Figma's own arrow icon is a flattened raster in the pulled code
+// (`imgVector5`/`imgVector6` — no reusable vector path data), and neither
+// existing repo icon in `/images/nav/` matches its thin open-stroke
+// chevron shape (`arrow.svg`/`arrow-lg.svg` are solid filled triangles for
+// a different UI — nav mega-menu cards / PLP CTA rows) — so a small inline
+// stroke-arrow SVG is built here instead of reusing either. Figma's own
+// left arrow is the SAME asset as the right arrow, just `rotate-180`'d —
+// reproduced the same way: one `ARROW_PATH`, rendered twice, the `--prev`
+// copy rotated 180deg in CSS rather than mirrored/duplicated.
+//
+// ---- Tokens / literals ---------------------------------------------------
+// Yellow band = --color-yellow (#FEC745, exact hex match to Figma's
+// `--bg-brand-strong`). Quote text = --color-ink on the yellow band
+// (Figma's pulled code shows plain `text-black`; --color-ink is this
+// repo's near-black ink token, reused rather than a raw `#000` literal,
+// same substitution CourseDetails/ComparisonChart make elsewhere). Author
+// name = --color-ink too (Figma's `--text-primary`, #231f20, exact hex
+// match), bold. Quote type has no exact-match token (Figma shows unbound
+// 16px/400-weight Montserrat) — --type-body-16 (400/16px/1.4) is the
+// closest real token, reused unmodified at both breakpoints, same
+// "one non-responsive token" precedent YoullStopAndInstead/ComparisonChart
+// set. Author name is 16px/700 in the pulled code — no exact bold-16 token
+// exists either; --type-label (600/16px) is the closest (a 100-weight
+// difference, same tolerance those components already accept), reused
+// rather than inventing a new literal.
+//
+// Section outer vertical padding: Figma's own frame is `py-96` (96px) on
+// BOTH breakpoints — bigger than this repo's largest --space step
+// (--space-8, 64px) — kept as a commented literal per this task's
+// "literal OK if no token matches" allowance, not stretched onto the
+// wrong token. The desktop card's 916px width, its --space-7 (48px) gap to
+// the flanking arrows, and the ~251px-wide attribution column (identical,
+// non-responsive, on both frames) are literals for the same reason —
+// called out inline. The mobile arrow-pair's own internal gap has no
+// exact source measurement (Figma flattened both icons into one raster
+// there), so it reuses --space-5 as a reasonable approximation, flagged
+// inline rather than presented as a precise pull.
+const { item } = Astro.props;
+// Accepts a single object (this task's real shape) or an array (a light
+// future-proofing allowance the brief offers for the deferred carousel,
+// not a feature built here) — always renders just the first testimonial.
+const raw = item.pdp?.testimonial;
+const testimonial = Array.isArray(raw) ? raw[0] : raw;
+const ARROW_PATH = 'M4 12H20M20 12L14 6M20 12L14 18';
+const STAR_PATH =
+  'M12 .587l3.668 7.568 8.332 1.151-6.064 5.828 1.48 8.279L12 19.771l-7.416 3.642 1.48-8.279L0 9.306l8.332-1.151z';
+---
+{testimonial && (
+  <section class="testimonial" data-pdp-id={item.id}>
+    <div class="testimonial__inner">
+      <div class="testimonial__row">
+        <div class="testimonial__card">
+          <span class="testimonial__stars" aria-hidden="true">
+            {[1, 2, 3, 4, 5].map(() => (
+              <svg width="28" height="28" viewBox="0 0 24 24">
+                <path d={STAR_PATH} />
+              </svg>
+            ))}
+          </span>
+          <p class="testimonial__sr-only">{`Rated ${testimonial.rating} out of 5 stars`}</p>
+
+          <blockquote class="testimonial__quote">
+            {testimonial.quote.map((paragraph) => (
+              <p>
+                {paragraph.split('\n').map((line, i, lines) => (
+                  <>
+                    {line}
+                    {i < lines.length - 1 && <br />}
+                  </>
+                ))}
+              </p>
+            ))}
+          </blockquote>
+
+          <div class="testimonial__attribution">
+            <p class="testimonial__author">{testimonial.author}</p>
+            {testimonial.role && <p class="testimonial__role">{testimonial.role}</p>}
+          </div>
+        </div>
+
+        <div class="testimonial__arrows" aria-hidden="true">
+          <span class="testimonial__arrow testimonial__arrow--prev">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+              <path d={ARROW_PATH} stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+          </span>
+          <span class="testimonial__arrow testimonial__arrow--next">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+              <path d={ARROW_PATH} stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+          </span>
+        </div>
+      </div>
+    </div>
+  </section>
+)}
+<style>
+  .testimonial__inner {
+    max-width: var(--container-max);
+    margin-inline: auto;
+    padding-inline: var(--space-5);
+    /* 96px literal — see header comment (bigger than --space-8, the
+       largest step in this repo's scale); identical on both breakpoints
+       per the Figma frames, so no responsive override needed. */
+    padding-block: 96px;
+  }
+
+  .testimonial__row {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    /* Card -> arrows-group gap, mobile (Figma 1109:14382 `gap-24`). */
+    gap: var(--space-5);
+  }
+
+  /* ---- Card ------------------------------------------------------------ */
+  .testimonial__card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-6);
+    width: 100%;
+    background: var(--color-yellow);
+    text-align: center;
+    /* Mobile padding (Figma 1109:14382: px-24/py-32) — both exact token
+       matches. */
+    padding: var(--space-6) var(--space-5);
+    /* Visual order fixed to 1 explicitly (see .testimonial__row below —
+       the arrows-group is `order: 2` at mobile, `display: contents` at
+       desktop so its own children take the `order` that flanks the card
+       there instead). */
+    order: 1;
+  }
+
+  .testimonial__stars {
+    display: inline-flex;
+    gap: var(--space-2);
+  }
+  .testimonial__stars svg {
+    fill: var(--color-paper);
+  }
+
+  .testimonial__quote {
+    font: var(--type-body-16);
+    color: var(--color-ink);
+  }
+  .testimonial__quote p + p {
+    /* 8px literal == --space-2; Figma's own `mb-[8px]` between paragraphs. */
+    margin-top: var(--space-2);
+  }
+
+  .testimonial__attribution {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    /* 251px literal — see header comment (identical, non-responsive,
+       fixed-width column on both frames). */
+    max-width: 251px;
+  }
+  .testimonial__author {
+    font: var(--type-label);
+    color: var(--color-ink);
+  }
+  .testimonial__role {
+    font: var(--type-body-sm);
+    color: var(--color-ink);
+  }
+
+  /* ---- Arrows (static placeholders — see header comment) --------------- */
+  .testimonial__arrows {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* Approximate — see header comment (Figma flattened both icons into
+       one raster on the mobile frame, no exact measurement to pull). */
+    gap: var(--space-5);
+    order: 2;
+  }
+  .testimonial__arrow {
+    display: inline-flex;
+    color: var(--color-ink);
+    /* Not a control yet — no pointer cursor, no hover/focus treatment
+       (see header comment: matches its "nothing" a11y presentation). */
+    cursor: default;
+  }
+  .testimonial__arrow--prev svg {
+    /* Same technique as the pulled Figma code: one arrow asset, the
+       "prev" copy rotated 180deg rather than mirrored/duplicated. */
+    transform: rotate(180deg);
+  }
+
+  .testimonial__sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  /* ---- Desktop (Figma 1106:15576, ≥1024) -------------------------------- */
+  @media (min-width: 1024px) {
+    .testimonial__inner {
+      padding-inline: var(--space-7);
+    }
+    .testimonial__row {
+      flex-direction: row;
+      justify-content: center;
+      /* Arrow<->card gap (Figma `gap-48`, exact --space-7 match). */
+      gap: var(--space-7);
+    }
+    .testimonial__card {
+      /* 916px literal — see header comment (fixed card width on the
+         1200-wide desktop frame, not a fluid/full-bleed section). */
+      width: 916px;
+      max-width: 100%;
+      /* Desktop padding (Figma 1106:15576: py-64 exact --space-8 match;
+         px-96 literal — see header comment, bigger than --space-8). */
+      padding: var(--space-8) 96px;
+      order: 2;
+    }
+    /* Dissolve the mobile arrows-group wrapper so its two children become
+       direct flex items of `.testimonial__row` — letting `order` flank
+       the card with them (arrow, card, arrow) the way the desktop frame
+       actually lays them out, instead of the mobile "card, then a paired
+       arrows row below it" grouping. The wrapper stays `aria-hidden` and
+       carries no accessible content either way, so `display: contents`
+       here has no a11y-semantics cost. */
+    .testimonial__arrows {
+      display: contents;
+    }
+    .testimonial__arrow--prev {
+      order: 1;
+    }
+    .testimonial__arrow--next {
+      order: 3;
+    }
+  }
+</style>
