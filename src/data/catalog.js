@@ -746,14 +746,14 @@ export const items = [
     // Task 1 (Course PDP Chunk A) — scaffolds the Sole Switch Pro course
     // PDP on the same data-driven Pdp.astro composer the 6 products use
     // (see their `sections` comments above). This 11-entry list is the
-    // FULL intended course-page section order; only the already-built,
-    // reused-from-products entries (`four-column`, `cross-sell`,
-    // `pdp-reviews`, `logo-wall`) have data below and render this task —
-    // the course-only types (`course-details`, `course-overview`,
-    // `youll-stop-and-instead`, `comparison-chart`, `testimonial`,
-    // `your-instructors`, `faqs`) have no REGISTRY entry yet, so Pdp.astro
-    // renders nothing for them (dev-only console.warn, no crash). Tasks
-    // 2-7 add their components + data.
+    // FULL intended course-page section order. As of Task 5: `four-column`,
+    // `cross-sell`, `pdp-reviews`, `logo-wall` (reused-from-products),
+    // `course-details`, `course-overview`, `youll-stop-and-instead`, and
+    // `comparison-chart` (course-only, built by Tasks 2-5) all have data
+    // below and a Pdp.astro REGISTRY entry — the remaining course-only
+    // types (`testimonial`, `your-instructors`, `faqs`) still have neither,
+    // so Pdp.astro renders nothing for them (dev-only console.warn, no
+    // crash) until Tasks 6-7 add their components + data.
     pdp: {
       sections: [
         'course-details',
@@ -910,6 +910,37 @@ export const items = [
           lead: "and instead you'll",
           body: 'gain confidence in your ability to look for key features when shoe shopping.',
         },
+      },
+      // Task 5 (Comparison Chart) — Figma-verbatim from node 675:4357
+      // (desktop, file FX7PDNvhZwyozODaq8Q8i7) / 1109:14381 (mobile — the
+      // "Sole Switch Pro Page" > "Comparison Chart" instance inside the
+      // professional-courses mobile frame 1109:14374). Both frames agree on
+      // every column name, row label, and cell value here (no
+      // desktop/mobile disagreement to flag, unlike `overview`/the
+      // component's own intro paragraph — see ComparisonChart.astro's
+      // header comment). `columns` are the 2 product names ("Sole Switch"
+      // vs "Sole Switch Pro" — this course's OWN page, compared against its
+      // Basic-tier sibling); `rows` are the 6 feature rows in the frames'
+      // own top-to-bottom order.
+      //
+      // Each row's `values` entries are plain STRINGS, not booleans, even
+      // for the two yes/no-shaped rows (Evidence Based, Continuing
+      // Education Credit) — both frames render those as literal "Yes"/"No"
+      // TEXT, not check/× icon marks, so the data stays verbatim rather
+      // than reinterpreting them as boolean icons the design doesn't show.
+      // ComparisonChart.astro's cell renderer still supports a `true`/
+      // `false` value (rendered as an accessible check/× glyph) for any
+      // future comparison table whose Figma frame actually uses one.
+      comparison: {
+        columns: ['Sole Switch', 'Sole Switch Pro'],
+        rows: [
+          { label: 'Course Structure', values: ['Online', 'Online'] },
+          { label: 'Course Length', values: ['50 Minutes', '2 Hours 13 Min'] },
+          { label: 'Audience', values: ['Individuals', 'Professionals'] },
+          { label: 'Evidence Based', values: ['Yes', 'Yes'] },
+          { label: 'Continuing Education Credit', values: ['No', 'Yes'] },
+          { label: 'Course Price', values: ['$50', '$150'] },
+        ],
       },
       // Cross-sell band — Figma-verbatim heading from the "Product Cards"
       // frame, node 1021:14005. That frame's 3 cards ("Functional Gait

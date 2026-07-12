@@ -20,19 +20,20 @@
 // empty `data-reveal` wrapper either, matching the pre-refactor
 // `{condition && (<div data-reveal>...)}` output byte-for-byte.
 //
-// A `type` with no registry entry (the course sections Tasks 5-7 haven't
-// built yet: comparison-chart, testimonial, your-instructors, faqs) renders
-// nothing — no crash, no markup, just a dev-only console.warn — so a course
-// item can list its full intended section order today and have the
-// not-yet-built slots fill in silently as later tasks add registry
-// entries. Task 2 added `course-details` (the course hero,
-// CourseDetails.astro); Task 3 added `course-overview`
-// (CourseOverview.astro); Task 4 adds `youll-stop-and-instead`
-// (YoullStopAndInstead.astro) below.
+// A `type` with no registry entry (the course sections Tasks 6-7 haven't
+// built yet: testimonial, your-instructors, faqs) renders nothing — no
+// crash, no markup, just a dev-only console.warn — so a course item can
+// list its full intended section order today and have the not-yet-built
+// slots fill in silently as later tasks add registry entries. Task 2 added
+// `course-details` (the course hero, CourseDetails.astro); Task 3 added
+// `course-overview` (CourseOverview.astro); Task 4 added
+// `youll-stop-and-instead` (YoullStopAndInstead.astro); Task 5 adds
+// `comparison-chart` (ComparisonChart.astro) below.
 import ProductDetails from './ProductDetails.astro';
 import CourseDetails from './CourseDetails.astro';
 import CourseOverview from './CourseOverview.astro';
 import YoullStopAndInstead from './YoullStopAndInstead.astro';
+import ComparisonChart from './ComparisonChart.astro';
 import FourColumn from './FourColumn.astro';
 import BrandSection from './BrandSection.astro';
 import PdpReviews from './PdpReviews.astro';
@@ -74,6 +75,12 @@ const REGISTRY = {
     // `item.pdp.youllStop` data render this section.
     Component: YoullStopAndInstead,
     props: (item) => (item.pdp?.youllStop ? { item } : null),
+  },
+  'comparison-chart': {
+    // Guarded like `course-overview`/`youll-stop-and-instead` — only items
+    // with real `item.pdp.comparison` data render this section.
+    Component: ComparisonChart,
+    props: (item) => (item.pdp?.comparison ? { item } : null),
   },
   'brand-section': {
     // Desktop-only per BrandSection.astro's own `@media (max-width: 1023px)
