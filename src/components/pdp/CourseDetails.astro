@@ -95,8 +95,10 @@ const { item } = Astro.props;
 
         {item.pdp?.instructorsByline && (
           <div class="course-details__instructors">
-            <span class="course-details__avatar" aria-hidden="true"></span>
-            <span class="course-details__avatar" aria-hidden="true"></span>
+            <span class="course-details__avatars" aria-hidden="true">
+              <span class="course-details__avatar"></span>
+              <span class="course-details__avatar"></span>
+            </span>
             <p class="course-details__instructors-text">{item.pdp.instructorsByline}</p>
           </div>
         )}
@@ -228,6 +230,14 @@ const { item } = Astro.props;
     flex-wrap: wrap;
     gap: var(--space-3);
   }
+  /* The avatar pair stays a side-by-side row at both widths (6px apart per
+     Figma); only the OUTER container flips to column on desktop so the pair
+     sits above the byline. */
+  .course-details__avatars {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
   /* Flat placeholder circles — no real instructor photography yet; Task 7
      ("Your Instructors") owns real bios/photos further down the page. Fill
      reuses --color-border, the same "no photography yet" placeholder token
@@ -299,7 +309,15 @@ const { item } = Astro.props;
       flex: 0 0 484px;
       max-width: 484px;
     }
-    .course-details__pill,
+    /* Desktop (675:4353) stacks the avatar pair ABOVE the "Course By:"
+       byline text; the base row layout is the mobile (1109:14377)
+       arrangement. */
+    .course-details__instructors {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    /* Only the enroll CTA needs the override — the outline pill is already
+       width: fit-content in its base rule. */
     .course-details__enroll {
       width: fit-content;
     }
