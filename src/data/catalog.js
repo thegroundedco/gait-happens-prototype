@@ -31,6 +31,13 @@ export const items = [
       ],
     },
     pdp: {
+      // Task 1 (Course PDP Chunk A): drives the data-driven Pdp.astro
+      // composer — same order the hardcoded composer rendered before this
+      // task (Product Details -> 4 Column -> Brand -> CrossSell -> Reviews
+      // -> LogoWall). Behavior-preserving: `four-column` still renders
+      // nothing without `features`, `pdp-reviews` still renders nothing
+      // without `reviews` (see Pdp.astro's REGISTRY guards).
+      sections: ['product-details', 'four-column', 'brand-section', 'cross-sell', 'pdp-reviews', 'logo-wall'],
       // Task 2 (Product Details hero) — Figma-verbatim price/description/
       // bullets/notes from node 710:6353 (desktop) / 1017:9517 (mobile), both
       // frames matched. `gallery` is a placeholder set (real photography
@@ -165,6 +172,10 @@ export const items = [
       ],
     },
     pdp: {
+      // Task 1 (Course PDP Chunk A): drives the data-driven Pdp.astro
+      // composer — same order/guards as every other product (see Toe
+      // Spacers' `sections` comment above).
+      sections: ['product-details', 'four-column', 'brand-section', 'cross-sell', 'pdp-reviews', 'logo-wall'],
       // Figma-verbatim from node 719:6542 (desktop) / 1017:9522 (mobile),
       // both frames matched. Figma's two lead paragraphs are merged into
       // one `description` string (ProductDetails.astro renders a single
@@ -270,6 +281,10 @@ export const items = [
     variants: null,
     sizeChart: null,
     pdp: {
+      // Task 1 (Course PDP Chunk A): drives the data-driven Pdp.astro
+      // composer — same order/guards as every other product (see Toe
+      // Spacers' `sections` comment above).
+      sections: ['product-details', 'four-column', 'brand-section', 'cross-sell', 'pdp-reviews', 'logo-wall'],
       // Figma-verbatim from node 721:7029 (desktop) / 1017:9529 (mobile).
       priceExact: '$8.50 USD',
       // Figma's lead paragraph contains an inline "Click here" hyperlink to
@@ -365,6 +380,10 @@ export const items = [
     variants: null,
     sizeChart: null,
     pdp: {
+      // Task 1 (Course PDP Chunk A): drives the data-driven Pdp.astro
+      // composer — same order/guards as every other product (see Toe
+      // Spacers' `sections` comment above).
+      sections: ['product-details', 'four-column', 'brand-section', 'cross-sell', 'pdp-reviews', 'logo-wall'],
       // Figma-verbatim sale pricing from node 721:7222 (desktop) /
       // 1017:9536 (mobile) — rendered via ProductDetails.astro's Task 7
       // `compareAtPrice` addition (red sale price + strikethrough original).
@@ -441,6 +460,10 @@ export const items = [
     variants: null,
     sizeChart: null,
     pdp: {
+      // Task 1 (Course PDP Chunk A): drives the data-driven Pdp.astro
+      // composer — same order/guards as every other product (see Toe
+      // Spacers' `sections` comment above).
+      sections: ['product-details', 'four-column', 'brand-section', 'cross-sell', 'pdp-reviews', 'logo-wall'],
       // Figma-verbatim from node 721:8349 (desktop) / 1017:9543 (mobile).
       // Task 7 fix (PDP review): Figma's CTA for this product reads "Notify
       // When Available" at 30% opacity (i.e. out of stock) rather than "Add
@@ -541,6 +564,11 @@ export const items = [
     variants: null,
     sizeChart: null,
     pdp: {
+      // Task 1 (Course PDP Chunk A): drives the data-driven Pdp.astro
+      // composer — same order/guards as every other product (see Toe
+      // Spacers' `sections` comment above). No `accordion` here (see the
+      // note below `features`), same as pre-refactor.
+      sections: ['product-details', 'four-column', 'brand-section', 'cross-sell', 'pdp-reviews', 'logo-wall'],
       priceExact: '$15.00 USD',
       compareAtPrice: '$20.00 USD',
       description:
@@ -706,6 +734,101 @@ export const items = [
     cta: 'View Course',
     variants: null,
     sizeChart: null,
+    // Task 1 (Course PDP Chunk A) — scaffolds the Sole Switch Pro course
+    // PDP on the same data-driven Pdp.astro composer the 6 products use
+    // (see their `sections` comments above). This 11-entry list is the
+    // FULL intended course-page section order; only the already-built,
+    // reused-from-products entries (`four-column`, `cross-sell`,
+    // `pdp-reviews`, `logo-wall`) have data below and render this task —
+    // the course-only types (`course-details`, `course-overview`,
+    // `youll-stop-and-instead`, `comparison-chart`, `testimonial`,
+    // `your-instructors`, `faqs`) have no REGISTRY entry yet, so Pdp.astro
+    // renders nothing for them (dev-only console.warn, no crash). Tasks
+    // 2-7 add their components + data.
+    pdp: {
+      sections: [
+        'course-details',
+        'course-overview',
+        'four-column',
+        'youll-stop-and-instead',
+        'comparison-chart',
+        'testimonial',
+        'your-instructors',
+        'cross-sell',
+        'faqs',
+        'pdp-reviews',
+        'logo-wall',
+      ],
+      // 4 Column feature band — Figma-verbatim heading + 4 blurbs from the
+      // "What to Expect" frame, node 675:4355 (file FX7PDNvhZwyozODaq8Q8i7).
+      // That frame's own heading literally reads "...Sole Switch Course"
+      // (not "...Sole Switch Pro Course") — kept Figma-verbatim per this
+      // task's instruction rather than silently "corrected", same
+      // verbatim-over-assumed precedent the product PDPs set (e.g. Toe
+      // Dynamometer's accordion links stay literal URLs). The 4th blurb's
+      // trailing comma with no closing clause ("...muscles engage,") is
+      // also copied verbatim off the frame, not rewritten — the source
+      // text is a fragment there too.
+      //
+      // No dedicated course photography exists yet (this course has never
+      // had a PDP before), so `image` reuses the one PLP course shot for
+      // all 4 cards — the same placeholder approach every product's
+      // `features` array takes for the same reason (see Toe Spacers'
+      // `features` comment).
+      featuresHeading: 'What to Expect in the Sole Switch Course',
+      features: [
+        {
+          image: '/images/plp/sole-switch-pro.jpg',
+          label: null,
+          text: 'Walk away with a better understanding of how to select healthy footwear! Plus, get a bonus PDF footwear guide!',
+        },
+        {
+          image: '/images/plp/sole-switch-pro.jpg',
+          label: null,
+          text: 'Receive lifetime access to a course written by clinicians with over 30 years of experience helping patients build foot health naturally.',
+        },
+        {
+          image: '/images/plp/sole-switch-pro.jpg',
+          label: null,
+          text: 'Learn specific and helpful strategies to help transition safely to less restrictive natural footwear.',
+        },
+        {
+          image: '/images/plp/sole-switch-pro.jpg',
+          label: null,
+          text: 'When the toes can properly splay, our foot and ankle muscles engage,',
+        },
+      ],
+      // Cross-sell band — Figma-verbatim heading from the "Product Cards"
+      // frame, node 1021:14005. That frame's 3 cards ("Functional Gait
+      // Assessment 1", "Gait Foundations Course", "Gait Happens Trainer
+      // Cert.") map to these 3 real Professionals-course catalog ids (their
+      // own `title`/`image`/`href` are what CrossSell.astro actually
+      // renders — see ../plp/CrossSell.astro, it looks items up by id and
+      // ignores any label text passed here). `shopAllHref` points at the
+      // Professionals course PLP (matching the section's own "for
+      // Professionals" framing) rather than the all-products collection
+      // every product PDP's cross-sell uses.
+      crossSell: {
+        heading: 'More Courses for Professionals',
+        itemIds: ['functional-gait-assessment-l1', 'gait-foundations', 'trainer-certification'],
+        shopAllHref: '/collections/courses-professionals',
+      },
+      // Reviews placeholder — same static reviews-app-screenshot values
+      // every product PDP reuses (see Toe Spacers' `reviews` comment /
+      // PdpReviews.astro's note); this course has no real review data any
+      // more than the products do.
+      reviews: {
+        rating: 4.75,
+        count: 12,
+        distribution: [
+          { stars: 5, count: 11 },
+          { stars: 4, count: 0 },
+          { stars: 3, count: 0 },
+          { stars: 2, count: 1 },
+          { stars: 1, count: 0 },
+        ],
+      },
+    },
   },
   {
     id: 'gait-foundations',
