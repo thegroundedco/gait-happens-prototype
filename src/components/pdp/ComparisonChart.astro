@@ -21,12 +21,19 @@
 // a future comparison table's frame ever DOES show a check/× glyph, that
 // table's data can express it as `true`/`false` without a component change.
 //
-// The heading ("Sole Switch VS Sole Switch Pro") has no field in the
-// brief's exact `{ columns, rows }` contract — same "static markup, not
-// data" treatment CourseOverview.astro gives its own unlisted "Course
-// Overview"/"Course Concepts" labels — so it's hardcoded here, verbatim on
-// both frames (both this page's own frame AND Sole Switch's reuse of this
-// same section literally read "Sole Switch VS Sole Switch Pro").
+// The heading ("Sole Switch VS Sole Switch Pro" on both pulled frames) is
+// DERIVED from `comparison.columns` — `{columns[0]} VS` as the (mobile-only-
+// recolored) prefix `<span>`, `{columns[1]}` as the tail — not hardcoded
+// (review fix wave 2). An earlier version of this comment defended the
+// hardcode by analogy to CourseOverview.astro's static "Course Overview"/
+// "Course Concepts" section labels, but that analogy didn't hold: those are
+// generic labels every course page reuses, while "Sole Switch"/"Sole Switch
+// Pro" are THIS pair of courses' names, baked into a shared component that
+// eight still-unbuilt course routes will also render. `columns` already
+// carries both names for the table itself, so no new data field is needed —
+// both pulled frames' headings are exactly `${columns[0]} VS` + a single
+// literal space + `${columns[1]}` (confirmed against the built HTML), so the
+// derivation reproduces both verbatim, whitespace included.
 //
 // ---- Component-generalization fix (Chunk B1 Task 2 follow-up) -----------
 // The CTA used to be hardcoded to a static label ("View Sole Switch Pro
@@ -75,14 +82,24 @@
 // intro` is sourced Figma-verbatim from that course's own comparison node
 // in catalog.js; the field is optional (the `<p>` only renders when
 // present) so a future comparison table with no intro paragraph of its own
-// doesn't force one. Rendered via `set:html`, not `{comparison.intro}` text
-// interpolation — Astro HTML-escapes interpolated text expressions (turning
-// Sole Switch Pro's apostrophe in "bachelor's" into `&#39;`), which would
-// have made this page's markup diverge from its pre-fix byte output even
-// though the two render identically in a browser. `comparison.intro` is
-// trusted, hand-authored catalog.js data, not user input, so `set:html` is
-// safe here — same trust boundary PdpAccordion.astro's `content` field and
-// Faqs.astro already establish for this repo.
+// doesn't force one. Rendered via plain `{comparison.intro}` text
+// interpolation, NOT `set:html` (review fix wave 2, reverting an earlier
+// version of this fix): neither course's `intro` value contains any HTML
+// markup, so `set:html` bought nothing here, and the PdpAccordion/Faqs
+// precedent it cited doesn't apply — those fields genuinely carry markup
+// (a real `<a>` hyperlink lives in one accordion `content` value), a plain
+// prose paragraph doesn't. Astro's HTML-escaping of the interpolated text
+// does turn Sole Switch Pro's "bachelor's" into "bachelor&#39;s" in the
+// built output, but that's a cosmetic entity-escape, not a rendering
+// change (the two are visually identical in a browser) — and the pilot
+// page already emits `&#39;` six times via InstructorCard.astro's plain
+// `{paragraph}` bios ("two Bachelor&#39;s degrees"), so text interpolation
+// here makes this paragraph consistent with the rest of the page's prose
+// instead of the one outlier escaping apostrophes via raw HTML. This is a
+// reference build a client dev team is porting to Shopify: `set:html`
+// signals "this field carries HTML" and invites wiring it to an unescaped
+// merchant-editable field, which breaks on ordinary copy (an `&` in "R&D")
+// even setting XSS aside.
 //
 // ---- Table semantics + a11y (the point of this task) --------------------
 // A real `<table>`: `<thead>` has one sr-only corner `<th scope="col">`
@@ -166,9 +183,9 @@ const isExternal = comparison?.cta ? /^https?:/.test(comparison.cta.href) : fals
     <div class="comparison-chart__inner">
       <div class="comparison-chart__intro-group">
         <h2 class="comparison-chart__heading">
-          <span class="comparison-chart__heading-prefix">Sole Switch VS</span> Sole Switch Pro
+          <span class="comparison-chart__heading-prefix">{comparison.columns[0]} VS</span> {comparison.columns[1]}
         </h2>
-        {comparison.intro && <p class="comparison-chart__intro" set:html={comparison.intro} />}
+        {comparison.intro && <p class="comparison-chart__intro">{comparison.intro}</p>}
       </div>
 
       <div class="comparison-chart__table-wrap">
