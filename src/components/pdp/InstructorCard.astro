@@ -40,22 +40,35 @@
 // toggle), so every already-shipped course instructor (Conley/Riley/Perez)
 // is entirely unaffected and keeps rendering its toggle exactly as before
 // (regression-diff verified byte-identical) — set to `false` only on
-// McDowell's entry. This is deliberately an authored data flag, not a
-// computed text-length/line-count heuristic: a live DOM measurement taken
-// during this fix (`scrollHeight` vs. clamped `clientHeight` at this card's
-// real 384px/body-sm rendering) showed Dr. Allison Riley's existing,
-// COMPLETE, Figma-verbatim single-paragraph bio (219 characters) also does
-// NOT overflow the 4-line clamp on Sole Switch Pro today — i.e. a
-// physically-accurate "is this actually clamped" computation would (quietly
-// correctly) turn Riley's toggle off too, which the regression gate
-// explicitly forbids touching. Riley's/Perez's short-but-complete bios are a
-// pre-existing, undiagnosed minor inconsistency (their toggle is likely
-// ALSO inert) that is out of scope for this task and intentionally left
-// alone; McDowell's is different in kind, not just degree — her bio is
-// known by us to be a partial excerpt, not merely short — so an explicit,
-// disclosed override is the honest mechanism here, not a magic-number
-// length threshold that would (at best) hold together on a few-character
-// margin between her bio and Riley's.
+// McDowell's entry.
+//
+// This is deliberately an authored data flag, not a computed heuristic —
+// but the earlier version of this comment overstated why, claiming a
+// computed "is this bio actually clamped" check is unsound in general. It
+// isn't, for the right instrument: a live DOM measurement taken during this
+// fix (`scrollHeight` vs. clamped `clientHeight` at this card's real
+// 384px/body-sm rendering) showed Dr. Allison Riley's existing, COMPLETE,
+// Figma-verbatim single-paragraph bio (219 characters) does NOT overflow the
+// 4-line clamp on Sole Switch Pro today. What that measurement actually
+// disproves is a CHARACTER-LENGTH heuristic ("N chars ≈ clamped") — Riley's
+// bio is short enough to sit under 219 characters and still legitimately
+// need its toggle on a narrower card, so no static length threshold can be
+// right at both widths. A MEASURED overflow check
+// (`bio.scrollHeight > bio.clientHeight`, re-evaluated on resize, since
+// whether 4 lines of body-sm text overflow this card is genuinely
+// width-dependent — mobile vs. desktop reflow the same bio differently) is
+// the correct instrument for "does this bio need a toggle", and would
+// correctly turn Riley's toggle off at the width where it doesn't overflow.
+// Implementing that — hiding the toggle when the bio doesn't overflow,
+// which subsumes today's authored `bioExpandable: false` skip for cards
+// that already know they don't need it — is deferred to a follow-up task:
+// it needs a real both-widths browser pass to verify against, out of this
+// review wave's scope. Until then, the authored flag stays the honest
+// mechanism for the one case we DO know about (McDowell's disclosed partial
+// excerpt); Riley's/Perez's short-but-complete bios are a pre-existing,
+// undiagnosed minor inconsistency (their toggle is likely also inert at
+// today's widths) left alone pending that follow-up, not treated as
+// evidence that measurement itself doesn't work.
 const { instructor } = Astro.props;
 const bioId = `instructor-bio-${instructor.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')}`;
 const showToggle = instructor.bioExpandable !== false;

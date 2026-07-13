@@ -166,9 +166,10 @@
 //    the page). Byte-identical output for all three current courses.
 //
 // 4. MINOR — the enroll CTA hardcoded `target="_blank" rel="noopener
-//    noreferrer"`, assuming `enrollHref` is always external. Now reuses the
-//    `isExternal = /^https?:/.test(href)` predicate declared above
-//    (ComparisonChart.astro's own precedent) so an internal `enrollHref`
+//    noreferrer"`, assuming `enrollHref` is always external. Now reuses
+//    `isExternalHref` (`src/scripts/links.js`, shared with ComparisonChart
+//    .astro — final review fix wave; previously each component declared its
+//    own copy of the same `/^https?:/` regex) so an internal `enrollHref`
 //    wouldn't wrongly hijack a new tab. All three current enroll links are
 //    external Kajabi URLs, so this is a no-op today.
 //
@@ -265,16 +266,18 @@
 //    now `item.pdp?.pills?.options?.length > 0`, which also subsumes the
 //    old presence check.
 import StarRating from '../plp/StarRating.astro';
+import { isExternalHref } from '../../scripts/links.js';
 
 const { item } = Astro.props;
-// Enroll CTA — externality derived from the href itself, reusing the exact
-// `isExternal = /^https?:/.test(href)` predicate ComparisonChart.astro's own
-// header comment documents ("Internal-vs-external CTA fix"). All three
-// shipped courses' `enrollHref` values are external Kajabi URLs, so this
-// stays a no-op today; a future internal-route `enrollHref` would now
-// correctly omit `target`/`rel` instead of the previous hardcoded pair.
+// Enroll CTA — externality derived from the href itself, reusing the shared
+// `isExternalHref` predicate (`src/scripts/links.js`, also used by
+// ComparisonChart.astro's own CTA — see that file's "Internal-vs-external
+// CTA fix" header comment). All three shipped courses' `enrollHref` values
+// are external Kajabi URLs, so this stays a no-op today; a future
+// internal-route `enrollHref` would now correctly omit `target`/`rel`
+// instead of the previous hardcoded pair.
 const enrollHref = item.pdp?.enrollHref ?? '#';
-const isExternal = /^https?:/.test(enrollHref);
+const isExternal = isExternalHref(enrollHref);
 ---
 <section class="course-details" data-pdp-id={item.id}>
   <div class="course-details__inner">

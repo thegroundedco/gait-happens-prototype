@@ -1238,8 +1238,10 @@ export const items = [
       // disagreement on the table itself.
       //
       // ComparisonChart.astro's heading ("Sole Switch VS Sole Switch Pro")
-      // stays hardcoded (identical verbatim text on both course pages' own
-      // frames, no data slot needed). The CTA is data-driven per the
+      // is DERIVED from `comparison.columns` (`${columns[0]} VS` + `
+      // ${columns[1]}`, commit 0095c92) — not hardcoded, and no separate
+      // heading data slot exists or is needed; `columns` below already
+      // carries both names for the table itself. The CTA is data-driven per the
       // component-generalization fix: `cta.label` is the frame's own
       // Figma-verbatim button text ("View Sole Switch Pro Course",
       // confirmed via get_design_context on THIS item's own comparison node

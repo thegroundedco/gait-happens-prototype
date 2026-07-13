@@ -11,9 +11,16 @@
 // `item.pdp.testimonial` is an ARRAY of `{ quote, author, role, rating }`
 // (Chunk B1's migrated, brief-mandated shape — see tests/testimonial.test.mjs,
 // which asserts every catalog item's `pdp.testimonial` is a non-empty array).
-// A bare object is still normalized to a 1-element array below so nothing
-// breaks on an un-migrated item, but the catalog itself now carries the
-// array shape exclusively. `quote` is an array of paragraph strings, one per
+// That's the ONE contract: the catalog carries the array shape exclusively,
+// this component reads `testimonials` straight off it below with no
+// normalization branch, and Pdp.astro's registry guard
+// (`item.pdp?.testimonial?.length > 0`) matches the same array shape — no
+// bare-object form exists anywhere in the composer/catalog/component chain
+// to keep in sync (an earlier draft normalized a bare object into a
+// 1-element array here "for un-migrated items"; that branch is dead code
+// against a catalog the test suite already forbids from carrying that shape,
+// so it was removed rather than left to muddy the contract for the Shopify
+// porting team). `quote` is an array of paragraph strings, one per
 // `<p>` in the pulled Figma code, not a single string: Sole Switch Pro's
 // only testimonial has a genuine, DELIBERATE internal line break (`<br
 // aria-hidden />` in the pulled code) between two sentences in its first
@@ -160,11 +167,10 @@
 // there), so it reuses --space-5 as a reasonable approximation, flagged
 // inline rather than presented as a precise pull.
 const { item } = Astro.props;
-const raw = item.pdp?.testimonial;
-// Normalize: a bare object still works (nothing can break on an un-migrated
-// item), but the catalog now carries the array shape exclusively — see
-// tests/testimonial.test.mjs.
-const testimonials = raw ? (Array.isArray(raw) ? raw : [raw]) : [];
+// `item.pdp.testimonial` is always an array — see header comment. Read
+// straight off it; Pdp.astro's registry guard already keeps this component
+// from rendering at all when the array is absent/empty.
+const testimonials = item.pdp?.testimonial ?? [];
 const isCarousel = testimonials.length > 1;
 const ARROW_PATH = 'M4 12H20M20 12L14 6M20 12L14 18';
 const STAR_PATH =

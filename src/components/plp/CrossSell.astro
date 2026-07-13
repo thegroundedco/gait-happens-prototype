@@ -22,7 +22,13 @@
 // not a `1fr` grid quarter). `kickers`/`blurbs` are parallel arrays indexed
 // the same as `itemIds` (only meaningful when `variant` is set) rather than
 // a richer `cards` array, since every other crossSell block on the site
-// already carries flat `itemIds` and this keeps that shape intact.
+// already carries flat `itemIds` and this keeps that shape intact. Because
+// they're parallel-indexed rather than nested per-item, a length mismatch
+// (an `itemIds` entry with no matching `kickers[i]`/`blurbs[i]`) is possible
+// by construction — the `.cross-sell__blurb` block only renders when at
+// least one of the pair is present at that index (final review fix wave),
+// so a mismatch renders nothing at that slot instead of an empty `<strong>`
+// + `<span>` inside a teal blurb box.
 //
 // The label-row cart icon reuses the site's existing `/images/nav/icon-
 // cart.svg` (same asset Header.astro's cart trigger uses) rendered as a
@@ -65,7 +71,7 @@ const isShopProducts = crossSell?.variant === 'shop-products';
               <img class="cross-sell__arrow" src="/images/nav/arrow.svg" width="24" height="24" alt="" />
             )}
           </span>
-          {isShopProducts && (
+          {isShopProducts && (crossSell.kickers?.[i] || crossSell.blurbs?.[i]) && (
             <span class="cross-sell__blurb">
               <strong class="cross-sell__kicker">{crossSell.kickers?.[i]}</strong>
               <span class="cross-sell__blurb-text">{crossSell.blurbs?.[i]}</span>

@@ -89,10 +89,13 @@ const REGISTRY = {
     props: (item) => (item.pdp?.comparison ? { item } : null),
   },
   'testimonial': {
-    // Guarded like the other course-only sections above — only items with
-    // real `item.pdp.testimonial` data render this section.
+    // Guarded like `four-column`/`your-instructors`/`faqs` above — `item.
+    // pdp.testimonial` is an ARRAY (see Testimonial.astro's header comment),
+    // so a presence check alone would let `testimonial: []` through and emit
+    // an empty `<div data-reveal>` around a Testimonial that renders
+    // nothing. `?.length > 0` guards non-emptiness, not just presence.
     Component: Testimonial,
-    props: (item) => (item.pdp?.testimonial ? { item } : null),
+    props: (item) => (item.pdp?.testimonial?.length > 0 ? { item } : null),
   },
   'your-instructors': {
     // Guarded like the other course-only sections above — only items with
@@ -113,8 +116,14 @@ const REGISTRY = {
     props: () => ({}),
   },
   'cross-sell': {
+    // Guarded like every other section above — an item that lists
+    // `cross-sell` without a real `item.pdp.crossSell` block would otherwise
+    // render a broken band (empty heading, zero cards, a "Shop All" `<a>`
+    // with no `href`). The catalog can't trip this today (guarded by
+    // catalog.test.mjs), but the composer is the artifact being ported, so
+    // it shouldn't fail open.
     Component: CrossSell,
-    props: (item) => ({ crossSell: item.pdp.crossSell }),
+    props: (item) => (item.pdp?.crossSell ? { crossSell: item.pdp.crossSell } : null),
   },
   'pdp-reviews': {
     Component: PdpReviews,

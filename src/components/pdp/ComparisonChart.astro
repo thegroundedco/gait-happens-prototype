@@ -55,19 +55,17 @@
 // but that made Sole Switch's now-internal `/courses/sole-switch-pro` link
 // wrongly hijack a new tab (and `rel="noopener noreferrer"` also stripped
 // the same-site referrer on it). That byte-identity-vs-correctness
-// trade-off was a false dilemma: `isExternal = /^https?:/.test(comparison.
+// trade-off was a false dilemma: `isExternal = isExternalHref(comparison.
 // cta.href)` derives externality from the href itself, and the two
 // attributes are spread onto the `<a>` only when `isExternal`. Sole Switch
 // Pro's `cta.href` is still the external `https://…mykajabi.com/…` Kajabi
 // link, so `isExternal` is true there and its markup stays byte-identical;
 // Sole Switch's `cta.href` is the internal `/courses/sole-switch-pro`
 // route, so `isExternal` is false and the attributes are correctly
-// omitted. No established internal/external link idiom exists elsewhere in
-// this repo to reuse instead — every other `target="_blank"` in the
-// codebase (catalog.js's shipping-policy/dynamometer-instructions FAQ
-// links, CourseDetails.astro's enroll CTA) is on a genuinely external,
-// unconditional URL — so this derivation is introduced here, scoped to
-// this component.
+// omitted. `isExternalHref` (`src/scripts/links.js`) is this repo's one
+// shared internal/external link predicate — CourseDetails.astro's enroll
+// CTA reuses the same import (final review fix wave; previously each
+// component declared its own copy of the same `/^https?:/` regex).
 //
 // ---- Intro paragraph is per-course data (review fix wave 2) -------------
 // The intro paragraph directly under the heading is `comparison.intro`, an
@@ -171,12 +169,14 @@
 // 424px panels use. The CTA button's 20px horizontal padding is a literal
 // (this repo's --space scale has 16px/24px on either side of it, no exact
 // 20px step) — also flagged per the same allowance.
+import { isExternalHref } from '../../scripts/links.js';
+
 const { item } = Astro.props;
 const comparison = item.pdp?.comparison;
 // See "Internal-vs-external CTA fix" above — externality is derived from
 // the href, not hardcoded, so `target`/`rel` are only spread onto the CTA
 // when it actually leaves the site.
-const isExternal = comparison?.cta ? /^https?:/.test(comparison.cta.href) : false;
+const isExternal = comparison?.cta ? isExternalHref(comparison.cta.href) : false;
 ---
 {comparison && (
   <section class="comparison-chart" data-pdp-id={item.id}>
