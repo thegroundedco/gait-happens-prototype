@@ -1016,6 +1016,367 @@ export const items = [
     cta: 'View Course',
     variants: null,
     sizeChart: null,
+    // Chunk B1 Task 3 (Course Details hero, 675:5542 desktop / 999:7156
+    // mobile) — this item previously had no top-level rating; both frames
+    // show a 5-star rating with "(27)" reviews, so it's added here per this
+    // task's brief. Also turns the star rating on for this item's PLP card
+    // (PlpCard.astro only renders <StarRating> when `item.rating` is set) —
+    // the same intentional side effect Sole Switch Pro's own `rating` field
+    // already documents.
+    rating: 5,
+    reviewCount: 27,
+    // Chunk B1 Task 3 — Combating Bunions course PDP. Figma desktop frame
+    // 675:5540 ("Combating Bunions Course", file FX7PDNvhZwyozODaq8Q8i7) /
+    // mobile "Combating Bunions Course Mobile" frame under section 999:7142.
+    // Same 11-section order the first 2 shipped courses use — every type
+    // below already has a Pdp.astro REGISTRY entry, so this assembles end to
+    // end with no new components, matching this task's "data-only" brief.
+    //
+    // CLIENT-CONTENT FLAG (systemic): this course's MOBILE frames repeatedly
+    // carry content that was clearly copy-pasted from the Sole Switch
+    // template and never updated for Combating Bunions — not just wording
+    // drift, but wrong facts (an instructor name that doesn't teach this
+    // course, an Audience sentence about shoes not bunions, a comparison
+    // intro naming the wrong two courses, a 4-column blurb about toe splay
+    // instead of bunions, and an FAQ accordion whose 5 mobile questions don't
+    // match desktop's at all). Every instance is called out at its own field
+    // below; DESKTOP is kept canonical throughout per this task's brief, and
+    // every mobile mismatch is flagged here as a client-content item — this
+    // page's mobile Figma frames need a real content pass before this ships
+    // past the reference build.
+    pdp: {
+      sections: [
+        'course-details',
+        'course-overview',
+        'four-column',
+        'youll-stop-and-instead',
+        'comparison-chart',
+        'testimonial',
+        'your-instructors',
+        'cross-sell',
+        'faqs',
+        'pdp-reviews',
+        'logo-wall',
+      ],
+      // Course Details hero — Figma-verbatim from node 675:5542 (desktop) /
+      // 999:7156 (mobile). `heroTitle` overrides the catalog's shorter
+      // `title` for just the hero <h1> (both frames read "Combating Bunions
+      // Course").
+      heroTitle: 'Combating Bunions Course',
+      // Both frames show a single flat price, no sale/compare-at price —
+      // `priceExact` matches this item's own top-level `price` exactly, so
+      // no `compareAtPrice` field is set (unlike Sole Switch's sale price).
+      priceExact: '$45.00 USD',
+      // Hero intro paragraph — desktop text kept canonical (trailing
+      // Figma text-node whitespace trimmed, curly apostrophe normalized to
+      // straight per this file's convention). Mobile's own copy of this
+      // same paragraph only differs by lowercasing "tailor's" — a wording-
+      // only diff, not flagged as a separate client-content item.
+      description:
+        "Gain the tools you need to walk away from the pain and limitations of bunions and bunionettes (Tailor's bunions).",
+      // Primary CTA (enroll, external — see CourseDetails.astro's Sole
+      // Switch/Sole Switch Pro remap precedent: Figma's own buybox is a
+      // cart/quantity-stepper "Add to Cart" flow, remapped to a Kajabi
+      // enrollment link since this course is fulfilled on Kajabi, not the
+      // Shopify cart). Realistic Kajabi placeholder URL; swap for the real
+      // offer/checkout URL once the course is live on Kajabi.
+      enrollHref: 'https://gaithappens.mykajabi.com/offers/combating-bunions-course',
+      enrollLabel: 'Enroll Now',
+      // No `secondaryCta` — unlike Sole Switch/Sole Switch Pro's two-tier
+      // pill toggle, neither of this course's Course Details frames shows a
+      // second course pill next to the CTA (single-tier course, no sibling
+      // tier to cross-link from the hero).
+      //
+      // ---- COMPONENT GAP (not fixed here — data-only task) --------------
+      // No `courseCard` is set. Unlike Sole Switch/Sole Switch Pro, whose
+      // Figma hero right column is a flattened raster of a BRANDED card
+      // (solid teal/yellow background + title text + optional tag —
+      // reconstructed as real markup via `courseCard.titleLines`/`tag`/
+      // `variant`), THIS course's right-column raster (675:5542 node
+      // I675:5542;173:147 / 999:7156 node I999:7156;181:674) is a plain
+      // close-up PHOTO of feet — no overlaid text, no colored background,
+      // confirmed via get_design_context on both breakpoints. CourseDetails
+      // .astro's right column only ever renders a `courseCard` (title text
+      // on a colored background); it has no field/branch for "just an
+      // image, no card" — setting `courseCard` here would force-render a
+      // teal card with invented title text Figma doesn't show, and leaving
+      // it unset (done here) means the hero's right column renders BLANK
+      // instead of the photo. Neither option is correct without a component
+      // change (e.g. a new `heroImage` field alongside `courseCard`), which
+      // is out of this task's data-only scope — flagged per the brief's
+      // "STOP and report, don't work around" instruction rather than
+      // silently faking a card or editing the component.
+      instructorsByline: 'Course By: Dr. Conley and Dr. Perez',
+      // CLIENT-CONTENT FLAG: mobile's own instructors byline (999:7156)
+      // reads "Course By: Dr. Conley and Dr. Riley" instead — Dr. Riley
+      // doesn't teach this course (this page's own Your Instructors section,
+      // both breakpoints, lists Conley + Perez, not Riley) — a mobile-only
+      // copy-paste error from the Sole Switch template. Desktop's "Dr.
+      // Conley and Dr. Perez" is kept canonical (matches this item's own
+      // top-level `description` and the real instructor roster below).
+      //
+      // Course Overview — Figma 675:5543 (desktop) / 999:7157 (mobile).
+      // Desktop kept canonical for `details`/`body` — mobile disagrees on
+      // MORE than wording here (see the CLIENT-CONTENT FLAG below).
+      overview: {
+        image: '/images/plp/combating-bunions.jpg',
+        details: [
+          { label: 'Course Length', value: '4 Module Mini-Course' },
+          { label: 'Evidence Based', value: 'Yes' },
+          { label: 'Course Structure', value: 'Online on demand' },
+          { label: 'Course Style', value: 'Video Lecture and Exercises' },
+          {
+            label: 'Audience',
+            value:
+              "Individuals dealing with bunions or tailor's bunions who want to understand their condition and explore non-surgical solutions.",
+          },
+        ],
+        // CLIENT-CONTENT FLAG: mobile's Audience value (999:7157) reads
+        // "Anyone looking to understand how to choose healthy shoes for
+        // themselves" — that's Sole Switch's own Audience sentence
+        // (byte-for-byte, see that item's own `overview.details` above),
+        // not this course's, and has nothing to do with bunions — another
+        // Sole-Switch-template copy-paste error. Mobile's 3rd/4th detail
+        // labels also rename to "Course Format"/"Course Style" (dropping
+        // "Video Lecture and Exercises" down to just "Video lecture") —
+        // desktop's 5-fact set above is kept canonical throughout.
+        body: "Understand what bunions and Tailor's bunions are and are not, learn how the mobility and strength of your feet can improve the function of your toes, get specific exercises for individuals with bunions, and discover footwear and tools that can support your feet and can help reduce the need for surgery.",
+      },
+      // 4 Column feature band — Figma-verbatim heading + 4 blurbs from node
+      // 675:5544 (desktop) / 999:7158 (mobile). No dedicated feature
+      // photography exists for this course — `image` reuses this item's own
+      // PLP course shot for all 4 cards, same placeholder approach every
+      // other course's `features` array takes.
+      featuresHeading: "What's Included:",
+      features: [
+        {
+          image: '/images/plp/combating-bunions.jpg',
+          label: null,
+          text: "A 4-module mini-course designed SPECIFICALLY to target discomfort caused by bunions AND Tailor's bunions.",
+        },
+        {
+          image: '/images/plp/combating-bunions.jpg',
+          label: null,
+          text: 'The ability to improve function of your feet and get back to your favorite activities.',
+        },
+        {
+          image: '/images/plp/combating-bunions.jpg',
+          label: null,
+          text: 'Crystal clear instruction on how to care for your feet - form exercises to choosing footwear.',
+        },
+        {
+          image: '/images/plp/combating-bunions.jpg',
+          label: null,
+          // CLIENT-CONTENT FLAG: mobile's 4th blurb (999:7158) reads "When
+          // the toes can properly splay, our foot and ankle muscles engage,
+          // creating a stronger, more stable platform from which to propel
+          // ourselves forward." — that's Sole Switch/Sole Switch Pro's own
+          // 4th blurb verbatim, not written for this course and unrelated
+          // to bunions. Desktop's bunion-specific text is kept canonical.
+          text: "Tools to overcome bunion and Tailor's bunion pain without needing surgery.",
+        },
+      ],
+      // "You'll Stop and Instead" — Figma 675:5545 (desktop) / 999:7159
+      // (mobile). Both frames pair the SAME lead-in/body text as each other
+      // (mobile only differs by a CSS-only capitalize transform) — no
+      // desktop/mobile disagreement to flag here, unlike every other section
+      // on this page.
+      youllStop: {
+        stop: {
+          lead: "You'll stop",
+          body: 'thinking surgery is your only option',
+        },
+        instead: {
+          lead: "and instead you'll",
+          body: 'gain confidence in your ability to reduce bunion pain and foot limitations.',
+        },
+      },
+      // Comparison Chart — Figma-verbatim from node 996:8246 (desktop) /
+      // 1037:16571 (mobile). This course's own comparison is "Combating
+      // Bunions VS Fit Feet" (NOT Sole Switch's own "Sole Switch VS Sole
+      // Switch Pro" table) — `columns`/`rows`/`intro`/`cta` are all pulled
+      // fresh from this course's own comparison node, per this task's brief.
+      comparison: {
+        columns: ['Combating Bunions', 'Fit Feet'],
+        intro:
+          'Trying to figure out which course is right for you? This table provides a brief overview of the differences between the Combating Bunions and Fit Feet courses.',
+        // CLIENT-CONTENT FLAG: mobile's own intro paragraph (1037:16571)
+        // instead reads "...between the Sole Switch and Sole Switch Pro
+        // courses." — a verbatim copy of Sole Switch's own intro text, not
+        // updated for this course's actual Combating Bunions/Fit Feet
+        // comparison. Desktop's correct intro is kept canonical.
+        rows: [
+          { label: 'Course Structure', values: ['Online', 'Online'] },
+          { label: 'Course Length', values: ['4 Mini-Modules', '12 Weeks'] },
+          { label: 'Audience', values: ['Individuals', 'Individuals'] },
+          { label: 'Evidence Based', values: ['Yes', 'Yes'] },
+          { label: 'Continuing Education Credit', values: ['No', 'No'] },
+          { label: 'Course Price', values: ['$45', '$185'] },
+        ],
+        // CLIENT-CONTENT FLAG (real DATA divergence, not just wording):
+        // mobile's own "Continuing Education Credit" row (1037:16571) reads
+        // ['No', 'Yes'] — Fit Feet shows "Yes" on mobile vs desktop's "No".
+        // Every other cell agrees between breakpoints. Desktop's ['No',
+        // 'No'] is kept canonical per this task's brief, but this one is
+        // flagged as needing real clarification from Gait Happens (which
+        // value is actually correct for Fit Feet), not just a cosmetic
+        // wording fix.
+        //
+        // CTA — Figma-verbatim button text on both frames ("View the Fit
+        // Feet Course"); `href` is an internal route to the Fit Feet
+        // course's own page (`/courses/fit-feet`, an existing placeholder
+        // route — see sitemap.js), so ComparisonChart.astro's `isExternal`
+        // check omits `target="_blank"` for this CTA.
+        cta: { label: 'View the Fit Feet Course', href: '/courses/fit-feet' },
+      },
+      // Testimonial — Figma-verbatim from node 675:7967 (desktop) /
+      // 999:7161 (mobile). Identical quote/author/role/rating on both
+      // frames — no desktop/mobile disagreement here, unlike every other
+      // section on this page. `role` is Bethany's own second attribution
+      // line, "Human Sole" (present on both frames, unlike Phyllis' name-only
+      // attribution on the other 2 courses) — populated rather than left
+      // `null`. See tests/testimonial.test.mjs — array shape required.
+      testimonial: [
+        {
+          quote: [
+            'I just started the Bunions mini-course - and I am LOVING it!',
+            'The exercises are fantastic! Thank you SO, so much for putting this together. I love the educational aspect behind the exercises as well!',
+            "I've already improved my toe and foot strength/splay over the past few months with the Fit Feet Program, and I can't wait to progress even more with the added eduction and exercises from the Bunions program. You are all truly amazing!!",
+          ],
+          author: 'Bethany Pendergrass',
+          role: 'Human Sole',
+          rating: 5,
+        },
+      ],
+      // Your Instructors — Figma-verbatim from node 675:5547 (desktop) /
+      // 999:7162 (mobile). Identical 2 instructors/bios/credentials on both
+      // frames — no desktop/mobile disagreement here. Dr. Courtney Conley's
+      // bio is the SAME 4-paragraph biography Sole Switch/Sole Switch Pro
+      // already carry (same clinician teaches all 3 courses) — reused
+      // verbatim. Dr. Jenifer Perez, DC is new to this course (not one of
+      // Sole Switch's 2 instructors). `photo` reuses this item's own PLP
+      // course shot for both cards (no dedicated instructor photography
+      // exists yet, same placeholder convention every other course takes).
+      instructors: [
+        {
+          photo: '/images/plp/combating-bunions.jpg',
+          name: 'Dr. Courtney Conley',
+          credential: 'Lakewood, Colorado',
+          bio: [
+            "Dr. Courtney Conley is a national bestselling author, international educator, and one of the world's foremost authorities on foot and gait health. Her book, Walk, hit both the USA Today and Amazon bestseller lists, resonating with readers eager to understand the profound connection between foot function and whole-body health. The book's success has brought Dr. Conley to some of the most respected platforms in health and wellness media, including appearances on The Peter Attia Drive Podcast, Diary of a CEO, Feel Better, Live More with Dr. Rangan Chatterjee, as well as national television features on CBS Mornings and Fox & Friends.",
+            "Dr. Conley holds a Doctorate in Chiropractic Medicine and two Bachelor's degrees in Kinesiology and Human Biology. With nearly 25 years of clinical practice, she has worked with professional athletes from organizations including the Phoenix Suns, New York Yankees, Cleveland Browns, New York Giants, and San Francisco 49ers. She has also collaborated with medical experts across the country, addressing complex foot and gait challenges at the highest level of performance. She currently serves as Head of Patient Care at Total Health Solutions and Total Health Performance in Lakewood, Colorado—premier clinics known for comprehensive, rehabilitation-focused patient care where she is committed to helping people improve their lives one step at a time.",
+            'That same commitment led her to found and lead Gait Happens, an education enterprise leading a paradigm shift in foot health by empowering people worldwide to reclaim optimal foot function through science-backed training and protocols. Gait Happens offers a comprehensive ecosystem of resources — from professional education for practitioners to consumer training programs and personalized consultations with top-of-field specialists — all grounded in research and designed to deliver real, measurable results. With a focus on natural, preventative approaches to foot and gait health, Gait Happens has built a global community of individuals committed to moving better and living pain-free, offering a proven alternative to unnecessary surgical intervention through education and evidence-based care.',
+            'An internationally recognized speaker, Dr. Conley shares her expertise to clinicians and consumers alike through in-person and online lectures on foot mechanics and gait dynamics. Her work spans authorship, mentorship, patent and curriculum development, and the creation of pioneering foot and gait methodologies. Yet at the heart of every lecture, protocol, and patient interaction is the same driving belief: real strength starts from the ground up, and healthy feet are the foundation every body needs to move through life with confidence and ease.',
+          ],
+        },
+        {
+          photo: '/images/plp/combating-bunions.jpg',
+          name: 'Dr. Jenifer Perez, DC',
+          credential: 'Lafayette, Colorado',
+          bio: [
+            'Dr. Jen Perez is the co-owner and Vice President of Gait Happens. As both an educator and a clinician, her mission is to empower as many people as possible to take charge of their lower body health so they can get back to what they love.',
+          ],
+        },
+      ],
+      // Cross-sell band — Figma-verbatim heading from the "Product Cards"
+      // frame, node 1000:11633 (desktop) / 1106:15395 (mobile).
+      //
+      // CLIENT-CONTENT FLAG: desktop's own 3 cards read "Combating Bunions"
+      // / "Fit Feet Course" / "Sole Switch Pro" — the FIRST card literally
+      // cross-sells THIS SAME course from its own page (a self-referencing
+      // link), which is almost certainly a Figma authoring artifact (this
+      // "Product Cards" band appears to be a shared/reused frame across
+      // several course pages, not built fresh per page — see Sole Switch's
+      // own `crossSell` comment for the identical situation on that course).
+      // Kept Figma-verbatim per this task's "content is Figma-verbatim,
+      // never invent" instruction rather than editorially swapping it for a
+      // 4th course — flagged here for Gait Happens to correct. Mobile
+      // (1106:15395) disagrees with desktop on this same first card, reading
+      // "Sole Switch Course" instead of "Combating Bunions" — yet another
+      // Sole-Switch-template mismatch; desktop's literal (if odd) trio is
+      // kept canonical.
+      crossSell: {
+        heading: 'More Resources For Your Movement Journey',
+        itemIds: ['combating-bunions', 'fit-feet', 'sole-switch-pro'],
+        shopAllHref: '/collections/all',
+      },
+      // FAQs — Figma node 1002:10467 (desktop) / 999:7164 (mobile).
+      //
+      // CRITICAL FLAG: mobile's FAQ accordion doesn't just disagree on
+      // wording — it shows 5 ENTIRELY DIFFERENT questions ("Virtual
+      // Consultations", "Gait Happens Education", "Online Courses",
+      // "Memberships", "Gait Happens Products" — generic site-wide category
+      // labels, not course questions), confirmed via get_design_context on
+      // both node trees. This is not this course's own accordion at all on
+      // mobile; desktop's 5 real, course-specific question labels are used
+      // below instead, per this task's "keep desktop canonical" brief.
+      //
+      // Neither frame contains any ANSWER copy for its own questions (both
+      // are static mockups of the collapsed state only) — same situation
+      // Sole Switch Pro's own FAQ section hit. Per this task's explicit
+      // instruction NOT to author plausible-sounding invented answers, each
+      // row below is handled per its own actual grounding:
+      //   - Row 1 ("right for me"): restates this SAME entry's already-
+      //     Figma-verbatim `overview.details` Audience line + `description`.
+      //   - Row 2 (exercises): restates this SAME entry's already-Figma-
+      //     verbatim `overview.details` Course Style value ("Video Lecture
+      //     and Exercises").
+      //   - Row 3 (Tailor's bunions included): restates this SAME entry's
+      //     already-Figma-verbatim `description` + `features[0].text`,
+      //     both of which explicitly name Tailor's bunions/bunionettes.
+      //   - Rows 4 & 5 (equipment; course access length): NO grounding data
+      //     exists anywhere in this file for either question, and neither
+      //     answer can be inferred from real data without inventing a new
+      //     fact. Rather than author a plausible-sounding placeholder (the
+      //     exact mistake this task's brief warns against repeating), each
+      //     `content` value is an explicit, honest "no answer copy exists
+      //     yet" disclosure — not a fabricated answer.
+      // Flagged here AND in this task's report; rows 4 & 5 in particular
+      // need real client-approved answer copy before this ships past the
+      // reference build.
+      faqs: [
+        {
+          label: 'Is this course right for me?',
+          content:
+            "<p>This course is built for individuals dealing with bunions or tailor's bunions who want to understand their condition and explore non-surgical solutions — the tools to walk away from the pain and limitations of bunions and bunionettes (Tailor's bunions).</p>",
+        },
+        {
+          label: 'Are there exercises in the Combating Bunions course?',
+          content:
+            '<p>Yes — the course pairs video lecture with exercises (its own Course Style is "Video Lecture and Exercises").</p>',
+        },
+        {
+          label: "Are Tailor's bunions included?",
+          content:
+            "<p>Yes. The course is specifically designed to target discomfort caused by both bunions and Tailor's bunions (bunionettes).</p>",
+        },
+        {
+          label: 'Do I need equipment',
+          content:
+            "<p>No answer copy for this question exists in the Figma source (only the collapsed accordion label was provided, and no equipment information appears anywhere else in this course's content) — needs real copy from Gait Happens before this ships past the reference build.</p>",
+        },
+        {
+          label: 'How long do I have access to the course?',
+          content:
+            "<p>No answer copy for this question exists in the Figma source (only the collapsed accordion label was provided, and no access-duration information appears anywhere else in this course's content) — needs real copy from Gait Happens before this ships past the reference build.</p>",
+        },
+      ],
+      // Reviews placeholder — same static reviews-app-screenshot values
+      // every product/course PDP reuses (see Toe Spacers' `reviews` comment
+      // / PdpReviews.astro's note); this course has no real review data any
+      // more than the others do.
+      reviews: {
+        rating: 4.75,
+        count: 12,
+        distribution: [
+          { stars: 5, count: 11 },
+          { stars: 4, count: 0 },
+          { stars: 3, count: 0 },
+          { stars: 2, count: 1 },
+          { stars: 1, count: 0 },
+        ],
+      },
+    },
   },
   {
     id: 'fit-feet',
