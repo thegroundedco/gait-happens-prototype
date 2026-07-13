@@ -212,29 +212,58 @@
 // real Figma data (`selected: true`), reflected as a `--selected` modifier
 // class (fills the pill, reusing the same 1px teal border so its box stays
 // the same size as its outline siblings — no extra CSS needed to prevent a
-// size jump) plus `aria-current="true"` on the inert span (a global ARIA
-// state, valid outside any specific widget role, for "this represents the
-// current item in a set" — appropriate for a read-only status display).
+// size jump). See the "Review fix wave" section below for how the
+// selected state is exposed to assistive tech (superseding an earlier
+// `aria-current`-on-`<span>` approach) and for the markup's actual
+// two-level shape.
 //
-// Markup shape: deliberately NOT a second wrapper div around the options
-// (no `.course-details__pills` row element) — `.course-details__tier`
-// itself becomes the flex-wrap container, with the label pinned to
-// `flex: 1 0 100%` so it claims its own full-width row and every option
-// wraps onto the row(s) below. This keeps the exact same DOM shape the
-// pilot's single-pill case already emitted (tier div > label span > pill
-// element, no extra nesting) — verified byte-identical against Sole
-// Switch/Sole Switch Pro's built HTML (see task report) — while still
-// correctly wrapping Fit Feet's 4 pills into 2-per-row at mobile widths,
-// matching Figma. Tradeoff: Figma's own structure nests a SECOND flex-wrap
-// level (12px label->row gap, 8px pill->pill gap, including between
-// wrapped rows) that this flattened, single-level version can't fully
-// reproduce — the `gap: var(--space-3) var(--space-2)` shorthand below
-// applies row-gap (12px) between label->pills AND between any wrapped pill
-// rows, where Figma's own nested structure would use 8px for the latter.
-// A 4px difference between wrapped pill rows on Fit Feet's mobile view
-// only, accepted as the cost of the byte-identical guarantee for the two
-// already-shipped courses — flagged here rather than silently accepted,
-// same as this file's other documented literal/token tradeoffs.
+// ---- Review fix wave (pill-group findings) -------------------------------
+// Two follow-up fixes to the pill-group generalization above, caught on
+// review before this branch merged:
+//
+// 1. Markup shape / geometry. The first pass deliberately flattened
+//    Figma's two-level structure (675:8156;181:819 column > nested
+//    181:822 pill row) into a single `.course-details__tier` flex-wrap
+//    container, reasoning that the tradeoff (a wrong 12px gap between
+//    WRAPPED pill rows, vs Figma's 8px) was worth staying byte-identical
+//    with the two already-shipped Sole Switch pages. That traded away
+//    correctness on the one page this generalization exists to build
+//    (`/courses/fit-feet`, the only course whose pills actually wrap) to
+//    preserve byte-identity on two pages that don't need it — the wrong
+//    side of that tradeoff. Fixed by adding the `.course-details__pills`
+//    wrapper Figma actually has: `.course-details__tier` is now a column
+//    (`gap: var(--space-3)`, i.e. 12px, label-to-pills) containing
+//    `.course-details__pills`, a flex-wrap row (`gap: var(--space-2)`,
+//    8px) around just the options — so 8px now governs wrapped-row gaps
+//    too, matching Figma exactly. The label's `flex: 1 0 100%` line-break
+//    hack is gone (the column layout makes it redundant). Sole Switch/Sole
+//    Switch Pro now differ from their previously-shipped HTML by exactly
+//    one wrapper `<div>` — same label text, same pill(s), same href,
+//    same computed geometry (their pill count never wraps, so the 12-vs-8
+//    gap was never visible there either way).
+//
+// 2. `aria-current="true"` on the inert `<span>` (the language pills) was
+//    the wrong instrument: a role-less generic `<span>` doesn't reliably
+//    surface "current" state to screen readers (no mappable role, and the
+//    four pills aren't exposed as a set), leaving `English`'s selected
+//    state carried by background fill alone — a WCAG 1.4.1 colour-only
+//    smell. Replaced with a visually-hidden " (selected)" text node inside
+//    the selected span, `.course-details__sr-only` — byte-for-byte the
+//    same clip-rect utility `.comparison-chart__sr-only` /
+//    `.star-rating__sr-only` / `.testimonial__sr-only` already establish
+//    in this repo (now a 4th instance of the same idiom, not a new one).
+//    `aria-current="true"` moved to the real `<a>` branch instead (Sole
+//    Switch/Sole Switch Pro's cross-link pill) — the canonically correct,
+//    universally-supported element for it; a no-op today since no shipped
+//    `<a>` option also sets `selected: true`, but no longer backwards.
+//
+// 3. MINOR — the `pills` guard checked presence (`item.pdp?.pills &&`),
+//    not emptiness. `pills: { label, options: [] }` would have re-created
+//    the exact "caption with nothing under it" bug the courseCard/heroImage
+//    guard fix (above) already killed once, and `pills: { label }` with no
+//    `options` key would throw at build (`.map` on `undefined`). Guard is
+//    now `item.pdp?.pills?.options?.length > 0`, which also subsumes the
+//    old presence check.
 import StarRating from '../plp/StarRating.astro';
 
 const { item } = Astro.props;
@@ -273,26 +302,29 @@ const isExternal = /^https?:/.test(enrollHref);
 
         {item.pdp?.description && <p class="course-details__intro">{item.pdp.description}</p>}
 
-        {item.pdp?.pills && (
+        {item.pdp?.pills?.options?.length > 0 && (
           <div class="course-details__tier">
             <span class="course-details__tier-label">{item.pdp.pills.label}</span>
-            {item.pdp.pills.options.map((option) =>
-              option.href ? (
-                <a
-                  class={`course-details__pill${option.selected ? ' course-details__pill--selected' : ''}`}
-                  href={option.href}
-                >
-                  {option.label}
-                </a>
-              ) : (
-                <span
-                  class={`course-details__pill course-details__pill--static${option.selected ? ' course-details__pill--selected' : ''}`}
-                  aria-current={option.selected ? 'true' : undefined}
-                >
-                  {option.label}
-                </span>
-              )
-            )}
+            <div class="course-details__pills">
+              {item.pdp.pills.options.map((option) =>
+                option.href ? (
+                  <a
+                    class={`course-details__pill${option.selected ? ' course-details__pill--selected' : ''}`}
+                    href={option.href}
+                    aria-current={option.selected ? 'true' : undefined}
+                  >
+                    {option.label}
+                  </a>
+                ) : (
+                  <span
+                    class={`course-details__pill course-details__pill--static${option.selected ? ' course-details__pill--selected' : ''}`}
+                  >
+                    {option.label}
+                    {option.selected && <span class="course-details__sr-only"> (selected)</span>}
+                  </span>
+                )
+              )}
+            </div>
           </div>
         )}
 
@@ -407,25 +439,28 @@ const isExternal = /^https?:/.test(enrollHref);
     color: var(--color-ink);
   }
 
-  /* Flex-wrap container doubling as the label's own row AND the pill-wrap
-     row(s) below it — see header comment ("Markup shape") for why there's
-     no separate `.course-details__pills` wrapper: `-label` claims a full
-     row via flex-basis, so options wrap onto the row(s) after it with no
-     extra nesting. row-gap (--space-3, label->pills) also governs the gap
-     between wrapped pill rows — see header comment for the resulting
-     4px-vs-Figma tradeoff on Fit Feet's mobile 2-row case. */
+  /* Two-level structure mirroring Figma (675:8156;181:819 column > 181:822
+     pill row) — see header comment ("Markup shape"). `-tier` is the column:
+     label, then the pill row, --space-3 (12px) apart. `-pills` is its own
+     flex-wrap row so the 8px pill-to-pill gap also governs the gap between
+     WRAPPED pill rows (Fit Feet's 4-pill mobile case), matching Figma
+     exactly instead of the 12px a flattened single-level container would
+     apply there. */
   .course-details__tier {
     display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: var(--space-3) var(--space-2);
+    flex-direction: column;
+    gap: var(--space-3);
   }
   .course-details__tier-label {
-    flex: 1 0 100%;
     font: var(--type-caption);
     text-transform: uppercase;
     letter-spacing: var(--tracking-caption);
     color: var(--color-ink);
+  }
+  .course-details__pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
   }
 
   /* Pill (secondary-CTA link OR inert language option) — outline style,
@@ -460,6 +495,27 @@ const isExternal = /^https?:/.test(enrollHref);
      arrows already set. */
   .course-details__pill--static {
     cursor: default;
+  }
+
+  /* Visually-hidden text conveying the selected pill's state to screen
+     readers — byte-for-byte the same idiom as `.comparison-chart__sr-only`
+     / `.star-rating__sr-only` / `.testimonial__sr-only` (this repo's
+     established visually-hidden utility, cited three times already). Used
+     only inside the inert `<span>` branch (see header comment: `aria-current`
+     on a role-less `<span>` isn't reliably surfaced by screen readers, and
+     the fill-only distinction is otherwise colour-only/WCAG 1.4.1). The
+     real `<a>` branch instead carries `aria-current="true"` directly —
+     that's the canonically correct, universally-supported element for it. */
+  .course-details__sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
   }
 
   /* Primary CTA — Enroll (external, Kajabi). Same teal-filled styling as
