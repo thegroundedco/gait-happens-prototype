@@ -14,8 +14,51 @@
 // object its caller already has to hand — no extra `index`/`key` prop —
 // while still producing a real, unique id for the toggle's `aria-controls`
 // to target.
+//
+// ---- `credential` guard (review-fix wave, post-Walk) ---------------------
+// Walk's own instructor entries are the first ever to pass `credential:
+// null` (neither of its cards shows the teal location line other courses'
+// cards do). This used to render unconditionally (`<p>{instructor.credential}</p>`),
+// so a null value shipped one small empty `<p></p>` per Walk card. Guarded
+// the same optional-field way every other section here treats an absent
+// field (e.g. Testimonial.astro's `role`, FourColumn.astro's `label`) — no
+// existing course instructor is affected, since all of them already carry a
+// real, non-null `credential` string.
+//
+// ---- `bioExpandable` guard (review-fix wave, post-Walk) -------------------
+// The "Read More" toggle used to render unconditionally too. Walk's
+// Dr. Milica McDowell exposed why that's wrong: her authored `bio` above is
+// a disclosed, KNOWN-INCOMPLETE transcript (see catalog.js's comment on her
+// entry) — Figma clamps her real card behind a "Read More" whose expanded
+// text this task's tooling could never retrieve, so what we ship is only
+// the legible collapsed preview. Rendering a real toggle over that preview
+// promises access to hidden content that, in OUR data, genuinely doesn't
+// exist — a false affordance, the same call Testimonial.astro's decorative
+// prev/next arrows already make when there's nothing to page between (see
+// that component's header comment). `item.pdp.instructors[].bioExpandable`
+// is an optional per-instructor override — defaulting to `true` (render the
+// toggle), so every already-shipped course instructor (Conley/Riley/Perez)
+// is entirely unaffected and keeps rendering its toggle exactly as before
+// (regression-diff verified byte-identical) — set to `false` only on
+// McDowell's entry. This is deliberately an authored data flag, not a
+// computed text-length/line-count heuristic: a live DOM measurement taken
+// during this fix (`scrollHeight` vs. clamped `clientHeight` at this card's
+// real 384px/body-sm rendering) showed Dr. Allison Riley's existing,
+// COMPLETE, Figma-verbatim single-paragraph bio (219 characters) also does
+// NOT overflow the 4-line clamp on Sole Switch Pro today — i.e. a
+// physically-accurate "is this actually clamped" computation would (quietly
+// correctly) turn Riley's toggle off too, which the regression gate
+// explicitly forbids touching. Riley's/Perez's short-but-complete bios are a
+// pre-existing, undiagnosed minor inconsistency (their toggle is likely
+// ALSO inert) that is out of scope for this task and intentionally left
+// alone; McDowell's is different in kind, not just degree — her bio is
+// known by us to be a partial excerpt, not merely short — so an explicit,
+// disclosed override is the honest mechanism here, not a magic-number
+// length threshold that would (at best) hold together on a few-character
+// margin between her bio and Riley's.
 const { instructor } = Astro.props;
 const bioId = `instructor-bio-${instructor.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')}`;
+const showToggle = instructor.bioExpandable !== false;
 ---
 <div class="instructor-card">
   <div class="instructor-card__photo">
@@ -24,23 +67,25 @@ const bioId = `instructor-bio-${instructor.name.toLowerCase().replace(/[^a-z0-9]
   <div class="instructor-card__body">
     <div class="instructor-card__intro">
       <h3 class="instructor-card__name">{instructor.name}</h3>
-      <p class="instructor-card__credential">{instructor.credential}</p>
+      {instructor.credential && <p class="instructor-card__credential">{instructor.credential}</p>}
     </div>
-    <div class="instructor-card__bio" id={bioId} data-collapsed>
+    <div class="instructor-card__bio" id={bioId} data-collapsed={showToggle ? '' : undefined}>
       {instructor.bio.map((paragraph) => <p>{paragraph}</p>)}
     </div>
-    <button
-      type="button"
-      class="instructor-card__toggle"
-      data-instructor-toggle
-      aria-expanded="false"
-      aria-controls={bioId}
-    >
-      <span data-instructor-toggle-label>Read More</span>
-      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-        <path d="M5 1L12 8L5 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-      </svg>
-    </button>
+    {showToggle && (
+      <button
+        type="button"
+        class="instructor-card__toggle"
+        data-instructor-toggle
+        aria-expanded="false"
+        aria-controls={bioId}
+      >
+        <span data-instructor-toggle-label>Read More</span>
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+          <path d="M5 1L12 8L5 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+      </button>
+    )}
   </div>
 </div>
 <style>

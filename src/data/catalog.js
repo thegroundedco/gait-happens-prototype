@@ -634,7 +634,24 @@ export const items = [
     // cart/drawer/subtotal despite the PDP itself showing $30.
     price: '$30 USD',
     priceRange: null,
-    description: "WALK is Gait Happens' guide to understanding your feet and reclaiming a natural, pain-free stride.", // (sample; out of this task's `pdp`-block scope — see PLP card copy)
+    // Review-fix wave: was a `(sample)` guess (a nice-sounding but invented
+    // sentence, never in Figma) before this fix — the other 3 top-level
+    // sample fields (price/rating/reviewCount) were Figma-verified by Task 5
+    // but this one was missed. Real Figma copy DOES exist for it: the
+    // Products PLP grid (section 764:10786, file FX7PDNvhZwyozODaq8Q8i7),
+    // Walk's own "PLP Card" instance (node 867:9364), carries a real,
+    // legible (non-lorem-ipsum) blurb — confirmed via `get_design_context`
+    // on 867:9354 (the full grid, all 7 product cards pulled in one call to
+    // positively identify which card is Walk's by its own title/price/
+    // rating text, not by node-id proximity guessing). This is a near-match
+    // to `pdp.description` below (the PDP hero's own paragraph) but not
+    // identical — the PLP card drops ", longevity," — reproduced Figma-
+    // verbatim, not deduplicated against the hero copy. This is what
+    // PlpCard.astro renders as the PLP grid blurb AND what BaseLayout uses
+    // as this page's `<meta name="description">` (the same top-level field
+    // every other item's PLP-card blurb doubles as).
+    description:
+      'Discover the new rules of walking to increase your health and overall wellbeing--from two go-to experts.',
     image: '/images/plp/walk.jpg',
     href: '/products/walk',
     cta: 'View Product',
@@ -816,30 +833,27 @@ export const items = [
         },
       ],
       // ---- Your Instructors ------------------------------------------------
-      // COMPONENT GAP — FOUND, NOT FIXED (per this task's explicit
-      // instruction not to self-edit Testimonial.astro/YourInstructors.astro
-      // — see the task report for full detail). Figma's own heading for this
-      // section, BOTH breakpoints (721:7907 desktop node I721:7907;173:318 /
-      // 1017:9594 mobile node I1017:9594;183:393), reads "Meet the Authors"
-      // — not "Your Instructors". YourInstructors.astro hardcodes a static
-      // `<h2>Your Instructors</h2>` (no data-driven override exists), so
-      // Walk's own page will render the wrong heading text for this section
-      // until a follow-up task generalizes it (the same "heading text is a
-      // static string" shape as the fix this branch already made for
-      // CourseDetails' pill-group block). `item.pdp.instructors` below is
-      // still authored in full — the section otherwise renders correctly —
-      // so that follow-up fix only needs to thread a heading override
-      // through, not touch this data.
+      // REVIEW FIX WAVE — the heading/credential/toggle component gaps
+      // flagged by Task 5 (below, preserved for history) are now fixed.
+      // Figma's own heading for this section, BOTH breakpoints (721:7907
+      // desktop node I721:7907;173:318 / 1017:9594 mobile node
+      // I1017:9594;183:393), reads "Meet the Authors" — not "Your
+      // Instructors" (re-verified directly via `get_design_context` on
+      // 721:7907 during the fix: the node's own pulled text is literally
+      // "Meet the Authors", confirmed against a 2600px screenshot too).
+      // YourInstructors.astro now reads `item.pdp.instructorsHeading`
+      // (optional, defaults to "Your Instructors" — see that component's
+      // header comment for the FourColumn `featuresHeading` precedent this
+      // follows).
+      instructorsHeading: 'Meet the Authors',
       //
       // Neither instructor card shows a distinct teal credential/location
       // line under the name on either breakpoint (unlike every course's own
       // instructor cards) — `credential: null` on both entries below is
-      // Figma-accurate, not a missing-data gap. (InstructorCard.astro
-      // doesn't guard `credential` the way Testimonial.astro guards `role`,
-      // so this renders one small empty `<p>` per card — a pre-existing,
-      // very minor rendering quirk exposed by Walk being the first item to
-      // ever pass `credential: null`; not fixed here for the same
-      // "don't self-edit this component" reason as the heading above.)
+      // Figma-accurate, not a missing-data gap. InstructorCard.astro now
+      // guards `credential` the same optional-field way Testimonial.astro
+      // guards `role` (fixed in this review wave — previously rendered one
+      // small empty `<p></p>` per card, confirmed gone from the built HTML).
       //
       // Conley's bio: this item's own Figma card (both breakpoints) opens
       // with the EXACT same sentence Fit Feet's already-shipped Conley bio
@@ -851,25 +865,62 @@ export const items = [
       // science-backed guide..."). Reused verbatim from fit-feet's own
       // catalog entry (same "same clinician, same bio, reused across pages"
       // precedent that entry's own comment already documents for
-      // Conley/Perez across Fit Feet/Combating Bunions).
+      // Conley/Perez across Fit Feet/Combating Bunions). Her bio is long
+      // enough to genuinely overflow InstructorCard's 4-line clamp (live DOM
+      // measurement during this fix: ~2740 characters, well past the
+      // clamp), so `bioExpandable` is left unset (defaults to `true`) — her
+      // Read More toggle is real and needed.
       //
       // McDowell's bio: NEW instructor, never in this catalog before, and a
       // genuine tooling limitation blocked full extraction — `get_metadata`
       // /`get_design_context` on 721:7907 (and a forced full-page pull of
       // 721:7417) all returned this section's instructor-card children as a
       // literally EMPTY node (`<div ... />`, no text at all), even though
-      // the section visibly renders 2 populated cards on canvas. Screenshots
-      // (both breakpoints) DO show her card's text, but Figma's own card
-      // visually clamps the bio to ~4 lines behind a "Read More" toggle, and
-      // only the clamped preview is legible in any screenshot — the full
-      // reveal text was never retrievable by any tool available to this
-      // task. The paragraph below is a best-effort verbatim transcription of
-      // ONLY the confirmed-legible portion (cut at the last fully-legible
-      // complete word, "Health Sciences" — the next word is cut off
-      // mid-glyph as "Cent…" and NOT completed/guessed here), with one
-      // closing parenthesis added so the truncated sentence is syntactically
-      // valid rather than left visibly broken — no wording invented or
-      // paraphrased. NEEDS REAL CLIENT COPY — see task report.
+      // the section visibly renders 2 populated cards on canvas. A 2600px
+      // `get_screenshot` of 721:7907 (re-pulled during this fix) DOES show
+      // her card's legible text, but Figma's own card visually clamps the
+      // bio behind a "Read More" toggle, and only the clamped preview is
+      // legible in any screenshot — the full reveal text was never
+      // retrievable by any tool available to this task. The paragraph below
+      // is a best-effort verbatim transcription of ONLY the confirmed-
+      // legible portion. Figma's own legible text reads (screenshot-
+      // verified): "...a master's degree (Physical Therapy, University of
+      // Colorado Health Sciences Cent…" — visibly truncated MID-WORD by
+      // Figma's own clamp, not at a word boundary. The word is completed
+      // here ("Center" — the only institution this can plausibly be:
+      // "University of Colorado Health Sciences Center" is a real,
+      // correctly-named institution; the prior version of this entry cut the
+      // word short at "Health Sciences" and appended a fabricated closing
+      // paren + period, which read as a complete sentence while actually
+      // misnaming the institution — fixed here to name it correctly, with
+      // no invented closing parenthesis: the parenthetical Figma opened
+      // ("(Physical Therapy, ...") is left genuinely unclosed below, because
+      // we do not know where — or whether — it closes in the untruncated
+      // original. An ellipsis ("…") is appended instead, in place of the
+      // fabricated ")." — this is a typographic truncation MARKER, not
+      // invented biographical content: it's the same character Figma's own
+      // clamped rendering already uses at this exact cut point (confirmed in
+      // the re-pulled screenshot: "...Health Sciences Cent…"), so ending on
+      // it here honestly signals "this sentence is cut off" instead of
+      // presenting either a fabricated complete sentence (the prior bug) or
+      // an unmarked, silently dangling open parenthesis (which would read as
+      // a typo rather than a disclosed cut). No wording beyond the one
+      // completed proper noun is invented or paraphrased. Separately,
+      // Figma's own source text has a doubled open
+      // parenthesis ("(Exercise Physiology and Health Promotion, (Montana
+      // State University)") that reads as a typo in the design file itself;
+      // this entry silently normalizes it to a single, correctly-paired
+      // parenthetical below — a reasonable call, but flagged here (per this
+      // review wave) as a disclosed deviation from strict verbatim, which
+      // the prior version of this comment did not disclose.
+      // THIS BIO IS NOT COMPLETE — NEEDS REAL CLIENT COPY before this ships
+      // past a reference build. `bioExpandable: false` below turns off her
+      // card's "Read More" toggle: the text we have IS the entire preview
+      // Figma itself shows before clamping, so — in OUR data — there is
+      // nothing further to reveal, and a working-looking toggle over it
+      // would be a false affordance (see InstructorCard.astro's header
+      // comment for the full reasoning, including why this is a data-level
+      // override rather than a computed text-length heuristic).
       instructors: [
         {
           photo: '/images/plp/walk.jpg',
@@ -887,10 +938,12 @@ export const items = [
           name: 'Dr. Milica McDowell',
           credential: null,
           // Best-effort transcription of Figma's own clamped preview text —
-          // see the COMPONENT GAP comment above. Not a complete bio.
+          // see the comment above. NOT a complete bio — needs real client
+          // copy. `bioExpandable: false` — see comment above.
           bio: [
-            "Dr. Milica McDowell holds two Bachelor of Science degrees (Exercise Physiology and Health Promotion, Montana State University), a master's degree (Physical Therapy, University of Colorado Health Sciences).",
+            "Dr. Milica McDowell holds two Bachelor of Science degrees (Exercise Physiology and Health Promotion, Montana State University), a master's degree (Physical Therapy, University of Colorado Health Sciences Center…",
           ],
+          bioExpandable: false,
         },
       ],
       // ---- Cross-sell — `shop-products` variant (Chunk B1 Task 5) ---------
