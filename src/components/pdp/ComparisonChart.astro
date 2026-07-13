@@ -348,6 +348,14 @@ const comparison = item.pdp?.comparison;
     .comparison-chart__table tbody tr:last-child {
       border-bottom: 1px solid rgba(255, 255, 255, 0.3);
     }
+    /* The header's leading cell is the position:absolute sr-only "Feature"
+       corner — out of flex flow — so `space-between` (inherited above, correct
+       for body rows whose flex:1 1 auto label pushes the values right) would
+       strand the first product header at the far-left edge. Pack the two
+       product headers to the right so each sits over its value column. */
+    .comparison-chart__table thead tr {
+      justify-content: flex-end;
+    }
     .comparison-chart__table tbody th[scope='row'] {
       grid-column: unset;
       flex: 1 1 auto;
