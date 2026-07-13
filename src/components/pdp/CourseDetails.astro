@@ -87,6 +87,54 @@
 //    with the same optional-field idiom the rest of this file/Testimonial's
 //    `role` already use (`item.pdp.courseCard.tag && <span>...</span>`), so
 //    Sole Switch's tag-less Figma card renders no pill artifact.
+//
+// ---- Hero image branch (Chunk B1 Task 3 follow-up: component gap fix) ----
+// Combating Bunions' Figma hero (675:5542 desktop / 999:7156 mobile) has no
+// branded card at all — its right column raster (`imgRectangle41` in
+// get_design_context's pull, node `I675:5542;173:147` desktop /
+// `I999:7156;181:674` mobile) is a plain product photo, no overlaid text, no
+// colored background (see catalog.js's `combating-bunions` entry, flagged as
+// a STOP-and-report component gap by the task that first authored that
+// item's data). `item.pdp.heroImage` is a second, OPTIONAL field for this
+// case, guarded with the exact same `item.pdp?.x &&` idiom `courseCard`
+// already uses — `courseCard` and `heroImage` are mutually exclusive
+// (an item sets at most one; neither renders anything when both are unset).
+//
+// Shape: a plain string path, e.g. `overview.image` in CourseOverview.astro
+// — not an object, and not ProductDetails.astro's `gallery` array. The
+// gallery shape exists to drive thumbnail-swap interaction across MULTIPLE
+// images; this hero has exactly one static image with no interaction, the
+// same shape CourseOverview's single `image` field already models. Alt text
+// is likewise NOT carried in the data (neither CourseOverview's `image` nor
+// ProductDetails' gallery thumbs carry alt in catalog data — alt is always a
+// judgment call made at render time in the component). Per YourInstructors
+// .astro's placeholder-photo precedent (`alt=""` because the placeholder is
+// a generic shot, not a real likeness — a name-echoing alt would misrepresent
+// it), this image is likewise `alt=""`: it's a stand-in PLP course photo
+// (see catalog.js) reused as decorative art beside an `<h1>` that already
+// names the course in text, not a real product photo with informational
+// content of its own yet. Unlike CourseOverview's image (below-the-fold,
+// `loading="lazy"`), this one is the hero's own right column — the same
+// above-the-fold position as ProductDetails' main gallery image, which
+// intentionally omits `loading="lazy"` (only its secondary thumbnails lazy-
+// load) — so this omits it too, to not delay this page's LCP candidate.
+//
+// Layout: mobile is a literal Figma `h-[210px] w-full` box — identical to
+// `.course-details__card`'s own mobile fixed height (same frame, same slot).
+// Desktop's node is unconstrained (`flex-[1_0_0] ... self-stretch`, no
+// aspect-ratio in the pulled code) — rather than measuring one course's
+// content height off its frame the way `.course-details__card`'s desktop
+// `aspect-ratio: 556 / 399` literal does (a value specific to Sole Switch
+// Pro's own buybox height), this stretches to match the buybox's actual
+// rendered height via `align-self: stretch` with no fixed height/ratio at
+// all — a plain image has no internal content forcing its own minimum size,
+// so it cleanly inherits the row's cross-axis size from its sibling exactly
+// like Figma's own `self-stretch` expresses, and stays correct regardless of
+// how tall any given course's buybox content happens to be. The crop itself
+// (Figma's absolutely-positioned `h-[166.97%] top-[-33.48%]` image) is the
+// same object-fit:cover-via-Figma-percentages idiom CourseOverview.astro's
+// own header comment already documents — reproduced as a plain
+// overflow:hidden + object-fit:cover box, not the literal percentages.
 import StarRating from '../plp/StarRating.astro';
 
 const { item } = Astro.props;
@@ -152,6 +200,12 @@ const { item } = Astro.props;
             {item.pdp.courseCard.titleLines.map((line) => <span>{line}</span>)}
           </p>
           {item.pdp.courseCard.tag && <span class="course-details__card-tag">{item.pdp.courseCard.tag}</span>}
+        </div>
+      )}
+
+      {item.pdp?.heroImage && (
+        <div class="course-details__hero-image">
+          <img src={item.pdp.heroImage} alt="" />
         </div>
       )}
     </div>
@@ -360,6 +414,22 @@ const { item } = Astro.props;
     padding: var(--space-2) var(--space-4);
   }
 
+  /* ---- Hero image (right column) — mutually exclusive with the branded
+     card above (see header comment). Mobile is a literal Figma-measured
+     fixed 210px height, identical to `.course-details__card`'s own mobile
+     height (999:7156;181:674 is the same slot/frame as the card's). */
+  .course-details__hero-image {
+    overflow: hidden;
+    background: var(--color-border);
+    height: 210px;
+  }
+  .course-details__hero-image img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .course-details__pill:hover,
     .course-details__enroll:hover {
@@ -406,6 +476,16 @@ const { item } = Astro.props;
          (48px) padding — mobile's smaller --space-5 above is a fixed-height
          fit constraint, not a desktop concern. */
       padding: var(--space-7);
+    }
+    /* Desktop hero image (675:5542;173:147) is unconstrained in Figma — no
+       fixed height/aspect-ratio, just `self-stretch` — so unlike the card
+       above this intentionally carries no aspect-ratio literal, letting it
+       stretch to match the buybox's actual rendered height directly (see
+       header comment). */
+    .course-details__hero-image {
+      flex: 1 0 0;
+      align-self: stretch;
+      height: auto;
     }
   }
 </style>

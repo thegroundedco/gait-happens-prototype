@@ -1087,25 +1087,28 @@ export const items = [
       // second course pill next to the CTA (single-tier course, no sibling
       // tier to cross-link from the hero).
       //
-      // ---- COMPONENT GAP (not fixed here — data-only task) --------------
-      // No `courseCard` is set. Unlike Sole Switch/Sole Switch Pro, whose
-      // Figma hero right column is a flattened raster of a BRANDED card
-      // (solid teal/yellow background + title text + optional tag —
-      // reconstructed as real markup via `courseCard.titleLines`/`tag`/
-      // `variant`), THIS course's right-column raster (675:5542 node
-      // I675:5542;173:147 / 999:7156 node I999:7156;181:674) is a plain
-      // close-up PHOTO of feet — no overlaid text, no colored background,
-      // confirmed via get_design_context on both breakpoints. CourseDetails
-      // .astro's right column only ever renders a `courseCard` (title text
-      // on a colored background); it has no field/branch for "just an
-      // image, no card" — setting `courseCard` here would force-render a
-      // teal card with invented title text Figma doesn't show, and leaving
-      // it unset (done here) means the hero's right column renders BLANK
-      // instead of the photo. Neither option is correct without a component
-      // change (e.g. a new `heroImage` field alongside `courseCard`), which
-      // is out of this task's data-only scope — flagged per the brief's
-      // "STOP and report, don't work around" instruction rather than
-      // silently faking a card or editing the component.
+      // ---- COMPONENT GAP — RESOLVED (CourseDetails.astro hero image fix) --
+      // No `courseCard` is set, and never should be for this course: unlike
+      // Sole Switch/Sole Switch Pro, whose Figma hero right column is a
+      // flattened raster of a BRANDED card (solid teal/yellow background +
+      // title text + optional tag — reconstructed as real markup via
+      // `courseCard.titleLines`/`tag`/`variant`), THIS course's right-column
+      // raster (675:5542 node I675:5542;173:147 / 999:7156 node
+      // I999:7156;181:674) is a plain close-up PHOTO of feet — no overlaid
+      // text, no colored background, confirmed via get_design_context on
+      // both breakpoints. This was originally flagged as a component gap
+      // (CourseDetails.astro had no branch for "just an image, no card") and
+      // left unset, shipping a blank hero right column — since fixed by
+      // adding the sibling `heroImage` field below + a second, mutually
+      // exclusive render branch in CourseDetails.astro (see that file's
+      // header comment for the full field-shape/alt-text/layout reasoning).
+      // `courseCard` and `heroImage` are never both set on the same item.
+      heroImage: '/images/plp/combating-bunions.jpg',
+      // Same placeholder PLP course shot every other image slot on this
+      // item already reuses (`overview.image`, `features[].image`,
+      // `instructors[].photo` below) — no dedicated hero photography exists
+      // for this course yet (see this file's other placeholder-image
+      // comments on this same item).
       instructorsByline: 'Course By: Dr. Conley and Dr. Perez',
       // CLIENT-CONTENT FLAG: mobile's own instructors byline (999:7156)
       // reads "Course By: Dr. Conley and Dr. Riley" instead — Dr. Riley
