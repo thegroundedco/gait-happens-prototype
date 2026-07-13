@@ -729,12 +729,22 @@ export const items = [
       // URL once the course is live on Kajabi.
       enrollHref: 'https://gaithappens.mykajabi.com/offers/sole-switch-course',
       enrollLabel: 'Enroll Now',
-      // Secondary CTA — Figma's OUTLINE pill on this page is "Sole Switch
-      // Pro" (the filled/selected pill is "Sole Switch Basic" — this page's
-      // own tier, dropped per CourseDetails.astro's established convention:
-      // the tier already being viewed isn't repeated as a 3rd CTA). Links to
-      // the Pro course's own page (already `built` — see sitemap.js).
-      secondaryCta: { label: 'Sole Switch Pro', href: '/courses/sole-switch-pro' },
+      // Pill group — Task 4 follow-up (Chunk B1's 9th-finding fix) migrated
+      // this off the old single-purpose tier-pill field onto the
+      // generalized `pills` shape CourseDetails.astro now renders (see that
+      // file's header comment). Figma's OUTLINE pill on this page is "Sole
+      // Switch Pro" (the filled/selected pill is "Sole Switch Basic" — this
+      // page's own tier, dropped per CourseDetails.astro's established
+      // convention: the tier already being viewed isn't repeated as a 3rd
+      // CTA). Links to the Pro course's own page (already `built` — see
+      // sitemap.js). `label` is this page's own real Figma caption
+      // ("Select your course", node 998:14856); `options` is a
+      // single-element array — same real link/label pair the old field
+      // carried, just renamed and reshaped to a 1-item list.
+      pills: {
+        label: 'Select your course',
+        options: [{ label: 'Sole Switch Pro', href: '/courses/sole-switch-pro' }],
+      },
       //
       // Figma's branded card (right column) is a flattened screenshot, same
       // situation Sole Switch Pro's own `courseCard` comment describes — but
@@ -1082,10 +1092,14 @@ export const items = [
       // offer/checkout URL once the course is live on Kajabi.
       enrollHref: 'https://gaithappens.mykajabi.com/offers/combating-bunions-course',
       enrollLabel: 'Enroll Now',
-      // No `secondaryCta` — unlike Sole Switch/Sole Switch Pro's two-tier
-      // pill toggle, neither of this course's Course Details frames shows a
-      // second course pill next to the CTA (single-tier course, no sibling
-      // tier to cross-link from the hero).
+      // No `pills` — unlike Sole Switch/Sole Switch Pro's two-tier pill
+      // toggle (now the generalized `pdp.pills` shape — see
+      // CourseDetails.astro's header comment) or Fit Feet's language
+      // selector, neither of this course's Course Details frames shows any
+      // pill-group content next to the CTA (single-tier course, no sibling
+      // tier or language selector to cross-link from the hero). Left unset
+      // — the whole pill-group block guards on this field's presence, same
+      // idiom as `courseCard`/`heroImage`, so nothing renders.
       //
       // ---- COMPONENT GAP — RESOLVED (CourseDetails.astro hero image fix) --
       // No `courseCard` is set, and never should be for this course: unlike
@@ -1416,22 +1430,32 @@ export const items = [
     // already has a Pdp.astro REGISTRY entry, so this assembles end to end
     // with no new components, matching this task's "data-only" brief.
     //
-    // ---- COMPONENT GAP FOUND — NOT FIXED (per this task's explicit "stop
-    // and report; do not work around; do not edit the component" instruction)
-    // Unlike any of the first 3 shipped courses, this course's Course Details
-    // hero (675:8156 desktop / 999:7170 mobile) shows a real "LANGUAGE"
-    // selector row between the intro paragraph and the Add to Cart/Enroll
-    // button: 4 pills ("English" filled/selected; "Spanish"/"French"/
-    // "Japanese" outline), present identically on BOTH breakpoints (not a
-    // one-off single-frame artifact — confirmed via get_design_context on
-    // both node trees). CourseDetails.astro has no render path for this
-    // content at all — unlike the 8 earlier findings on this branch (all
-    // "component hardcodes something THIS course's Figma doesn't show"),
-    // this is the inverse: Figma shows real, repeated content the component
-    // has no field name or branch for. Left completely UNSET/unrendered
-    // here — no data field invented, no component touched — and reported as
-    // this task's 9th finding for a follow-up task to add a
-    // `pdp.languages`-shaped field + render branch to CourseDetails.astro.
+    // ---- COMPONENT GAP — RESOLVED (Chunk B1 pill-group generalization) ----
+    // This course's Course Details hero (675:8156 desktop / 999:7170 mobile)
+    // shows a real "Language" selector row between the intro paragraph and
+    // the Add to Cart/Enroll button: 4 pills ("English" filled/selected;
+    // "Spanish"/"French"/"Japanese" outline), present identically on BOTH
+    // breakpoints (confirmed via get_design_context on both node trees —
+    // not a one-off single-frame artifact). This was the 9th finding on
+    // this branch (reported, not fixed, by the task that first authored
+    // this item's data) because CourseDetails.astro had no render path for
+    // it at all. The follow-up task generalized the pilot's single-pill
+    // "Select your course" tier block (its old single-purpose field) into
+    // one data-driven `pdp.pills = { label, options }` shape that
+    // expresses both cases —
+    // see CourseDetails.astro's header comment. `pills.options` below is
+    // set from this course's own `pdp.pills` field, not a new parallel
+    // field, per that task's explicit "generalize, don't bolt on"
+    // instruction. Verified: neither pill links anywhere in either Figma
+    // frame (each is a plain unlinked "Button" node, no prototype
+    // interaction, no destination) — these are a Kajabi/Shopify-side
+    // language-variant control this reference build doesn't wire up, so
+    // `options` carries no `href` and CourseDetails.astro renders them as
+    // inert `<span>`s, not links — same "a control that does nothing is a
+    // false affordance" call Testimonial.astro's decorative arrows already
+    // made for this exact situation. `English` is the one filled/selected
+    // pill in both frames — carried as `selected: true`, reflected in the
+    // markup via a `--selected` modifier class + `aria-current`.
     //
     // ---- CLIENT-CONTENT FLAG (systemic, recurs a 4th time — worse this
     // time) — this course's MOBILE frames again carry content that reads
@@ -1481,9 +1505,24 @@ export const items = [
       // Kajabi.
       enrollHref: 'https://gaithappens.mykajabi.com/offers/fit-feet-course',
       enrollLabel: 'Enroll Now',
-      // No `secondaryCta` — like Combating Bunions, neither of this course's
-      // Course Details frames shows a second course pill next to the CTA
-      // (single-tier course, no sibling tier to cross-link from the hero).
+      // Pill group — the 9th-finding fix (see this item's own header
+      // comment above for the full Figma evidence + reasoning). `label` is
+      // Figma-verbatim ("Language", node I675:8156;264:1453 desktop /
+      // I999:7170;181:1153 mobile — identical text on both frames, rendered
+      // uppercase via CSS text-transform like every other caption label on
+      // this page, not stored upper-cased here). `options` has no `href` on
+      // any entry (unlinked in Figma — see header comment), so
+      // CourseDetails.astro renders these as inert spans; `English` alone
+      // carries `selected: true` (the one filled pill in both frames).
+      pills: {
+        label: 'Language',
+        options: [
+          { label: 'English', selected: true },
+          { label: 'Spanish' },
+          { label: 'French' },
+          { label: 'Japanese' },
+        ],
+      },
       //
       // No `courseCard` — like Combating Bunions, this course's Figma hero
       // right column (675:8156 node I675:8156;173:147 / 999:7170 node
@@ -1891,13 +1930,20 @@ export const items = [
       // the course is live on Kajabi.
       enrollHref: 'https://gaithappens.mykajabi.com/offers/sole-switch-pro-course',
       enrollLabel: 'Enroll Now',
-      // Secondary CTA — Figma's outline "Sole Switch Basic" pill, kept as a
-      // real link (verbatim label) to the Basic-tier course's own page
-      // (`/courses/sole-switch`, an existing placeholder route — see
+      // Pill group — Task 4 follow-up (Chunk B1's 9th-finding fix) migrated
+      // this off the old single-purpose tier-pill field onto the
+      // generalized `pills` shape CourseDetails.astro now renders (see that
+      // file's header comment). Figma's outline "Sole Switch Basic" pill,
+      // kept as a real link (verbatim label) to the Basic-tier course's own
+      // page (`/courses/sole-switch`, an existing placeholder route — see
       // sitemap.js). The Figma frame's second, filled "Sole Switch Pro"
       // pill is NOT reproduced as a 3rd element — see CourseDetails.astro's
-      // header comment for why.
-      secondaryCta: { label: 'Sole Switch Basic', href: '/courses/sole-switch' },
+      // header comment for why. `label` is this page's own real Figma
+      // caption ("Select your course", node 675:4353).
+      pills: {
+        label: 'Select your course',
+        options: [{ label: 'Sole Switch Basic', href: '/courses/sole-switch' }],
+      },
       // Branded teal card (right column) — Figma-verbatim text read off the
       // frame's flattened screenshot (see CourseDetails.astro's header
       // comment: no real text layers to pull structurally). `titleLines` is

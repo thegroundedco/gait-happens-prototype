@@ -141,13 +141,15 @@
 // surfaced by rolling out `combating-bunions`:
 //
 // 1. CRITICAL — the "Select your course" tier block's wrapper `<div>` and
-//    label rendered UNCONDITIONALLY; only the inner pill was guarded on
-//    `item.pdp?.secondaryCta`. Combating Bunions correctly has no
-//    `secondaryCta` (single-tier course, no sibling to cross-link), so the
-//    old markup shipped a "SELECT YOUR COURSE" caption with nothing under
-//    it. The guard now wraps the whole `.course-details__tier` block, the
-//    same optional-block idiom `courseCard`/`heroImage` already use — a
-//    no-op for Sole Switch/Sole Switch Pro, which both set `secondaryCta`.
+//    label rendered UNCONDITIONALLY; only the inner pill was guarded on the
+//    old single-purpose tier-pill field (since renamed/reshaped to `pills`
+//    — see the Pill-group generalization section below). Combating Bunions
+//    correctly had no value for that field (single-tier course, no sibling
+//    to cross-link), so the old markup shipped a "SELECT YOUR COURSE"
+//    caption with nothing under it. The guard now wraps the whole
+//    `.course-details__tier` block, the same optional-block idiom
+//    `courseCard`/`heroImage` already use — a no-op for Sole Switch/Sole
+//    Switch Pro, which both set that field (now `pills`).
 //
 // 2. MINOR — `courseCard`/`heroImage` were two independent `&&` guards
 //    (this comment already asserted they're mutually exclusive, but nothing
@@ -169,6 +171,70 @@
 //    (ComparisonChart.astro's own precedent) so an internal `enrollHref`
 //    wouldn't wrongly hijack a new tab. All three current enroll links are
 //    external Kajabi URLs, so this is a no-op today.
+//
+// ---- Pill-group generalization (Chunk B1 Task 4 follow-up: 9th finding) --
+// Fit Feet's Course Details hero (675:8156 desktop / 999:7170 mobile) has a
+// real 4-pill "Language" selector (English/Spanish/French/Japanese) this
+// file had no field or render branch for at all — the 9th finding on this
+// branch, reported not fixed by the task that first authored that item's
+// data. Rather than adding a second, parallel `languages` field next to the
+// existing single-pill tier field (which would just re-hardcode "one label
+// + N pills" a level up), the pilot's tier block — already exactly that
+// shape with N pinned at 1 — is generalized in place:
+//
+//   OLD single-purpose field: { label: href pill }
+//   -> pdp.pills: { label, options: [{ label, href?, selected? }] }
+//
+// `label` is real per-course Figma data now (read off each course's OWN
+// node, never assumed) — Sole Switch/Sole Switch Pro's frames both read
+// "Select your course" (migrated verbatim, just reshaped); Fit Feet's reads
+// "Language". `options` is 1 element for the migrated courses (unchanged
+// content, just moved), 4 for Fit Feet. Combating Bunions sets no `pills`
+// at all (its own frames show neither), so the whole block still renders
+// nothing there — the exact guard-the-whole-wrapper fix #1 above already
+// established, now keyed off `pills`.
+//
+// Interactive vs inert, per option: an option with an `href` renders as a
+// real `<a>` (Sole Switch/Sole Switch Pro's single cross-link pill, real
+// navigation, unchanged behavior). An option WITHOUT `href` renders as a
+// plain, non-interactive `<span>` — verified in Figma that neither language
+// pill links anywhere in either frame (each is an unlinked "Button" node,
+// no prototype interaction): this is a Kajabi/Shopify-side language-variant
+// control this reference build doesn't wire up. A `<button>` styled inert
+// would still promise "this is a control" to assistive tech; a control that
+// does nothing is a false affordance — the exact reasoning
+// Testimonial.astro's decorative (`aria-hidden`, non-`<button>`) arrows
+// already established for a single-testimonial page, applied here the same
+// way (though unlike those purely-iconographic arrows, the language names
+// ARE meaningful text content, so these spans are NOT `aria-hidden` — only
+// their non-interactivity is inherited from that precedent, not their
+// invisibility to assistive tech). `English`'s filled/selected state is
+// real Figma data (`selected: true`), reflected as a `--selected` modifier
+// class (fills the pill, reusing the same 1px teal border so its box stays
+// the same size as its outline siblings — no extra CSS needed to prevent a
+// size jump) plus `aria-current="true"` on the inert span (a global ARIA
+// state, valid outside any specific widget role, for "this represents the
+// current item in a set" — appropriate for a read-only status display).
+//
+// Markup shape: deliberately NOT a second wrapper div around the options
+// (no `.course-details__pills` row element) — `.course-details__tier`
+// itself becomes the flex-wrap container, with the label pinned to
+// `flex: 1 0 100%` so it claims its own full-width row and every option
+// wraps onto the row(s) below. This keeps the exact same DOM shape the
+// pilot's single-pill case already emitted (tier div > label span > pill
+// element, no extra nesting) — verified byte-identical against Sole
+// Switch/Sole Switch Pro's built HTML (see task report) — while still
+// correctly wrapping Fit Feet's 4 pills into 2-per-row at mobile widths,
+// matching Figma. Tradeoff: Figma's own structure nests a SECOND flex-wrap
+// level (12px label->row gap, 8px pill->pill gap, including between
+// wrapped rows) that this flattened, single-level version can't fully
+// reproduce — the `gap: var(--space-3) var(--space-2)` shorthand below
+// applies row-gap (12px) between label->pills AND between any wrapped pill
+// rows, where Figma's own nested structure would use 8px for the latter.
+// A 4px difference between wrapped pill rows on Fit Feet's mobile view
+// only, accepted as the cost of the byte-identical guarantee for the two
+// already-shipped courses — flagged here rather than silently accepted,
+// same as this file's other documented literal/token tradeoffs.
 import StarRating from '../plp/StarRating.astro';
 
 const { item } = Astro.props;
@@ -207,12 +273,26 @@ const isExternal = /^https?:/.test(enrollHref);
 
         {item.pdp?.description && <p class="course-details__intro">{item.pdp.description}</p>}
 
-        {item.pdp?.secondaryCta && (
+        {item.pdp?.pills && (
           <div class="course-details__tier">
-            <span class="course-details__tier-label">Select your course</span>
-            <a class="course-details__pill" href={item.pdp.secondaryCta.href}>
-              {item.pdp.secondaryCta.label}
-            </a>
+            <span class="course-details__tier-label">{item.pdp.pills.label}</span>
+            {item.pdp.pills.options.map((option) =>
+              option.href ? (
+                <a
+                  class={`course-details__pill${option.selected ? ' course-details__pill--selected' : ''}`}
+                  href={option.href}
+                >
+                  {option.label}
+                </a>
+              ) : (
+                <span
+                  class={`course-details__pill course-details__pill--static${option.selected ? ' course-details__pill--selected' : ''}`}
+                  aria-current={option.selected ? 'true' : undefined}
+                >
+                  {option.label}
+                </span>
+              )
+            )}
           </div>
         )}
 
@@ -327,20 +407,31 @@ const isExternal = /^https?:/.test(enrollHref);
     color: var(--color-ink);
   }
 
+  /* Flex-wrap container doubling as the label's own row AND the pill-wrap
+     row(s) below it — see header comment ("Markup shape") for why there's
+     no separate `.course-details__pills` wrapper: `-label` claims a full
+     row via flex-basis, so options wrap onto the row(s) after it with no
+     extra nesting. row-gap (--space-3, label->pills) also governs the gap
+     between wrapped pill rows — see header comment for the resulting
+     4px-vs-Figma tradeoff on Fit Feet's mobile 2-row case. */
   .course-details__tier {
     display: flex;
-    flex-direction: column;
-    gap: var(--space-3);
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-3) var(--space-2);
   }
   .course-details__tier-label {
+    flex: 1 0 100%;
     font: var(--type-caption);
     text-transform: uppercase;
     letter-spacing: var(--tracking-caption);
     color: var(--color-ink);
   }
 
-  /* Secondary CTA — outline pill, matches ProductDetails' unselected size
-     pill exactly (border-teal / paper bg / teal text). */
+  /* Pill (secondary-CTA link OR inert language option) — outline style,
+     matches ProductDetails' unselected size pill exactly (border-teal /
+     paper bg / teal text). Shared by both real <a> links and the
+     non-interactive <span>s (see header comment). */
   .course-details__pill {
     display: inline-flex;
     align-items: center;
@@ -353,6 +444,22 @@ const isExternal = /^https?:/.test(enrollHref);
     padding: var(--space-3) var(--space-5);
     text-decoration: none;
     transition: transform var(--motion-fast) var(--ease-standard);
+  }
+  /* Filled/selected state (Fit Feet's "English", 675:8156) — border stays
+     the same 1px teal (now indistinguishable from the fill) so the box's
+     rendered size doesn't shift versus its outline siblings on the same
+     row. */
+  .course-details__pill--selected {
+    background: var(--color-teal);
+    color: var(--color-paper);
+  }
+  /* Inert variant (no destination — see header comment). No pointer
+     cursor; the shared hover-lift below is also scoped off real <a>
+     elements only, so this gets no hover treatment either — same
+     "decorative, not styled-inert-control" precedent Testimonial.astro's
+     arrows already set. */
+  .course-details__pill--static {
+    cursor: default;
   }
 
   /* Primary CTA — Enroll (external, Kajabi). Same teal-filled styling as
@@ -371,7 +478,11 @@ const isExternal = /^https?:/.test(enrollHref);
     transition: transform var(--motion-fast) var(--ease-standard);
   }
 
-  .course-details__pill:hover,
+  /* Hover-lift only applies to real links — tag-qualified so the inert
+     language `<span>`s (see header comment) don't inherit an affordance
+     they don't have; CSS :hover fires on any hovered element regardless of
+     interactivity, so this can't rely on the class alone. */
+  a.course-details__pill:hover,
   .course-details__enroll:hover {
     transform: translateY(-2px);
   }
@@ -471,7 +582,7 @@ const isExternal = /^https?:/.test(enrollHref);
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .course-details__pill:hover,
+    a.course-details__pill:hover,
     .course-details__enroll:hover {
       transform: none;
     }
