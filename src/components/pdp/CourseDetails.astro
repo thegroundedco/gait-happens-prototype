@@ -68,9 +68,12 @@
 //    struck-through compare-at price renders beside the sale price.
 //
 // 2. Course card colour. `item.pdp.courseCard.variant` is an OPTIONAL
-//    string ('yellow' | unset), same variant-name idiom `NavCard.astro`
-//    already uses for `sitemap.js`'s nav cards (`card.variant` ->
-//    `nav-card--${variant}`). Unset (Sole Switch Pro) keeps the base
+//    string ('yellow' | unset). NavCard.astro takes an arbitrary `variant`
+//    string and interpolates it directly (`nav-card--${variant}`); this
+//    component doesn't reuse that interpolation — it just checks
+//    `variant === 'yellow'` and toggles one fixed modifier class, since
+//    'yellow' is the only variant this course card has ever needed. Unset
+//    (Sole Switch Pro) keeps the base
 //    `.course-details__card` teal background byte-for-byte; `'yellow'`
 //    (Sole Switch) adds a `--yellow` modifier class. Figma's own flattened
 //    card image confirms the title text stays WHITE on both the teal AND
@@ -327,9 +330,10 @@ const { item } = Astro.props;
     background: var(--color-teal);
     height: 210px;
   }
-  /* Optional colour variant — same variant-name idiom NavCard.astro already
-     uses for sitemap.js's `card.variant` ('yellow'/'teal' ->
-     `nav-card--${variant}`). Sole Switch's card (998:14856) is yellow with
+  /* Optional colour variant — unlike NavCard.astro's `nav-card--${variant}`
+     interpolation (which accepts any variant string), this component only
+     ever toggles a single fixed 'yellow' modifier class (see the header
+     comment). Sole Switch's card (998:14856) is yellow with
      no tag; Sole Switch Pro's stays the base teal (no `variant` set) +
      its "For Health Professionals" tag. Figma's own flattened card raster
      confirms the title text stays white on both colours, so only the

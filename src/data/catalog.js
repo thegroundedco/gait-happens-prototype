@@ -845,7 +845,7 @@ export const items = [
       // literally byte-for-byte the same comparison Sole Switch Pro's own
       // `comparison` block above already carries — it's the SAME two-tier
       // comparison table shown on both course pages) — no desktop/mobile
-      // disagreement.
+      // disagreement on the table itself.
       //
       // ComparisonChart.astro's heading ("Sole Switch VS Sole Switch Pro")
       // stays hardcoded (identical verbatim text on both course pages' own
@@ -859,9 +859,25 @@ export const items = [
       // this button is upselling, NOT this item's own `enrollHref` above
       // (that would incorrectly self-enroll the visitor in the Basic course
       // a button reading "View Sole Switch Pro Course" — the bug this fix
-      // corrects; see ComparisonChart.astro's header comment).
+      // corrects; see ComparisonChart.astro's header comment). Because this
+      // href is internal, ComparisonChart.astro's `isExternal` check omits
+      // `target="_blank" rel="noopener noreferrer"` for this CTA.
+      //
+      // `intro` (review fix wave 2): THIS course's own comparison node
+      // (998:14860) — confirmed via get_design_context, desktop frame — pairs
+      // the table with a table-purpose explainer, "Trying to figure out
+      // which course is right for you? This table provides a brief overview
+      // of the differences between the Sole Switch and Sole Switch Pro
+      // courses.", NOT Sole Switch Pro's Dr. Courtney Conley bio (a
+      // component-level hardcode this field replaces — see
+      // ComparisonChart.astro's header comment). Figma-verbatim; a single
+      // trailing space in the pulled node's own text is trimmed as a
+      // text-node artifact, same precedent as `youllStop.instead.body`
+      // above.
       comparison: {
         columns: ['Sole Switch', 'Sole Switch Pro'],
+        intro:
+          'Trying to figure out which course is right for you? This table provides a brief overview of the differences between the Sole Switch and Sole Switch Pro courses.',
         rows: [
           { label: 'Course Structure', values: ['Online', 'Online'] },
           { label: 'Course Length', values: ['50 Minutes', '2 Hours 13 Min'] },
@@ -1233,9 +1249,10 @@ export const items = [
       // "Sole Switch Pro Page" > "Comparison Chart" instance inside the
       // professional-courses mobile frame 1109:14374). Both frames agree on
       // every column name, row label, and cell value here (no
-      // desktop/mobile disagreement to flag, unlike `overview`/the
-      // component's own intro paragraph — see ComparisonChart.astro's
-      // header comment). `columns` are the 2 product names ("Sole Switch"
+      // desktop/mobile disagreement to flag on the table itself, unlike
+      // `overview` above — see `intro` below for the one place this
+      // section's OWN content differs from Sole Switch's). `columns` are
+      // the 2 product names ("Sole Switch"
       // vs "Sole Switch Pro" — this course's OWN page, compared against its
       // Basic-tier sibling); `rows` are the 6 feature rows in the frames'
       // own top-to-bottom order.
@@ -1255,9 +1272,25 @@ export const items = [
       // byte (the same external Kajabi link ComparisonChart.astro's CTA
       // already pointed at before this field existed), preserving today's
       // rendered output exactly. `cta.label` is the frame's own
-      // Figma-verbatim button text.
+      // Figma-verbatim button text. Because this href is external,
+      // ComparisonChart.astro's `isExternal` check still spreads
+      // `target="_blank" rel="noopener noreferrer"` onto this CTA — the
+      // same attributes it unconditionally carried before that fix, so
+      // this page's rendered HTML is unchanged.
+      //
+      // `intro` (review fix wave 2): THIS course's own comparison node
+      // (675:4357, main-component subtree 1017:8983/1017:8987) is Dr.
+      // Courtney Conley's bio, "Dr. Courtney Conley holds a Doctorate in
+      // Chiropractic Medicine as well as two bachelor's degrees in
+      // Kinesiology and Human Biology. The founder and creator of Gait
+      // Happens." — reproduced byte-for-byte from what was previously
+      // ComparisonChart.astro's own hardcoded text (see that component's
+      // header comment), so moving it here doesn't change this page's
+      // rendered HTML.
       comparison: {
         columns: ['Sole Switch', 'Sole Switch Pro'],
+        intro:
+          "Dr. Courtney Conley holds a Doctorate in Chiropractic Medicine as well as two bachelor's degrees in Kinesiology and Human Biology. The founder and creator of Gait Happens.",
         rows: [
           { label: 'Course Structure', values: ['Online', 'Online'] },
           { label: 'Course Length', values: ['50 Minutes', '2 Hours 13 Min'] },

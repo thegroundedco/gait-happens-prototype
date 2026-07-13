@@ -40,22 +40,49 @@
 // page's rendered HTML is unchanged); Sole Switch's `cta.href` instead
 // points at `/courses/sole-switch-pro` (an internal upsell route, confirmed
 // against Figma — the CTA's copy is a "View Sole Switch Pro Course" upsell
-// on BOTH course pages, not a self-enroll link). The `target="_blank"
-// rel="noopener noreferrer"` external-link treatment is kept static/
-// unconditional (not data-driven) purely to keep Sole Switch Pro's markup
-// byte-identical to its pre-fix output; it's a minor UX quirk that Sole
-// Switch's now-internal link also opens a new tab, flagged here rather than
-// adding an unrequested external/internal heuristic.
+// on BOTH course pages, not a self-enroll link).
 //
-// The intro paragraph directly under the heading is the one place desktop
-// and mobile genuinely DISAGREE on content, not just wording: desktop
-// reads a Dr. Courtney Conley bio ("...holds a Doctorate in Chiropractic
-// Medicine..."); mobile reads a table-purpose explainer ("Trying to figure
-// out which course is right for you?..."). Since this text has no data
-// slot in the brief's schema either, desktop is kept as the one canonical
-// source at both breakpoints — same "pull desktop first, flag the
-// disagreement" precedent CourseOverview.astro's header comment sets for
-// its own `details`/Audience conflict — flagged here, not silently merged.
+// ---- Internal-vs-external CTA fix (review fix wave 2) -------------------
+// `target="_blank" rel="noopener noreferrer"` were previously left static/
+// unconditional purely to keep Sole Switch Pro's markup byte-identical —
+// but that made Sole Switch's now-internal `/courses/sole-switch-pro` link
+// wrongly hijack a new tab (and `rel="noopener noreferrer"` also stripped
+// the same-site referrer on it). That byte-identity-vs-correctness
+// trade-off was a false dilemma: `isExternal = /^https?:/.test(comparison.
+// cta.href)` derives externality from the href itself, and the two
+// attributes are spread onto the `<a>` only when `isExternal`. Sole Switch
+// Pro's `cta.href` is still the external `https://…mykajabi.com/…` Kajabi
+// link, so `isExternal` is true there and its markup stays byte-identical;
+// Sole Switch's `cta.href` is the internal `/courses/sole-switch-pro`
+// route, so `isExternal` is false and the attributes are correctly
+// omitted. No established internal/external link idiom exists elsewhere in
+// this repo to reuse instead — every other `target="_blank"` in the
+// codebase (catalog.js's shipping-policy/dynamometer-instructions FAQ
+// links, CourseDetails.astro's enroll CTA) is on a genuinely external,
+// unconditional URL — so this derivation is introduced here, scoped to
+// this component.
+//
+// ---- Intro paragraph is per-course data (review fix wave 2) -------------
+// The intro paragraph directly under the heading is `comparison.intro`, an
+// OPTIONAL per-course data field — NOT a desktop/mobile divergence as an
+// earlier version of this comment claimed. That claim was only ever true
+// of Sole Switch Pro's OWN frame (675:4357), whose paragraph is a Dr.
+// Courtney Conley bio ("...holds a Doctorate in Chiropractic Medicine...").
+// Sole Switch's OWN frame (998:14860) genuinely reads a different,
+// table-purpose explainer ("Trying to figure out which course is right for
+// you?...") — and it does so at DESKTOP too, not just mobile; that frame
+// was never actually pulled before this fix. Each course's `comparison.
+// intro` is sourced Figma-verbatim from that course's own comparison node
+// in catalog.js; the field is optional (the `<p>` only renders when
+// present) so a future comparison table with no intro paragraph of its own
+// doesn't force one. Rendered via `set:html`, not `{comparison.intro}` text
+// interpolation — Astro HTML-escapes interpolated text expressions (turning
+// Sole Switch Pro's apostrophe in "bachelor's" into `&#39;`), which would
+// have made this page's markup diverge from its pre-fix byte output even
+// though the two render identically in a browser. `comparison.intro` is
+// trusted, hand-authored catalog.js data, not user input, so `set:html` is
+// safe here — same trust boundary PdpAccordion.astro's `content` field and
+// Faqs.astro already establish for this repo.
 //
 // ---- Table semantics + a11y (the point of this task) --------------------
 // A real `<table>`: `<thead>` has one sr-only corner `<th scope="col">`
@@ -129,6 +156,10 @@
 // 20px step) — also flagged per the same allowance.
 const { item } = Astro.props;
 const comparison = item.pdp?.comparison;
+// See "Internal-vs-external CTA fix" above — externality is derived from
+// the href, not hardcoded, so `target`/`rel` are only spread onto the CTA
+// when it actually leaves the site.
+const isExternal = comparison?.cta ? /^https?:/.test(comparison.cta.href) : false;
 ---
 {comparison && (
   <section class="comparison-chart" data-pdp-id={item.id}>
@@ -137,10 +168,7 @@ const comparison = item.pdp?.comparison;
         <h2 class="comparison-chart__heading">
           <span class="comparison-chart__heading-prefix">Sole Switch VS</span> Sole Switch Pro
         </h2>
-        <p class="comparison-chart__intro">
-          Dr. Courtney Conley holds a Doctorate in Chiropractic Medicine as well as two bachelor's
-          degrees in Kinesiology and Human Biology. The founder and creator of Gait Happens.
-        </p>
+        {comparison.intro && <p class="comparison-chart__intro" set:html={comparison.intro} />}
       </div>
 
       <div class="comparison-chart__table-wrap">
@@ -182,8 +210,7 @@ const comparison = item.pdp?.comparison;
         <a
           class="comparison-chart__cta"
           href={comparison.cta.href}
-          target="_blank"
-          rel="noopener noreferrer"
+          {...(isExternal ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
         >
           {comparison.cta.label}
         </a>
