@@ -1,0 +1,379 @@
+---
+// Comparison Chart band (Task 5, Course PDP Chunk A) — Figma desktop
+// 675:4357 (file FX7PDNvhZwyozODaq8Q8i7; the pulled instance resolves to
+// its main-component subtree at 1017:8983) / mobile 1109:14381 (the "Sole
+// Switch Pro Page" > "Comparison Chart" instance inside the
+// professional-courses mobile frame 1109:14374). Prop is `{ item }` (same
+// shape as CourseOverview/YoullStopAndInstead), reading
+// `item.pdp.comparison`.
+//
+// `item.pdp.comparison` = `{ columns: [c1, c2], rows: [{ label, values:
+// [v1, v2] }] }` — this task's brief-mandated shape. Each `values` entry
+// can be EITHER a string (rendered verbatim as cell text) OR a boolean
+// (rendered as an accessible check/× glyph: a decorative `aria-hidden`
+// mark plus a visually-hidden "Included"/"Not included" span). Neither
+// pulled frame actually contains icon check/× marks though — both render
+// every row, including the yes/no-shaped ones (Evidence Based, Continuing
+// Education Credit), as literal "Yes"/"No" TEXT — so catalog.js's real data
+// below uses strings throughout, Figma-verbatim, and the boolean branch is
+// exercised by nothing today. It stays in the component (not deleted)
+// because this repo's convention is "Figma-verbatim over invented UI": if
+// a future comparison table's frame ever DOES show a check/× glyph, that
+// table's data can express it as `true`/`false` without a component change.
+//
+// The heading ("Sole Switch VS Sole Switch Pro") and the closing CTA
+// button ("View Sole Switch Pro Course") have no field in the brief's
+// exact `{ columns, rows }` contract — same "static markup, not data"
+// treatment CourseOverview.astro gives its own unlisted "Course
+// Overview"/"Course Concepts" labels — so both are hardcoded here,
+// verbatim on both frames. The CTA's href has no data field either; it
+// reuses `item.pdp.enrollHref` (the same Kajabi placeholder
+// CourseDetails.astro's primary "Enroll Now" CTA already points at) with
+// the same external-link treatment (`target="_blank"
+// rel="noopener noreferrer"`), rather than inventing a new catalog field
+// for a single button.
+//
+// The intro paragraph directly under the heading is the one place desktop
+// and mobile genuinely DISAGREE on content, not just wording: desktop
+// reads a Dr. Courtney Conley bio ("...holds a Doctorate in Chiropractic
+// Medicine..."); mobile reads a table-purpose explainer ("Trying to figure
+// out which course is right for you?..."). Since this text has no data
+// slot in the brief's schema either, desktop is kept as the one canonical
+// source at both breakpoints — same "pull desktop first, flag the
+// disagreement" precedent CourseOverview.astro's header comment sets for
+// its own `details`/Audience conflict — flagged here, not silently merged.
+//
+// ---- Table semantics + a11y (the point of this task) --------------------
+// A real `<table>`: `<thead>` has one sr-only corner `<th scope="col">`
+// (no data — Figma's top-left cell is blank) plus one `<th scope="col">`
+// per `columns` entry; `<tbody>` rows each lead with `<th scope="row">`
+// for the feature label and one `<td>` per value, exactly the
+// `PdpAccordion.astro` size-chart table idiom (`th scope="col"`/`scope=
+// "row"`, sr-only caption). `.comparison-chart__sr-only` is a byte-for-byte
+// copy of `.pdp-accordion__sr-only` (this repo's established visually-
+// hidden utility), reused rather than re-invented.
+//
+// Responsive: the mobile frame does neither of the two "obvious" table
+// behaviors (a literal 2-col table that overflows into a horizontal
+// scroller, or the SAME row shape with just narrower columns). It
+// genuinely REFLOWS each row's internals: the feature label moves onto its
+// own centered line (spanning both columns — e.g. "Continuing Education
+// Credit" wraps to 2 lines there), with the two values sitting on a
+// second line below as a plain 2-column split (first value white/left,
+// second gold/right). Desktop keeps every row on one line (label left,
+// both values right-anchored in two fixed ~175px columns, both white — no
+// per-column color accent there). Reproduced with CSS Grid on `<tr>`
+// (`grid-template-columns: repeat(2, 1fr)`, the row-header spanning
+// `grid-column: 1 / -1`) at mobile, switched to a flex row at
+// `min-width: 1024px` — NOT literal horizontal scrolling, since the
+// reflowed row already fits full width at both 342px (mobile component)
+// and 390px (frame) with room to spare.
+//
+// Overriding `display` on `<tr>`/`<th>`/`<td>` (grid at mobile, flex at
+// desktop) can strip a table's IMPLICIT accessible row/cell semantics in
+// some browser/AT combinations (a well-documented CSS-table-reflow
+// footgun). Every table-part element below carries an explicit ARIA role
+// (`table`/`rowgroup`/`row`/`columnheader`/`rowheader`/`cell`) matching its
+// implicit HTML role as a redundant safety net, so the accessibility tree
+// stays correct at both breakpoints regardless of the CSS `display` in
+// play — a deliberate belt-and-suspenders choice given this task's explicit
+// a11y focus, not copied from any other component in this repo.
+//
+// ---- Tokens / literals ---------------------------------------------------
+// Teal band bg = --color-teal (Figma `--bg-brand`, #047791, exact hex
+// match). Heading = --type-display (700/40px) + --color-yellow (Figma
+// `--text-inverse`, #fec745, exact hex match) on both frames' full
+// heading text; mobile ADDITIONALLY recolors just the "Sole Switch VS"
+// prefix to white (`--color-paper`) per its own pulled code (a genuine
+// breakpoint-only accent difference, not a wording change) — implemented
+// as a `<span>` around the prefix, white by default, overridden gold at
+// `min-width: 1024px` to match desktop's uniform-gold heading.
+// Intro/column-header/value text = --color-paper (Figma's `--text-on-brand`
+// white) throughout, EXCEPT mobile's last (Pro) column, which Figma
+// explicitly recolors --color-yellow with right-aligned text — a
+// deliberate mobile-only emphasis accent (there's no side-by-side visual
+// weight cue on a stacked-row mobile layout the way desktop's spacing
+// provides one) — cancelled back to uniform white at desktop via the
+// `:last-child` override in the `min-width: 1024px` block. Column headers
+// use --type-label (600/16px); desktop's own pulled code shows 600 exactly,
+// mobile's shows 700 — the ~100-weight difference is absorbed into one
+// non-responsive token, same "single token across breakpoints" precedent
+// CourseOverview.astro's heading/detail-label tokens set. Row labels use
+// --type-h4 (500/24px) at both breakpoints too, even though mobile's own
+// pulled code shows an unbound 20px — same precedent again (CourseOverview's
+// h3 case). Values use --type-body-sm (400/14px), an exact match at both
+// breakpoints. The divider line under each row is a literal
+// `rgba(255, 255, 255, .3)` — no dedicated "divider on brand surface" token
+// exists in tokens.css, and Figma's own divider is a flattened image asset
+// (no fill token to read off it), so this is a reasonable approximation of
+// a thin white hairline on the teal band, called out as a literal per this
+// task's "literal OK if commented" allowance. Desktop's two value/header
+// columns are a literal 175px each, measured off the 1200-wide frame's own
+// fixed-width cells — same "literal px column" idiom YoullStopAndInstead's
+// 424px panels use. The CTA button's 20px horizontal padding is a literal
+// (this repo's --space scale has 16px/24px on either side of it, no exact
+// 20px step) — also flagged per the same allowance.
+const { item } = Astro.props;
+const comparison = item.pdp?.comparison;
+---
+{comparison && (
+  <section class="comparison-chart" data-pdp-id={item.id}>
+    <div class="comparison-chart__inner">
+      <div class="comparison-chart__intro-group">
+        <h2 class="comparison-chart__heading">
+          <span class="comparison-chart__heading-prefix">Sole Switch VS</span> Sole Switch Pro
+        </h2>
+        <p class="comparison-chart__intro">
+          Dr. Courtney Conley holds a Doctorate in Chiropractic Medicine as well as two bachelor's
+          degrees in Kinesiology and Human Biology. The founder and creator of Gait Happens.
+        </p>
+      </div>
+
+      <div class="comparison-chart__table-wrap">
+        <table class="comparison-chart__table" role="table">
+          <caption class="comparison-chart__sr-only">
+            {`${comparison.columns[0]} vs ${comparison.columns[1]} course comparison`}
+          </caption>
+          <thead role="rowgroup">
+            <tr role="row">
+              <th scope="col" role="columnheader" class="comparison-chart__sr-only">Feature</th>
+              {comparison.columns.map((col) => (
+                <th scope="col" role="columnheader">{col}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody role="rowgroup">
+            {comparison.rows.map((row) => (
+              <tr role="row">
+                <th scope="row" role="rowheader">{row.label}</th>
+                {row.values.map((value) => (
+                  <td role="cell" class={typeof value === 'boolean' ? 'comparison-chart__cell--icon' : ''}>
+                    {typeof value === 'boolean' ? (
+                      <span class="comparison-chart__cell-inner">
+                        <span class="comparison-chart__mark" aria-hidden="true">{value ? '✓' : '✕'}</span>
+                        <span class="comparison-chart__sr-only">{value ? 'Included' : 'Not included'}</span>
+                      </span>
+                    ) : (
+                      value
+                    )}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {item.pdp?.enrollHref && (
+        <a
+          class="comparison-chart__cta"
+          href={item.pdp.enrollHref}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          View Sole Switch Pro Course
+        </a>
+      )}
+    </div>
+  </section>
+)}
+<style>
+  .comparison-chart__inner {
+    max-width: var(--container-max);
+    margin-inline: auto;
+    background: var(--color-teal);
+    padding-block: var(--space-7);
+    padding-inline: var(--space-5);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-6);
+    text-align: center;
+  }
+
+  .comparison-chart__intro-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-6);
+    width: 100%;
+  }
+
+  .comparison-chart__heading {
+    font: var(--type-display);
+    color: var(--color-yellow);
+  }
+  .comparison-chart__heading-prefix {
+    color: var(--color-paper);
+  }
+
+  .comparison-chart__intro {
+    font: var(--type-body-sm);
+    color: var(--color-paper);
+    max-width: 761px;
+  }
+
+  /* ---- Table ------------------------------------------------------------
+     Mobile-first base: each row is a 2-col CSS Grid (label spans both
+     columns on its own line, the two values sit below it) — see header
+     comment for why `display`/roles are handled together. */
+  .comparison-chart__table-wrap {
+    width: 100%;
+    overflow-x: auto;
+  }
+  .comparison-chart__table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  .comparison-chart__table th,
+  .comparison-chart__table td {
+    padding: 0;
+    border: 0;
+    font-weight: normal;
+  }
+
+  .comparison-chart__sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  .comparison-chart__table thead tr,
+  .comparison-chart__table tbody tr {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    /* `gap` (not just column-gap): the row-header spans both columns on row 1
+       and the two values auto-flow to row 2, so the frame's 24px label->values
+       vertical gap needs an explicit row-gap too. On desktop the row is
+       overridden to display:flex (single line) where row-gap is inert. */
+    gap: var(--space-5);
+    /* literal — see header comment (no divider token in tokens.css) */
+    border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+    padding-block: var(--space-4);
+  }
+  /* Mobile's frame draws a divider before each row and NONE after the last
+     row (no trailing line before the CTA); desktop re-adds it below. */
+  .comparison-chart__table tbody tr:last-child {
+    border-bottom: 0;
+  }
+
+  .comparison-chart__table thead th[scope='col'] {
+    font: var(--type-label);
+    color: var(--color-paper);
+    text-align: left;
+  }
+  .comparison-chart__table thead th[scope='col']:last-child {
+    color: var(--color-yellow);
+    text-align: right;
+  }
+
+  .comparison-chart__table tbody th[scope='row'] {
+    grid-column: 1 / -1;
+    font: var(--type-h4);
+    color: var(--color-paper);
+    text-align: center;
+  }
+  .comparison-chart__table tbody td {
+    font: var(--type-body-sm);
+    color: var(--color-paper);
+    text-align: left;
+  }
+  .comparison-chart__table tbody td:last-child {
+    color: var(--color-yellow);
+    text-align: right;
+  }
+  .comparison-chart__table tbody td.comparison-chart__cell--icon {
+    text-align: center;
+  }
+  .comparison-chart__mark {
+    font-weight: 700;
+  }
+
+  /* ---- CTA ---------------------------------------------------------- */
+  .comparison-chart__cta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-3);
+    /* 20px literal — see header comment (--space scale has 16/24, not 20) */
+    padding: var(--space-4) 20px;
+    background: var(--color-paper);
+    color: var(--color-teal);
+    font: var(--type-button);
+    text-decoration: none;
+    transition: transform var(--motion-fast) var(--ease-standard);
+  }
+  .comparison-chart__cta:hover {
+    transform: translateY(-2px);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .comparison-chart__cta:hover {
+      transform: none;
+    }
+  }
+
+  /* ---- Desktop (Figma 675:4357, ≥1024) -------------------------------- */
+  @media (min-width: 1024px) {
+    .comparison-chart__inner {
+      padding-inline: var(--space-7);
+      gap: var(--space-7);
+    }
+    .comparison-chart__intro-group {
+      gap: var(--space-6);
+    }
+    .comparison-chart__heading-prefix {
+      color: var(--color-yellow);
+    }
+
+    .comparison-chart__table thead tr,
+    .comparison-chart__table tbody tr {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      /* Minimum gap safeguard, same idiom YoullStopAndInstead's row uses —
+         Figma's own row has no explicit gap (space-between plus two fixed
+         175px columns handles the distribution), this only guards against
+         the label ever touching the value pair on an unusually narrow
+         desktop viewport. */
+      gap: var(--space-5);
+    }
+    /* Desktop's frame DOES keep a trailing line after the last row (Course
+       Price) before the CTA — mobile removed it above. */
+    .comparison-chart__table tbody tr:last-child {
+      border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+    }
+    /* The header's leading cell is the position:absolute sr-only "Feature"
+       corner — out of flex flow — so `space-between` (inherited above, correct
+       for body rows whose flex:1 1 auto label pushes the values right) would
+       strand the first product header at the far-left edge. Pack the two
+       product headers to the right so each sits over its value column. */
+    .comparison-chart__table thead tr {
+      justify-content: flex-end;
+    }
+    .comparison-chart__table tbody th[scope='row'] {
+      grid-column: unset;
+      flex: 1 1 auto;
+      text-align: left;
+    }
+    .comparison-chart__table thead th[scope='col'],
+    .comparison-chart__table tbody td {
+      /* 175px literal — see header comment (measured off the 1200-wide
+         frame's own fixed-width value columns) */
+      flex: 0 0 175px;
+      text-align: center;
+    }
+    .comparison-chart__table thead th[scope='col']:last-child,
+    .comparison-chart__table tbody td:last-child {
+      /* Desktop's frame has no per-column color accent — cancel mobile's
+         gold "Pro" column emphasis back to uniform white. */
+      color: var(--color-paper);
+      text-align: center;
+    }
+  }
+</style>

@@ -1,17 +1,45 @@
 ---
-// PDP composer: product sections stack -> CrossSell -> LogoWall.
-// Task 1 proved the pipeline with the two sections we already had
-// (CrossSell + LogoWall, both reused from the PLP composer). Task 2 adds the
-// hero (Product Details buy box + gallery); Task 3 adds the Product Details
-// accordion (size chart / instructions / research), built inside
-// ProductDetails.astro itself (see PdpAccordion.astro) rather than as a
-// separate section here, since Figma nests it in the same buy-box column.
-// Task 4 adds the 4 Column feature band directly after Product Details.
-// Task 5 adds the Brand Section band directly after that. Task 6 adds the
-// Customer Reviews placeholder, between CrossSell and LogoWall — the
-// Figma stack order is Product Details -> 4 Column -> Brand -> Product
-// Cards (cross-sell) -> Reviews -> Logo Wall.
+// PDP composer — data-driven (Task 1 of the Course PDP Chunk A plan).
+//
+// Tasks 1-6 built this composer as a hardcoded stack (Product Details ->
+// 4 Column -> Brand -> CrossSell -> Reviews -> LogoWall, matching the
+// Figma order: Product Details -> 4 Column -> Brand -> Product Cards
+// (cross-sell) -> Reviews -> Logo Wall). This task generalizes that stack
+// into a `type -> { Component, props }` REGISTRY driven by the item's own
+// `item.pdp.sections` (an ordered array of `type` strings, or `{ type,
+// ...data }` objects), so the same composer can also drive course PDPs
+// (Sole Switch Pro, etc.) whose section list mixes reused sections
+// (four-column, cross-sell, pdp-reviews, logo-wall) with course-only
+// sections that don't exist yet.
+//
+// Each registry entry's `props` resolver reproduces exactly what that
+// section received before this refactor, INCLUDING its guard: `four-column`
+// only renders when `item.pdp.features` is non-empty, `pdp-reviews` only
+// when `item.pdp.reviews` is truthy. A resolver returning `null` means
+// "guarded off" — no section, and (unlike a naive `{...data}` spread) no
+// empty `data-reveal` wrapper either, matching the pre-refactor
+// `{condition && (<div data-reveal>...)}` output byte-for-byte.
+//
+// A `type` with no registry entry renders nothing — no crash, no markup,
+// just a dev-only console.warn — so a course item can list its full
+// intended section order today and have the not-yet-built slots fill in
+// silently as later tasks add registry entries. Task 2 added `course-details`
+// (the course hero, CourseDetails.astro); Task 3 added `course-overview`
+// (CourseOverview.astro); Task 4 added `youll-stop-and-instead`
+// (YoullStopAndInstead.astro); Task 5 added `comparison-chart`
+// (ComparisonChart.astro); Task 6 added `testimonial` (Testimonial.astro);
+// Task 7 added `your-instructors` (YourInstructors.astro); Task 8 adds
+// `faqs` (Faqs.astro) below — the last course-only type, so every entry in
+// Sole Switch Pro's `pdp.sections` list now has a registry entry and the
+// full course PDP assembles end to end.
 import ProductDetails from './ProductDetails.astro';
+import CourseDetails from './CourseDetails.astro';
+import CourseOverview from './CourseOverview.astro';
+import YoullStopAndInstead from './YoullStopAndInstead.astro';
+import ComparisonChart from './ComparisonChart.astro';
+import Testimonial from './Testimonial.astro';
+import YourInstructors from './YourInstructors.astro';
+import Faqs from './Faqs.astro';
 import FourColumn from './FourColumn.astro';
 import BrandSection from './BrandSection.astro';
 import PdpReviews from './PdpReviews.astro';
@@ -20,28 +48,104 @@ import LogoWall from '../plp/LogoWall.astro';
 import { pressLogos } from '../../data/catalog.js';
 
 const { item } = Astro.props;
+
+// type -> { Component, props(item, data) }. `props` returns the exact prop
+// object that type's component received pre-refactor, or `null` to signal
+// "guarded off, render nothing" — never a blind `{...data}` spread, since
+// each component's prop shape is genuinely heterogeneous (see file header).
+const REGISTRY = {
+  'product-details': {
+    Component: ProductDetails,
+    props: (item) => ({ item }),
+  },
+  'course-details': {
+    Component: CourseDetails,
+    props: (item) => ({ item }),
+  },
+  'course-overview': {
+    // Guarded like `four-column`/`pdp-reviews` — only items with real
+    // overview data (`item.pdp.overview`) render this section; other course
+    // items without it yet render nothing rather than an empty section.
+    Component: CourseOverview,
+    props: (item) => (item.pdp?.overview ? { item } : null),
+  },
+  'four-column': {
+    Component: FourColumn,
+    props: (item) =>
+      item.pdp?.features?.length > 0
+        ? { heading: item.pdp.featuresHeading, columns: item.pdp.features }
+        : null,
+  },
+  'youll-stop-and-instead': {
+    // Guarded like `course-overview` — only items with real
+    // `item.pdp.youllStop` data render this section.
+    Component: YoullStopAndInstead,
+    props: (item) => (item.pdp?.youllStop ? { item } : null),
+  },
+  'comparison-chart': {
+    // Guarded like `course-overview`/`youll-stop-and-instead` — only items
+    // with real `item.pdp.comparison` data render this section.
+    Component: ComparisonChart,
+    props: (item) => (item.pdp?.comparison ? { item } : null),
+  },
+  'testimonial': {
+    // Guarded like the other course-only sections above — only items with
+    // real `item.pdp.testimonial` data render this section.
+    Component: Testimonial,
+    props: (item) => (item.pdp?.testimonial ? { item } : null),
+  },
+  'your-instructors': {
+    // Guarded like the other course-only sections above — only items with
+    // real `item.pdp.instructors` data render this section.
+    Component: YourInstructors,
+    props: (item) => (item.pdp?.instructors?.length > 0 ? { item } : null),
+  },
+  'faqs': {
+    // Guarded like the other course-only sections above — only items with
+    // real `item.pdp.faqs` data render this section.
+    Component: Faqs,
+    props: (item) => (item.pdp?.faqs?.length > 0 ? { item } : null),
+  },
+  'brand-section': {
+    // Desktop-only per BrandSection.astro's own `@media (max-width: 1023px)
+    // { display: none }` — no composer-level guard needed, same as before.
+    Component: BrandSection,
+    props: () => ({}),
+  },
+  'cross-sell': {
+    Component: CrossSell,
+    props: (item) => ({ crossSell: item.pdp.crossSell }),
+  },
+  'pdp-reviews': {
+    Component: PdpReviews,
+    props: (item) => (item.pdp?.reviews ? { reviews: item.pdp.reviews } : null),
+  },
+  'logo-wall': {
+    Component: LogoWall,
+    props: () => ({ logos: pressLogos }),
+  },
+};
+
+const sections = (item.pdp?.sections ?? [])
+  .map((s) => (typeof s === 'string' ? { type: s } : s))
+  .map((entry) => {
+    const registered = REGISTRY[entry.type];
+    if (!registered) {
+      if (import.meta.env.DEV) {
+        // eslint-disable-next-line no-console
+        console.warn(`[Pdp] "${entry.type}" has no registry entry yet (item "${item.id}") — rendering nothing.`);
+      }
+      return null;
+    }
+    const props = registered.props(item, entry);
+    return props ? { Component: registered.Component, props } : null;
+  })
+  .filter(Boolean);
 ---
 <div class="pdp">
-  <div data-reveal>
-    <ProductDetails item={item} />
-  </div>
-  {item.pdp?.features?.length > 0 && (
+  {sections.map(({ Component, props }) => (
     <div data-reveal>
-      <FourColumn heading={item.pdp.featuresHeading} columns={item.pdp.features} />
+      <Component {...props} />
     </div>
-  )}
-  <div data-reveal>
-    <BrandSection />
-  </div>
-  <div data-reveal>
-    <CrossSell crossSell={item.pdp.crossSell} />
-  </div>
-  {item.pdp?.reviews && (
-    <div data-reveal>
-      <PdpReviews reviews={item.pdp.reviews} />
-    </div>
-  )}
-  <div data-reveal>
-    <LogoWall logos={pressLogos} />
-  </div>
+  ))}
 </div>

@@ -1,0 +1,146 @@
+---
+// Instructor card — sub-component of YourInstructors.astro (Task 7, Course
+// PDP Chunk A). One card per `item.pdp.instructors` entry: photo, name,
+// credential/location, a truncated bio + a real expand/collapse toggle.
+// Split out from the parent because the card itself is non-trivial (5
+// sub-parts + the toggle's aria wiring) — see YourInstructors.astro's
+// header comment for the full rationale behind each design decision below
+// (the `credential` field naming, the placeholder photo, heading
+// semantics, and why the "Read More" toggle is real functionality rather
+// than Testimonial.astro's inert decorative arrows).
+//
+// `bioId` is derived from the instructor's own name (slugified) rather than
+// a positional index, so this component only needs the single `instructor`
+// object its caller already has to hand — no extra `index`/`key` prop —
+// while still producing a real, unique id for the toggle's `aria-controls`
+// to target.
+const { instructor } = Astro.props;
+const bioId = `instructor-bio-${instructor.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')}`;
+---
+<div class="instructor-card">
+  <div class="instructor-card__photo">
+    <img src={instructor.photo} alt="" loading="lazy" width="222" height="222" />
+  </div>
+  <div class="instructor-card__body">
+    <div class="instructor-card__intro">
+      <h3 class="instructor-card__name">{instructor.name}</h3>
+      <p class="instructor-card__credential">{instructor.credential}</p>
+    </div>
+    <div class="instructor-card__bio" id={bioId} data-collapsed>
+      {instructor.bio.map((paragraph) => <p>{paragraph}</p>)}
+    </div>
+    <button
+      type="button"
+      class="instructor-card__toggle"
+      data-instructor-toggle
+      aria-expanded="false"
+      aria-controls={bioId}
+    >
+      <span data-instructor-toggle-label>Read More</span>
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+        <path d="M5 1L12 8L5 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+      </svg>
+    </button>
+  </div>
+</div>
+<style>
+  .instructor-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-6);
+    width: 100%;
+    max-width: 384px;
+  }
+
+  .instructor-card__photo {
+    width: 222px;
+    height: 222px;
+    border-radius: 50%;
+    overflow: hidden;
+    background: var(--color-border);
+    flex-shrink: 0;
+  }
+  .instructor-card__photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .instructor-card__body {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-5);
+    width: 100%;
+  }
+
+  .instructor-card__intro {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    width: 100%;
+  }
+  .instructor-card__name {
+    font: var(--type-h3);
+    color: var(--color-ink);
+  }
+  .instructor-card__credential {
+    font: var(--type-h4);
+    color: var(--color-teal);
+  }
+
+  .instructor-card__bio {
+    font: var(--type-body-sm);
+    color: var(--color-ink);
+    width: 100%;
+  }
+  .instructor-card__bio p {
+    margin: 0;
+  }
+  .instructor-card__bio p + p {
+    margin-top: var(--space-2);
+  }
+  /* Collapsed (default) state — clamps the bio to an approximate 4-line
+     preview, matching both frames' truncated card height; no exact "N
+     lines" spec exists in the pulled Figma code (it renders the truncation
+     via a flattened fixed-height box, not a CSS line-clamp), so 4 is a
+     reasonable approximation flagged here rather than presented as a
+     precise pull — same "approximate, flagged" allowance
+     YoullStopAndInstead/ComparisonChart's own literals take. Removed by the
+     toggle script (in YourInstructors.astro) on expand. */
+  .instructor-card__bio[data-collapsed] {
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .instructor-card__toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    font: var(--type-cta);
+    color: var(--color-ink);
+    background: none;
+    border: 0;
+    padding: 0;
+    cursor: pointer;
+  }
+  .instructor-card__toggle svg {
+    flex-shrink: 0;
+    transition: transform var(--motion-fast) var(--ease-standard);
+  }
+  /* Figma only designed the collapsed state — this 90°-rotated chevron on
+     expand is this component's own reasonable toggle counterpart, not a
+     literal pull (see YourInstructors.astro's header comment). */
+  .instructor-card__toggle[aria-expanded='true'] svg {
+    transform: rotate(90deg);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .instructor-card__toggle svg {
+      transition: none;
+    }
+  }
+</style>

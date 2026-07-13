@@ -36,13 +36,40 @@
 // `content` HTML is trusted/static (authored by us in catalog.js, not user
 // input), so `set:html` is safe here — same trust boundary as any other
 // hardcoded markup in this reference build.
-const { item } = Astro.props;
-const rows = item.pdp?.accordion ?? [];
+//
+// ---- `rows` prop (Task 8, Course PDP Chunk A) ----------------------------
+// Faqs.astro reuses this component for `item.pdp.faqs` — a second row array
+// on the SAME item that must not collide with a product's own
+// `item.pdp.accordion`. So the data source is now an explicit `rows` prop
+// with a fallback, not a hardcoded read: `rows ?? item.pdp?.accordion ?? []`.
+// Every existing call site (ProductDetails.astro's `<PdpAccordion item={item}
+// />`) passes no `rows` prop, so `rows` is `undefined` there and the
+// fallback resolves to exactly `item.pdp?.accordion ?? []` — byte-for-byte
+// the same value this line always computed pre-refactor. Product PDP output
+// is therefore unchanged (verified by diffing `dist/products/*/index.html`
+// before/after this change — see task-8 report).
+//
+// ---- `variant` prop (onTeal) ---------------------------------------------
+// Faqs.astro also renders this component on a `--color-teal` section
+// background (Figma 1027:12323 desktop / 1109:14385 mobile) — this
+// component's DEFAULT styling below (teal border, teal summary text, teal
+// +/- icon, ink body text) is built for the product PDP's plain page
+// background and would be teal-on-teal (invisible) there. Rather than fork
+// this component or reach for external `:global()` overrides from
+// Faqs.astro, `variant="onTeal"` toggles a co-located `.pdp-accordion--on-
+// teal` modifier class whose overrides live in this component's own
+// `<style>` below, right next to the base rules they override. The DEFAULT
+// variant (every product accordion, `variant` omitted) matches none of
+// those modifier-scoped selectors, so it renders through completely
+// unchanged.
+const { item, rows, variant } = Astro.props;
+const accordionRows = rows ?? item.pdp?.accordion ?? [];
 const sizeChart = item.sizeChart;
+const wrapperClass = variant === 'onTeal' ? 'pdp-accordion pdp-accordion--on-teal' : 'pdp-accordion';
 ---
-{rows.length > 0 && (
-  <div class="pdp-accordion">
-    {rows.map((row) => (
+{accordionRows.length > 0 && (
+  <div class={wrapperClass}>
+    {accordionRows.map((row) => (
       <details class="pdp-accordion__row">
         <summary class="pdp-accordion__summary">
           <span class="pdp-accordion__label">{row.label}</span>
@@ -254,5 +281,42 @@ const sizeChart = item.sizeChart;
     width: 100%;
     height: 100%;
     border: 0;
+  }
+
+  /* ---- onTeal variant (Task 8, course FAQs band) ------------------------
+     See this file's header comment for the "why a modifier class, not a
+     fork" reasoning. Figma 1027:12323 (desktop) / 1109:14385 (mobile) shows
+     white 1px borders (not teal), bold white summary text, a white +/- icon
+     enlarged to a 24x24 box (vs. the default 16x16/20px-font icon), and
+     24px-vertical/32px-horizontal row padding (--space-5/--space-6, both
+     breakpoints — different from the default's --space-4/--space-6). Body
+     copy + any inline links also flip to white for contrast on teal.
+
+     Row label font: Figma reads 20px/700 — no existing product-accordion
+     precedent for that exact pairing (the default summary style below is a
+     component-intrinsic 24px/700 literal), and none of this repo's --type-*
+     tokens pair 700 with 24px either. --type-nav-label (700 20px/1.2) is an
+     exact spec match for 20px/700 and is reused here purely for its visual
+     spec, same "token regardless of its nav-sounding name" precedent
+     FourColumn.astro's own label-token comment sets. */
+  .pdp-accordion--on-teal .pdp-accordion__row {
+    border-color: var(--color-paper);
+    padding: var(--space-5) var(--space-6);
+  }
+  .pdp-accordion--on-teal .pdp-accordion__summary {
+    color: var(--color-paper);
+    font: var(--type-nav-label);
+  }
+  .pdp-accordion--on-teal .pdp-accordion__icon {
+    width: 24px;
+    height: 24px;
+    font-size: 24px;
+    color: var(--color-paper);
+  }
+  .pdp-accordion--on-teal .pdp-accordion__body {
+    color: var(--color-paper);
+  }
+  .pdp-accordion--on-teal .pdp-accordion__body :global(a) {
+    color: var(--color-paper);
   }
 </style>

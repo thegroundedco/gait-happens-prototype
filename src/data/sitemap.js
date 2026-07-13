@@ -73,7 +73,10 @@ export const routes = [
   r('/courses/fit-feet', 'Fit Feet', 'course', ['Home', 'Courses', 'Fit Feet']),
   r('/courses/virtual-consultations', 'Virtual Consultations', 'course', ['Home', 'Courses', 'Virtual Consultations']),
   r('/courses/sole-switch', 'Sole Switch', 'course', ['Home', 'Courses', 'Sole Switch']),
-  r('/courses/sole-switch-pro', 'Sole Switch Pro', 'course', ['Home', 'Courses', 'Sole Switch Pro']),
+  // Task 1 (Course PDP Chunk A): first course PDP scaffold — flipped from
+  // placeholder to built (page + catalog `pdp` block now exist; see
+  // src/pages/courses/sole-switch-pro.astro and catalog.js).
+  r('/courses/sole-switch-pro', 'Sole Switch Pro', 'course', ['Home', 'Courses', 'Sole Switch Pro'], { status: 'built' }),
   r('/courses/gait-guru-membership', 'Gait Guru Membership', 'course', ['Home', 'Courses', 'Gait Guru Membership']),
   r('/courses/trainer-certification', 'Trainer Certification', 'course', ['Home', 'Courses', 'Trainer Certification']),
   r('/courses/gait-foundations', 'Gait Foundations', 'course', ['Home', 'Courses', 'Gait Foundations']),

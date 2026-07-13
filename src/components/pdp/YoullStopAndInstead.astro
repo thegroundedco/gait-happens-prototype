@@ -1,0 +1,149 @@
+---
+// "You'll Stop and Instead" band (Task 4, Course PDP Chunk A) — Figma
+// 675:4356 (desktop, ≥1024, file FX7PDNvhZwyozODaq8Q8i7) / 1109:14380
+// (mobile — the "Sole Switch Pro Page" > "You'll Stop and Instead" instance
+// inside the professional-courses mobile frame 1109:14374). Prop is
+// `{ item }` (same shape as CourseOverview/CourseDetails), reading
+// `item.pdp.youllStop`.
+//
+// Two-part callout: a short bold "lead" phrase (You'll stop / and instead
+// you'll) + a longer muted-gray sentence completing it (the course-specific
+// pain point / benefit). Both frames pair the SAME lead-in wording with
+// different body copy per half, but per this task's brief ("capture the
+// FULL text of each half, including any heading/lead-in words") the lead
+// phrase is still real data (`item.pdp.youllStop.stop.lead` /
+// `.instead.lead`), not hardcoded markup — unlike CourseOverview's static
+// "Course Overview"/"Course Concepts" labels, which that task's brief
+// didn't ask to capture as data. `youllStop = { stop: { lead, body },
+// instead: { lead, body } }` — the brief's exact `{ stop, instead }`
+// top-level shape, each half's own object holding its full text.
+//
+// Desktop (675:4356) lays the two halves out as a row (Figma's own
+// `justify-content: space-between`). The frame is a deliberate diagonal
+// composition: the "stop" half is anchored to the TOP of the band and the
+// "instead" half to the BOTTOM (the band's 64px top/bottom paddings are
+// both clean --space-8 multiples, so the taller-than-content 429px height
+// is design intent, not a resized-frame artifact). Reproduced WITHOUT a
+// hardcoded height: the row's `align-items: flex-end` bottom-anchors
+// "instead", and `align-self: flex-start` on `.youll-stop__panel--stop`
+// top-anchors "stop" — so the offset survives any copy-length change.
+//
+// Mobile (1109:14380) stacks the two halves in a plain column (gap
+// --space-6/32px, matching Figma's own `gap-32`), each half left-aligned
+// at full width — Figma's own `items-center` on that mobile frame is a
+// no-op (each half's own width already equals the frame's content width),
+// reproduced simply as full-width blocks here.
+//
+// Mobile-only: Figma's mobile lead styling adds `text-transform:
+// capitalize` (screenshot reads "You'll Stop" / "And Instead You'll",
+// Title Case) that desktop's pulled code does NOT have (desktop reads
+// sentence-case "You'll stop" / "and instead you'll", matching the
+// Figma-verbatim data string used at both breakpoints) — kept as a
+// mobile-only CSS transform per the frame, not baked into the data string.
+//
+// Colors: the lead uses --color-ink (Figma's `--text-primary`, #231f20, an
+// exact hex match). The muted body sentence uses --color-border (#837E7F)
+// — Figma's `--text-muted` is the exact same hex, and no dedicated "muted
+// text" token exists in this repo's tokens.css; --color-border already
+// carries that hex everywhere else it's used (placeholder fills/dividers),
+// so it's reused here rather than introducing a new raw literal
+// (tokens-only per this task's brief).
+//
+// Type: the lead uses --type-h3 (600/32px), an exact match for both
+// frames' pulled weight/size. The muted sentence has no single matching DS
+// token (desktop's pulled code shows an unbound 16px/normal-weight; mobile
+// shows 16px/leading-none) — --type-body-16 (400/16px/1.4) is the closest
+// real token and is used unmodified at both breakpoints, same "one
+// non-responsive token, no per-breakpoint override" precedent
+// CourseOverview's heading set for its own --type-h3 case.
+const { item } = Astro.props;
+const youllStop = item.pdp?.youllStop;
+---
+{youllStop && (
+  <section class="youll-stop" data-pdp-id={item.id}>
+    <div class="youll-stop__inner">
+      <div class="youll-stop__row">
+        <div class="youll-stop__panel youll-stop__panel--stop">
+          <h3 class="youll-stop__lead">{youllStop.stop.lead}</h3>
+          <p class="youll-stop__body">{youllStop.stop.body}</p>
+        </div>
+        <div class="youll-stop__panel youll-stop__panel--instead">
+          <h3 class="youll-stop__lead">{youllStop.instead.lead}</h3>
+          <p class="youll-stop__body">{youllStop.instead.body}</p>
+        </div>
+      </div>
+    </div>
+  </section>
+)}
+<style>
+  .youll-stop__inner {
+    max-width: var(--container-max);
+    margin-inline: auto;
+    padding-inline: var(--space-5);
+    padding-block: var(--space-8);
+  }
+
+  .youll-stop__row {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-6);
+  }
+
+  .youll-stop__panel {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+
+  .youll-stop__lead {
+    font: var(--type-h3);
+    color: var(--color-ink);
+  }
+
+  .youll-stop__body {
+    font: var(--type-body-16);
+    color: var(--color-border);
+  }
+
+  /* ---- Desktop (Figma 675:4356, ≥1024) -------------------------------- */
+  @media (min-width: 1024px) {
+    .youll-stop__inner {
+      padding-inline: var(--space-7);
+    }
+    .youll-stop__row {
+      flex-direction: row;
+      align-items: flex-end;
+      justify-content: space-between;
+      /* Minimum gap safeguard — Figma's row has no explicit gap (it relies
+         entirely on `justify-content: space-between` across the two
+         424px-capped panels below), but a `gap` alongside `space-between`
+         only ever ADDS a floor under that distribution, so this never
+         shrinks the frame's own spacing and only protects against the two
+         panels ever touching in an unusually narrow desktop viewport. */
+      gap: var(--space-7);
+    }
+    .youll-stop__panel {
+      /* 424px measured off 675:4356 for both halves; capped (not
+         stretched) so the row's `space-between` absorbs the remaining
+         width as a gap, matching the frame's two fixed-width columns. */
+      flex: 0 1 424px;
+    }
+    /* Figma's frame anchors the "stop" half to the TOP and the "instead"
+       half to the BOTTOM of the band (a deliberate diagonal composition —
+       both the row's 64px paddings are clean --space-8 multiples, so the
+       429px height is intent, not a resize artifact). The row's
+       `align-items: flex-end` already bottom-anchors "instead"; this
+       top-anchors "stop" — reproducing the offset without a hardcoded
+       height, so it survives copy-length changes. */
+    .youll-stop__panel--stop {
+      align-self: flex-start;
+    }
+  }
+
+  /* ---- Mobile (Figma 1109:14380, 390 / component 342) ----------------- */
+  @media (max-width: 1023px) {
+    .youll-stop__lead {
+      text-transform: capitalize;
+    }
+  }
+</style>

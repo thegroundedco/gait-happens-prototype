@@ -31,6 +31,13 @@ export const items = [
       ],
     },
     pdp: {
+      // Task 1 (Course PDP Chunk A): drives the data-driven Pdp.astro
+      // composer — same order the hardcoded composer rendered before this
+      // task (Product Details -> 4 Column -> Brand -> CrossSell -> Reviews
+      // -> LogoWall). Behavior-preserving: `four-column` still renders
+      // nothing without `features`, `pdp-reviews` still renders nothing
+      // without `reviews` (see Pdp.astro's REGISTRY guards).
+      sections: ['product-details', 'four-column', 'brand-section', 'cross-sell', 'pdp-reviews', 'logo-wall'],
       // Task 2 (Product Details hero) — Figma-verbatim price/description/
       // bullets/notes from node 710:6353 (desktop) / 1017:9517 (mobile), both
       // frames matched. `gallery` is a placeholder set (real photography
@@ -165,6 +172,10 @@ export const items = [
       ],
     },
     pdp: {
+      // Task 1 (Course PDP Chunk A): drives the data-driven Pdp.astro
+      // composer — same order/guards as every other product (see Toe
+      // Spacers' `sections` comment above).
+      sections: ['product-details', 'four-column', 'brand-section', 'cross-sell', 'pdp-reviews', 'logo-wall'],
       // Figma-verbatim from node 719:6542 (desktop) / 1017:9522 (mobile),
       // both frames matched. Figma's two lead paragraphs are merged into
       // one `description` string (ProductDetails.astro renders a single
@@ -270,6 +281,10 @@ export const items = [
     variants: null,
     sizeChart: null,
     pdp: {
+      // Task 1 (Course PDP Chunk A): drives the data-driven Pdp.astro
+      // composer — same order/guards as every other product (see Toe
+      // Spacers' `sections` comment above).
+      sections: ['product-details', 'four-column', 'brand-section', 'cross-sell', 'pdp-reviews', 'logo-wall'],
       // Figma-verbatim from node 721:7029 (desktop) / 1017:9529 (mobile).
       priceExact: '$8.50 USD',
       // Figma's lead paragraph contains an inline "Click here" hyperlink to
@@ -365,6 +380,10 @@ export const items = [
     variants: null,
     sizeChart: null,
     pdp: {
+      // Task 1 (Course PDP Chunk A): drives the data-driven Pdp.astro
+      // composer — same order/guards as every other product (see Toe
+      // Spacers' `sections` comment above).
+      sections: ['product-details', 'four-column', 'brand-section', 'cross-sell', 'pdp-reviews', 'logo-wall'],
       // Figma-verbatim sale pricing from node 721:7222 (desktop) /
       // 1017:9536 (mobile) — rendered via ProductDetails.astro's Task 7
       // `compareAtPrice` addition (red sale price + strikethrough original).
@@ -441,6 +460,10 @@ export const items = [
     variants: null,
     sizeChart: null,
     pdp: {
+      // Task 1 (Course PDP Chunk A): drives the data-driven Pdp.astro
+      // composer — same order/guards as every other product (see Toe
+      // Spacers' `sections` comment above).
+      sections: ['product-details', 'four-column', 'brand-section', 'cross-sell', 'pdp-reviews', 'logo-wall'],
       // Figma-verbatim from node 721:8349 (desktop) / 1017:9543 (mobile).
       // Task 7 fix (PDP review): Figma's CTA for this product reads "Notify
       // When Available" at 30% opacity (i.e. out of stock) rather than "Add
@@ -541,6 +564,11 @@ export const items = [
     variants: null,
     sizeChart: null,
     pdp: {
+      // Task 1 (Course PDP Chunk A): drives the data-driven Pdp.astro
+      // composer — same order/guards as every other product (see Toe
+      // Spacers' `sections` comment above). No `accordion` here (see the
+      // note below `features`), same as pre-refactor.
+      sections: ['product-details', 'four-column', 'brand-section', 'cross-sell', 'pdp-reviews', 'logo-wall'],
       priceExact: '$15.00 USD',
       compareAtPrice: '$20.00 USD',
       description:
@@ -704,8 +732,364 @@ export const items = [
     image: '/images/plp/sole-switch-pro.jpg',
     href: '/courses/sole-switch-pro',
     cta: 'View Course',
+    // Task 2 (Course Details hero, 675:4353): 5-star rating, 5 reviews —
+    // sourced top-level exactly like every product's PDP hero (see e.g. Toe
+    // Spacers' `rating`/`reviewCount` comment above), not duplicated under
+    // `pdp`. This also turns rating on for this item's PLP card (PlpCard.astro
+    // only renders `<StarRating>` when `item.rating` is set) — an intentional
+    // side effect of reusing the single top-level field, not a separate PLP
+    // change.
+    rating: 5,
+    reviewCount: 5,
     variants: null,
     sizeChart: null,
+    // Task 1 (Course PDP Chunk A) — scaffolds the Sole Switch Pro course
+    // PDP on the same data-driven Pdp.astro composer the 6 products use
+    // (see their `sections` comments above). This 11-entry list is the
+    // FULL intended course-page section order. As of Task 8 (final task):
+    // every entry — `four-column`, `cross-sell`, `pdp-reviews`, `logo-wall`
+    // (reused-from-products), `course-details`, `course-overview`,
+    // `youll-stop-and-instead`, `comparison-chart`, `testimonial`,
+    // `your-instructors`, and `faqs` (course-only, built by Tasks 2-8) — has
+    // data below and a Pdp.astro REGISTRY entry, so the full course PDP now
+    // assembles end to end.
+    pdp: {
+      sections: [
+        'course-details',
+        'course-overview',
+        'four-column',
+        'youll-stop-and-instead',
+        'comparison-chart',
+        'testimonial',
+        'your-instructors',
+        'cross-sell',
+        'faqs',
+        'pdp-reviews',
+        'logo-wall',
+      ],
+      // Task 2 (Course Details hero) — Figma-verbatim price/copy/CTA labels
+      // from node 675:4353 (desktop) / 1109:14377 (mobile — the "Sole Switch
+      // Pro Page" > "Course Details" instance under the professional-courses
+      // mobile frame 1109:14374). See CourseDetails.astro's header comment
+      // for the cart->enroll CTA remap this task's brief mandated.
+      //
+      // `heroTitle` overrides the catalog's shorter `title` ("Sole Switch
+      // Pro") for just the hero <h1> — the frame reads "Sole Switch Pro
+      // Course"; `title` itself is left alone since nav/breadcrumbs/PLP
+      // cards/the page <title> all read it too.
+      heroTitle: 'Sole Switch Pro Course',
+      // `priceExact` intentionally differs from the top-level `price` ($59,
+      // marked "(sample)") above — same "PDP hero shows the Figma-verbatim
+      // exact price, top-level `price` is the separate PLP-card sample"
+      // split every product's catalog entry already has (see Toe
+      // Strengtheners' sale-price case) — flagged here, not silently
+      // reconciled.
+      priceExact: '$150.00 USD',
+      // Desktop's intro paragraph is grammatically clean ("...to give you
+      // better, more individualized..."); the mobile frame's copy has an
+      // apparent authoring typo ("...to give you make better..."). Since
+      // this is a single field rendered at both breakpoints (no separate
+      // mobile copy slot), the desktop frame's text was kept as the one
+      // canonical source, per this task's "pull desktop first" directive —
+      // flagged, not silently "corrected" into a third wording.
+      description:
+        'A two-hour online course to give you better, more individualized, footwear recommendations for your clients.',
+      // Primary CTA (enroll, external — see CourseDetails.astro). Realistic
+      // Kajabi placeholder URL; swap for the real offer/checkout URL once
+      // the course is live on Kajabi.
+      enrollHref: 'https://gaithappens.mykajabi.com/offers/sole-switch-pro-course',
+      enrollLabel: 'Enroll Now',
+      // Secondary CTA — Figma's outline "Sole Switch Basic" pill, kept as a
+      // real link (verbatim label) to the Basic-tier course's own page
+      // (`/courses/sole-switch`, an existing placeholder route — see
+      // sitemap.js). The Figma frame's second, filled "Sole Switch Pro"
+      // pill is NOT reproduced as a 3rd element — see CourseDetails.astro's
+      // header comment for why.
+      secondaryCta: { label: 'Sole Switch Basic', href: '/courses/sole-switch' },
+      // Branded teal card (right column) — Figma-verbatim text read off the
+      // frame's flattened screenshot (see CourseDetails.astro's header
+      // comment: no real text layers to pull structurally). `titleLines` is
+      // an array so the exact 2-line break shown in both the desktop and
+      // mobile screenshots renders reliably.
+      courseCard: {
+        titleLines: ['SoleSwitch', 'Pro Course'],
+        tag: 'For Health Professionals',
+      },
+      // Decorative byline under the CTAs — Figma-verbatim text; the 2
+      // avatar circles are flat placeholders (no real instructor
+      // photography yet). Task 7 ("Your Instructors") owns real bios/photos
+      // further down the page.
+      instructorsByline: 'Course By: Dr. Conley and Dr. Riley',
+      // Task 3 (Course Overview) — Figma 675:4354 (desktop, file
+      // FX7PDNvhZwyozODaq8Q8i7) kept as the canonical source for `details`;
+      // see CourseOverview.astro's header comment for why (mobile node
+      // 1109:14378 disagrees on the 3rd/4th facts AND the Audience wording,
+      // and `details` has no separate desktop/mobile slot). `body` is the
+      // frame's closing "Course Concepts" paragraph — identical on both
+      // desktop and mobile screenshots, trailing whitespace trimmed (a text
+      // node artifact, not wording).
+      //
+      // No dedicated course-overview photography exists (this course has
+      // never had a PDP before) — `image` reuses the same PLP course shot
+      // every other slot on this page already reuses (see the `features`
+      // comment below).
+      overview: {
+        image: '/images/plp/sole-switch-pro.jpg',
+        details: [
+          { label: 'Course Length', value: '2 Hours 13 Minutes' },
+          { label: 'Evidence Based', value: 'Yes' },
+          { label: 'Course Structure', value: 'Online on demand' },
+          { label: 'Continuing Education Credit', value: 'Yes' },
+          {
+            label: 'Audience',
+            value:
+              'Healthcare professionals looking to improve their footwear recommendations for clients and patients.',
+          },
+        ],
+        body: 'Understanding the key features of shoes, the concept of the shoe spectrum and where to sit on the spectrum, finding your baseline and learning what shoes are appropriate for you, transition strategies, and a PDF shoe guide.',
+      },
+      // 4 Column feature band — Figma-verbatim heading + 4 blurbs from the
+      // "What to Expect" frame, node 675:4355 (file FX7PDNvhZwyozODaq8Q8i7).
+      // That frame's own heading literally reads "...Sole Switch Course"
+      // (not "...Sole Switch Pro Course") — kept Figma-verbatim per this
+      // task's instruction rather than silently "corrected", same
+      // verbatim-over-assumed precedent the product PDPs set (e.g. Toe
+      // Dynamometer's accordion links stay literal URLs). The 4th blurb's
+      // trailing comma with no closing clause ("...muscles engage,") is
+      // also copied verbatim off the frame, not rewritten — the source
+      // text is a fragment there too.
+      //
+      // No dedicated course photography exists yet (this course has never
+      // had a PDP before), so `image` reuses the one PLP course shot for
+      // all 4 cards — the same placeholder approach every product's
+      // `features` array takes for the same reason (see Toe Spacers'
+      // `features` comment).
+      featuresHeading: 'What to Expect in the Sole Switch Course',
+      features: [
+        {
+          image: '/images/plp/sole-switch-pro.jpg',
+          label: null,
+          text: 'Walk away with a better understanding of how to select healthy footwear! Plus, get a bonus PDF footwear guide!',
+        },
+        {
+          image: '/images/plp/sole-switch-pro.jpg',
+          label: null,
+          text: 'Receive lifetime access to a course written by clinicians with over 30 years of experience helping patients build foot health naturally.',
+        },
+        {
+          image: '/images/plp/sole-switch-pro.jpg',
+          label: null,
+          text: 'Learn specific and helpful strategies to help transition safely to less restrictive natural footwear.',
+        },
+        {
+          image: '/images/plp/sole-switch-pro.jpg',
+          label: null,
+          text: 'When the toes can properly splay, our foot and ankle muscles engage,',
+        },
+      ],
+      // Task 4 ("You'll Stop and Instead" band) — Figma-verbatim copy from
+      // node 675:4356 (desktop, file FX7PDNvhZwyozODaq8Q8i7) / 1109:14380
+      // (mobile — the "Sole Switch Pro Page" > "You'll Stop and Instead"
+      // instance inside the professional-courses mobile frame 1109:14374).
+      // Both frames pair the SAME lead-in/body text (mobile only differs by
+      // a CSS-only capitalize transform — see YoullStopAndInstead.astro's
+      // header comment), so there's no desktop/mobile wording disagreement
+      // to flag here, unlike `overview` above. `lead` is the frame's own
+      // short framing phrase ("You'll stop" / "and instead you'll"); `body`
+      // is the course-specific pain point / benefit sentence completing it.
+      // Trailing whitespace on the "instead" body (a text-node artifact in
+      // Figma's pulled code, not wording) is trimmed, same precedent as
+      // `overview.body` above.
+      youllStop: {
+        stop: {
+          lead: "You'll stop",
+          body: 'feeling frustrated by confusing shoe feature terminology',
+        },
+        instead: {
+          lead: "and instead you'll",
+          body: 'gain confidence in your ability to look for key features when shoe shopping.',
+        },
+      },
+      // Task 5 (Comparison Chart) — Figma-verbatim from node 675:4357
+      // (desktop, file FX7PDNvhZwyozODaq8Q8i7) / 1109:14381 (mobile — the
+      // "Sole Switch Pro Page" > "Comparison Chart" instance inside the
+      // professional-courses mobile frame 1109:14374). Both frames agree on
+      // every column name, row label, and cell value here (no
+      // desktop/mobile disagreement to flag, unlike `overview`/the
+      // component's own intro paragraph — see ComparisonChart.astro's
+      // header comment). `columns` are the 2 product names ("Sole Switch"
+      // vs "Sole Switch Pro" — this course's OWN page, compared against its
+      // Basic-tier sibling); `rows` are the 6 feature rows in the frames'
+      // own top-to-bottom order.
+      //
+      // Each row's `values` entries are plain STRINGS, not booleans, even
+      // for the two yes/no-shaped rows (Evidence Based, Continuing
+      // Education Credit) — both frames render those as literal "Yes"/"No"
+      // TEXT, not check/× icon marks, so the data stays verbatim rather
+      // than reinterpreting them as boolean icons the design doesn't show.
+      // ComparisonChart.astro's cell renderer still supports a `true`/
+      // `false` value (rendered as an accessible check/× glyph) for any
+      // future comparison table whose Figma frame actually uses one.
+      comparison: {
+        columns: ['Sole Switch', 'Sole Switch Pro'],
+        rows: [
+          { label: 'Course Structure', values: ['Online', 'Online'] },
+          { label: 'Course Length', values: ['50 Minutes', '2 Hours 13 Min'] },
+          { label: 'Audience', values: ['Individuals', 'Professionals'] },
+          { label: 'Evidence Based', values: ['Yes', 'Yes'] },
+          { label: 'Continuing Education Credit', values: ['No', 'Yes'] },
+          { label: 'Course Price', values: ['$50', '$150'] },
+        ],
+      },
+      // Task 6 (Testimonial band) — Figma-verbatim from node 1106:15576
+      // (desktop, file FX7PDNvhZwyozODaq8Q8i7) / 1109:14382 (mobile — the
+      // "Sole Switch Pro Page" > "Testimonial" instance inside the
+      // professional-courses mobile frame 1109:14374). Both frames show the
+      // identical single testimonial (same quote, same author, same 5-star
+      // rating) — no desktop/mobile disagreement to flag here.
+      //
+      // `quote` is an array of paragraph strings (one per `<p>` in the
+      // pulled Figma code); the first paragraph's embedded `\n` reproduces
+      // a genuine, deliberate `<br>` between two sentences in the source
+      // (present at both the 916px desktop card and the 342px mobile card,
+      // so it's real data, not width-based reflow) — see
+      // Testimonial.astro's header comment. `role` has no value in either
+      // frame (Phyllis' attribution is name-only, no title/role line) —
+      // kept `null` rather than omitted, since it's part of this task's
+      // brief-mandated `{ quote, author, role, rating }` shape.
+      testimonial: {
+        quote: [
+          "This course put me on track for many positive changes in my foot health and strength!\nI also did Movement RX and also bought the Basic Foot health kit and have benefited in so many ways!",
+          'I am pain free and have stronger feet and up the chain benefits!',
+          'LOVE GAIT HAPPENS and follow along in podcasts, IG and YouTube!',
+        ],
+        author: 'Phyllis',
+        role: null,
+        rating: 5,
+      },
+      // Task 7 (Your Instructors) — Figma-verbatim from node 1007:7830
+      // (desktop, file FX7PDNvhZwyozODaq8Q8i7) / 1109:14383 (mobile — the
+      // "Sole Switch Pro Page" > "Your Instructors" instance inside the
+      // professional-courses mobile frame 1109:14374). Both frames show the
+      // identical 2 instructors, same names/credential-lines/bios — no
+      // desktop/mobile disagreement to flag here, unlike `overview` above.
+      //
+      // `credential` holds each card's teal second line as the frame
+      // actually renders it — a LOCATION ("Lakewood, Colorado" / "Salem,
+      // Massachusetts"), not a professional credential (Riley's real
+      // credential, "DPT", is already part of her `name` string below) —
+      // see YourInstructors.astro's header comment for why the field keeps
+      // this name regardless. `bio` is an array of paragraph strings, one
+      // per real `<p>` in the pulled Figma code (Conley's is a genuine
+      // 4-paragraph biography; Riley's is a single paragraph).
+      //
+      // No dedicated instructor photography exists yet (see this file's
+      // `instructorsByline` comment above) — `photo` reuses the same PLP
+      // course shot every other slot on this page already reuses.
+      instructors: [
+        {
+          photo: '/images/plp/sole-switch-pro.jpg',
+          name: 'Dr. Courtney Conley',
+          credential: 'Lakewood, Colorado',
+          bio: [
+            "Dr. Courtney Conley is a national bestselling author, international educator, and one of the world's foremost authorities on foot and gait health. Her book, Walk, hit both the USA Today and Amazon bestseller lists, resonating with readers eager to understand the profound connection between foot function and whole-body health. The book's success has brought Dr. Conley to some of the most respected platforms in health and wellness media, including appearances on The Peter Attia Drive Podcast, Diary of a CEO, Feel Better, Live More with Dr. Rangan Chatterjee, as well as national television features on CBS Mornings and Fox & Friends.",
+            "Dr. Conley holds a Doctorate in Chiropractic Medicine and two Bachelor's degrees in Kinesiology and Human Biology. With nearly 25 years of clinical practice, she has worked with professional athletes from organizations including the Phoenix Suns, New York Yankees, Cleveland Browns, New York Giants, and San Francisco 49ers. She has also collaborated with medical experts across the country, addressing complex foot and gait challenges at the highest level of performance. She currently serves as Head of Patient Care at Total Health Solutions and Total Health Performance in Lakewood, Colorado—premier clinics known for comprehensive, rehabilitation-focused patient care where she is committed to helping people improve their lives one step at a time.",
+            'That same commitment led her to found and lead Gait Happens, an education enterprise leading a paradigm shift in foot health by empowering people worldwide to reclaim optimal foot function through science-backed training and protocols. Gait Happens offers a comprehensive ecosystem of resources — from professional education for practitioners to consumer training programs and personalized consultations with top-of-field specialists — all grounded in research and designed to deliver real, measurable results. With a focus on natural, preventative approaches to foot and gait health, Gait Happens has built a global community of individuals committed to moving better and living pain-free, offering a proven alternative to unnecessary surgical intervention through education and evidence-based care.',
+            'An internationally recognized speaker, Dr. Conley shares her expertise to clinicians and consumers alike through in-person and online lectures on foot mechanics and gait dynamics. Her work spans authorship, mentorship, patent and curriculum development, and the creation of pioneering foot and gait methodologies. Yet at the heart of every lecture, protocol, and patient interaction is the same driving belief: real strength starts from the ground up, and healthy feet are the foundation every body needs to move through life with confidence and ease.',
+          ],
+        },
+        {
+          photo: '/images/plp/sole-switch-pro.jpg',
+          name: 'Dr. Allison Riley, DPT',
+          credential: 'Salem, Massachusetts',
+          bio: [
+            'Dr. Allison Riley has a passion for helping people recognize that movement is a powerful way to get and stay healthy, active, and happy. She has had an interest in lower body injuries and gait since early in her career.',
+          ],
+        },
+      ],
+      // Cross-sell band — Figma-verbatim heading from the "Product Cards"
+      // frame, node 1021:14005. That frame's 3 cards ("Functional Gait
+      // Assessment 1", "Gait Foundations Course", "Gait Happens Trainer
+      // Cert.") map to these 3 real Professionals-course catalog ids (their
+      // own `title`/`image`/`href` are what CrossSell.astro actually
+      // renders — see ../plp/CrossSell.astro, it looks items up by id and
+      // ignores any label text passed here). `shopAllHref` points at the
+      // Professionals course PLP (matching the section's own "for
+      // Professionals" framing) rather than the all-products collection
+      // every product PDP's cross-sell uses.
+      crossSell: {
+        heading: 'More Courses for Professionals',
+        itemIds: ['functional-gait-assessment-l1', 'gait-foundations', 'trainer-certification'],
+        shopAllHref: '/collections/courses-professionals',
+      },
+      // Task 8 (FAQs — final section, Sole Switch Pro assembly) —
+      // Figma-verbatim `label`s from node 1027:12323 (desktop, file
+      // FX7PDNvhZwyozODaq8Q8i7) / 1109:14385 (mobile — the "Sole Switch Pro
+      // Page" > "FAQs" instance inside the professional-courses mobile frame
+      // 1109:14374). Both frames show the identical 4 questions, same
+      // top-to-bottom order — no desktop/mobile disagreement to flag here.
+      //
+      // `content` is NOT Figma-verbatim, unlike every other field in this
+      // entry — see Faqs.astro's header comment for the full explanation:
+      // both frames are static mockups of the accordion's COLLAPSED state
+      // only, with no expanded-state panel, hidden layer, or component-doc
+      // string anywhere carrying real answer copy (confirmed via
+      // get_design_context on both node trees plus a search_design_system
+      // sweep of every library referenced from this file, including the
+      // "Question"/"FAQs" component_sets in the Gait Happens Design System
+      // library itself). Each row's `content` below is therefore AUTHORED
+      // copy, disclosed per-row:
+      //   - Row 1 ("right for me"): restates this SAME entry's already-
+      //     Figma-verbatim `overview.details` Audience line + `description`
+      //     — grounded in real, verified data, not invented.
+      //   - Row 4 ("Pro Course vs. regular course"): restates this SAME
+      //     entry's already-Figma-verbatim `comparison` table numbers
+      //     (course length, audience, CE credit) — grounded, not invented.
+      //   - Rows 2 & 3 (orthotics; flat feet/high arches): NO grounding
+      //     data exists anywhere in this file for either question. Written
+      //     conservatively — general framing, no new clinical claims — as a
+      //     clearly-flagged placeholder pending real client-approved copy.
+      // Flag this loudly in any downstream review: rows 2 & 3 in particular
+      // need real answers from Gait Happens before this ships past the
+      // reference build.
+      faqs: [
+        {
+          label: 'Is this mini-course right for me?',
+          content:
+            '<p>Yes — this course is built for healthcare professionals (physical therapists, chiropractors, trainers, and other clinicians) who want to give clients more individualized footwear recommendations. If foot health, gait, or movement is part of your practice, Sole Switch Pro was written for you.</p>',
+        },
+        {
+          label: 'I wear orthotics, should I still take this course?',
+          content:
+            "<p>Yes. The course covers the shoe spectrum and how to evaluate footwear features broadly, so the framework applies whether or not a client wears orthotics — you'll come away with a wider set of tools, not a one-size-fits-all rule.</p>",
+        },
+        {
+          label: 'Do you talk about shoes for flat feet? What about high arches?',
+          content:
+            "<p>Yes. The course walks through the shoe spectrum and how to find the right baseline across a range of foot shapes and arch types, so you'll leave with a framework you can apply to different client presentations.</p>",
+        },
+        {
+          label: 'Does the Pro Course include everything in the regular course?',
+          content:
+            '<p>Sole Switch Pro builds on the original Sole Switch course with expanded, professional-level content (2 hours 13 minutes vs. 50 minutes) plus Continuing Education Credit, which the original course does not offer.</p>',
+        },
+      ],
+      // Reviews placeholder — same static reviews-app-screenshot values
+      // every product PDP reuses (see Toe Spacers' `reviews` comment /
+      // PdpReviews.astro's note); this course has no real review data any
+      // more than the products do.
+      reviews: {
+        rating: 4.75,
+        count: 12,
+        distribution: [
+          { stars: 5, count: 11 },
+          { stars: 4, count: 0 },
+          { stars: 3, count: 0 },
+          { stars: 2, count: 1 },
+          { stars: 1, count: 0 },
+        ],
+      },
+    },
   },
   {
     id: 'gait-foundations',

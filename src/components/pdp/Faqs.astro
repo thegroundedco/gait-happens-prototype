@@ -1,0 +1,105 @@
+---
+// FAQs band (Task 8, Course PDP Chunk A — final section, Sole Switch Pro
+// PDP assembly) — Figma desktop 1027:12323 (file FX7PDNvhZwyozODaq8Q8i7) /
+// mobile 1109:14385 (the "Sole Switch Pro Page" > "FAQs" instance inside the
+// professional-courses mobile frame 1109:14374). Prop is `{ item }` (same
+// shape as every other course-only section on this page), reading
+// `item.pdp.faqs`.
+//
+// A thin section wrapper (teal band + "Frequently Asked Questions" heading)
+// around a REUSE of PdpAccordion.astro — the same native-<details> accordion
+// primitive the product PDPs' Question/Answer panels already use (collapsed
+// by default, +/- glyph, `content` rendered via `set:html`). Per this task's
+// brief, PdpAccordion gained an explicit `rows` prop (falling back to
+// `item.pdp?.accordion` when omitted, so product call sites are unaffected —
+// see PdpAccordion.astro's own header comment) so this component can hand it
+// `item.pdp.faqs` without colliding with a product's own `pdp.accordion`
+// field. It also passes `variant="onTeal"` — see PdpAccordion.astro's
+// "onTeal variant" comment for the recolor (this band's default
+// teal-border/teal-text styling would be teal-on-teal here).
+//
+// ---- Data / Figma-verbatim status ---------------------------------------
+// Both Figma frames show the identical 4 question labels, Figma-verbatim,
+// in the same top-to-bottom order: "Is this mini-course right for me?" / "I
+// wear orthotics, should I still take this course?" / "Do you talk about
+// shoes for flat feet? What about high arches?" / "Does the Pro Course
+// include everything in the regular course?" — no desktop/mobile wording
+// disagreement here, unlike CourseOverview's `details` case.
+//
+// CRITICAL FLAG: neither frame contains any ANSWER copy — both are static
+// mockups of the accordion's COLLAPSED state only (confirmed via
+// get_design_context on both node trees, plus a search_design_system sweep
+// across every design-system library referenced from this file, including
+// the "Question"/"FAQs" component_sets in the Gait Happens Design System
+// library itself — no expanded-state panel, hidden layer, or component-doc
+// string anywhere carries real answer text). catalog.js's `faqs[].content`
+// values are therefore AUTHORED copy, NOT pulled from Figma — grounded in
+// this same catalog entry's own already-verified data where possible (the
+// "Pro Course vs. regular course" answer restates `item.pdp.comparison`'s
+// real numbers; the "right for me" answer restates `item.pdp.overview
+// .details`' real Audience line) and written conservatively (no new
+// clinical claims) where no such grounding exists (the orthotics / flat-
+// feet-and-high-arches questions). Full per-row disclosure lives in
+// catalog.js's `faqs` comment. Flagged here AND in this task's report per
+// this repo's "flag, don't silently invent" convention (same discipline
+// ComparisonChart's intro-paragraph desktop/mobile conflict and
+// CourseOverview's `details` conflict both already established) — real
+// client-approved answer copy should replace these two ungrounded rows
+// before this goes further than this reference build.
+//
+// ---- Tokens / literals ---------------------------------------------------
+// Band bg = --color-teal (Figma `--bg-brand`, #047791, exact hex match,
+// same token ComparisonChart's band uses). Heading = --type-h3 (600/32px) +
+// --color-yellow (Figma `--text-inverse`, #fec745, exact hex match).
+// --type-h3 is an approximate WEIGHT match only (Figma's pulled code shows
+// font-bold/700, tokens.css's --type-h3 is 600) but an exact SIZE match —
+// same "one non-responsive 32px heading token" precedent every other course
+// section on this page (CourseOverview, YoullStopAndInstead, YourInstructors)
+// already accepts, cited in each of their own header comments. The
+// heading->rows gap is a plain, unbound 24px literal in Figma's own pulled
+// code (not tied to a --space-* var there) but an exact --space-5 match, so
+// the token is used rather than the raw literal. Section padding is
+// padding-block: --space-7 (48px, Figma's own `py-48`/`p-48`, identical at
+// BOTH breakpoints) / padding-inline: --space-5 (24px) at mobile stepping up
+// to --space-7 (48px) at desktop (≥1024) — the same responsive
+// inline-padding step ComparisonChart/YoullStopAndInstead/Testimonial's
+// `__inner` wrappers already use, background+max-width+padding all living on
+// the inner wrapper (not the outer `<section>`), same structural idiom those
+// three components set.
+import PdpAccordion from './PdpAccordion.astro';
+const { item } = Astro.props;
+const faqs = item.pdp?.faqs;
+---
+{faqs && faqs.length > 0 && (
+  <section class="faqs" data-pdp-id={item.id}>
+    <div class="faqs__inner">
+      <h2 class="faqs__heading">Frequently Asked Questions</h2>
+      <PdpAccordion item={item} rows={faqs} variant="onTeal" />
+    </div>
+  </section>
+)}
+<style>
+  .faqs__inner {
+    max-width: var(--container-max);
+    margin-inline: auto;
+    background: var(--color-teal);
+    padding-inline: var(--space-5);
+    padding-block: var(--space-7);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-5);
+  }
+
+  .faqs__heading {
+    font: var(--type-h3);
+    color: var(--color-yellow);
+    text-align: center;
+  }
+
+  /* ---- Desktop (Figma 1027:12323, ≥1024) -------------------------------- */
+  @media (min-width: 1024px) {
+    .faqs__inner {
+      padding-inline: var(--space-7);
+    }
+  }
+</style>

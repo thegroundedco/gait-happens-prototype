@@ -1,0 +1,15 @@
+---
+// Task 1 (Course PDP Chunk A) scaffold — same pattern as the built product
+// PDP pages (e.g. ../products/toe-spacers.astro): BaseLayout + the catalog
+// item, rendered through the shared, data-driven <Pdp> composer. The
+// course-only sections in this item's `pdp.sections` render nothing until
+// Tasks 2-7 add their components (see catalog.js's comment on this item).
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Pdp from '../../components/pdp/Pdp.astro';
+import { getItem } from '../../data/catalog.js';
+
+const item = getItem('sole-switch-pro');
+---
+<BaseLayout title={item.title} description={item.description} wide>
+  <Pdp item={item} />
+</BaseLayout>
