@@ -659,6 +659,15 @@ export const items = [
     badges: ['Course'],
     price: '$40 USD',
     priceRange: null,
+    // Pre-existing top-level rating/reviewCount (not touched by this task —
+    // Chunk B1 Task 2 brief flags these as "already" set). Figma's own
+    // Course Details hero (998:14856 / 999:7197, both breakpoints) reads a
+    // Figma-verbatim "(5)" review count next to its 5 stars, which disagrees
+    // with this `15` — CourseDetails.astro sources both fields straight off
+    // these top-level item fields (same as every product's hero), so the
+    // rendered page will show "(15)" rather than Figma's "(5)". Flagged as a
+    // client-content item, not corrected here: changing a pre-existing
+    // top-level field is outside this task's `pdp`-block scope per the brief.
     rating: 5,
     reviewCount: 15,
     description: 'A one-hour online course to help you better understand how to choose the right shoes for YOU!',
@@ -667,6 +676,317 @@ export const items = [
     cta: 'View Course',
     variants: null,
     sizeChart: null,
+    // Chunk B1 Task 2 — Sole Switch (Basic tier) course PDP. Figma desktop
+    // frame 998:14854 ("Sole Switch Basic Page", file FX7PDNvhZwyozODaq8Q8i7)
+    // / mobile "Sole Switch Basic Page Mobile" frame under section 999:7142.
+    // Same 11-section order Sole Switch Pro already ships (see that item's
+    // own `sections` comment above) — every type below already has a
+    // Pdp.astro REGISTRY entry, so this assembles end to end with no new
+    // components, matching this task's "data-only" brief.
+    pdp: {
+      sections: [
+        'course-details',
+        'course-overview',
+        'four-column',
+        'youll-stop-and-instead',
+        'comparison-chart',
+        'testimonial',
+        'your-instructors',
+        'cross-sell',
+        'faqs',
+        'pdp-reviews',
+        'logo-wall',
+      ],
+      // Course Details hero — Figma-verbatim from node 998:14856 (desktop) /
+      // 999:7197 (mobile), both frames matched (title/rating/price/intro/
+      // pill labels/instructors byline are all identical between the two).
+      //
+      // `heroTitle` overrides the catalog's shorter `title` ("Sole Switch")
+      // for just the hero <h1> — the frame reads "Sole Switch Course" — same
+      // targeted-override pattern Sole Switch Pro's own `heroTitle` uses.
+      heroTitle: 'Sole Switch Course',
+      //
+      // CLIENT-CONTENT / COMPONENT-GAP FLAG (price): both frames show a SALE
+      // price — "$40.00 USD" in red plus a struck-through "$50 USD" original
+      // — not a single flat price. `priceExact` below carries the real
+      // current price (matches this item's own top-level `price`), but
+      // CourseDetails.astro (built against Sole Switch Pro's frame, which
+      // has no sale price) has no `compareAtPrice` field/render path the way
+      // ProductDetails.astro does for products — so the "$50 USD"
+      // strikethrough is silently dropped on this page. Not fixed here per
+      // this task's brief ("no new components and no code" — a real content/
+      // component gap is a finding, not something to work around).
+      priceExact: '$40.00 USD',
+      // Matches this item's own top-level `description` verbatim — Figma's
+      // intro paragraph is identical on both breakpoints, no divergence to
+      // flag here (unlike Sole Switch Pro's own hero intro).
+      description:
+        'A one-hour online course to help you better understand how to choose the right shoes for YOU!',
+      // Primary CTA (enroll, external — see CourseDetails.astro's Sole
+      // Switch Pro remap precedent: Figma's own buybox is a cart/quantity-
+      // stepper "Add to Cart" flow, remapped to a Kajabi enrollment link
+      // since this course is fulfilled on Kajabi, not the Shopify cart).
+      // Realistic Kajabi placeholder URL; swap for the real offer/checkout
+      // URL once the course is live on Kajabi.
+      enrollHref: 'https://gaithappens.mykajabi.com/offers/sole-switch-course',
+      enrollLabel: 'Enroll Now',
+      // Secondary CTA — Figma's OUTLINE pill on this page is "Sole Switch
+      // Pro" (the filled/selected pill is "Sole Switch Basic" — this page's
+      // own tier, dropped per CourseDetails.astro's established convention:
+      // the tier already being viewed isn't repeated as a 3rd CTA). Links to
+      // the Pro course's own page (already `built` — see sitemap.js).
+      secondaryCta: { label: 'Sole Switch Pro', href: '/courses/sole-switch-pro' },
+      //
+      // CLIENT-CONTENT / COMPONENT-GAP FLAG (course card): Figma's branded
+      // card (right column) is a flattened screenshot, same situation Sole
+      // Switch Pro's own `courseCard` comment describes — but on THIS page
+      // it's genuinely different in two ways CourseDetails.astro can't
+      // express: (1) the card is YELLOW (`--color-yellow`), not teal —
+      // CourseDetails.astro hardcodes `--color-teal` for `.course-details__
+      // card` with no per-item override; (2) there is NO "For X" tag pill
+      // under the title — the component unconditionally renders a
+      // `.course-details__card-tag` span regardless of whether `tag` is
+      // set, so omitting it here (Figma-verbatim: no tag text) still leaves
+      // an empty tag-shaped box in the markup. Both are real component gaps
+      // against a second course's Figma frame, not something this
+      // data-only task can fix — flagged, not worked around. `titleLines`
+      // is the frame's own 2-line break ("SOLESWITCH" / "COURSE"), same
+      // array-of-lines shape Sole Switch Pro's card uses.
+      courseCard: {
+        titleLines: ['SoleSwitch', 'Course'],
+      },
+      // Same byline text as Sole Switch Pro's page (same 2 instructors teach
+      // both tiers) — Figma-verbatim, identical on both breakpoints.
+      instructorsByline: 'Course By: Dr. Conley and Dr. Riley',
+      // Course Overview — Figma 998:14857 (desktop) / 999:7198 (mobile).
+      // Desktop kept canonical for `details`/Audience per the SAME
+      // desktop/mobile disagreement CourseOverview.astro's header comment
+      // already documents for Sole Switch Pro: mobile's 3rd/4th facts read
+      // "Course Format"/"Course Style" ("Online on demand"/"Video lecture")
+      // instead of desktop's "Course Structure"/"Continuing Education
+      // Credit" ("Online on demand"/"Yes") — a genuinely different 4th fact,
+      // not a label rename. Mobile's Audience value also drops desktop's
+      // trailing period ("...for themselves" vs "...for themselves."). Both
+      // flagged here as the same class of client-content item, not merged
+      // or guessed. `body`'s wording also differs by one word ("where you
+      // sit" desktop vs "where to sit" mobile) — desktop kept, trailing
+      // Figma text-node whitespace trimmed.
+      overview: {
+        image: '/images/plp/sole-switch.jpg',
+        details: [
+          { label: 'Course Length', value: '50 minutes' },
+          { label: 'Evidence Based', value: 'Yes' },
+          { label: 'Course Structure', value: 'Online on demand' },
+          { label: 'Continuing Education Credit', value: 'Yes' },
+          {
+            label: 'Audience',
+            value: 'Anyone looking to understand how to choose healthy shoes for themselves.',
+          },
+        ],
+        body: 'Understanding the key features of shoes, the concept of the shoe spectrum and where you sit on the spectrum, finding your baseline and learning what shoes are appropriate for you, transition strategies, and a PDF shoe guide.',
+      },
+      // 4 Column feature band — Figma-verbatim heading + 4 blurbs from node
+      // 998:14858 (desktop) / 999:7199 (mobile). This frame's own heading
+      // correctly reads "...Sole Switch Course" (this IS the Sole Switch
+      // page, unlike Sole Switch Pro's own reused-heading quirk).
+      //
+      // CLIENT-CONTENT FLAG (4th blurb — desktop/mobile genuinely diverge in
+      // CONTENT, not just wording): desktop's 4th card cuts off mid-sentence
+      // — "When the toes can properly splay, our foot and ankle muscles
+      // engage," (trailing comma, no closing clause) — while mobile carries
+      // the FULL sentence: "...our foot and ankle muscles engage, creating a
+      // stronger, more stable platform from which to propel ourselves
+      // forward." Per this task's brief ("keep DESKTOP canonical, ship it,
+      // and REPORT the divergence"), the truncated desktop fragment is used
+      // below even though mobile's version is clearly the complete,
+      // probably-intended copy — flagged loudly, not silently completed
+      // using mobile's text.
+      //
+      // No dedicated feature photography exists for this course (same
+      // "reuses the one PLP course shot" placeholder approach Sole Switch
+      // Pro's own `features` takes).
+      featuresHeading: 'What to Expect in the Sole Switch Course',
+      features: [
+        {
+          image: '/images/plp/sole-switch.jpg',
+          label: null,
+          text: 'Walk away with a better understanding of how to select healthy footwear! Plus, get a bonus PDF footwear guide!',
+        },
+        {
+          image: '/images/plp/sole-switch.jpg',
+          label: null,
+          text: 'Receive lifetime access to a course written by clinicians with over 30 years of experience helping patients build foot health naturally.',
+        },
+        {
+          image: '/images/plp/sole-switch.jpg',
+          label: null,
+          text: 'Learn specific and helpful strategies to help transition safely to less restrictive natural footwear.',
+        },
+        {
+          image: '/images/plp/sole-switch.jpg',
+          label: null,
+          text: 'When the toes can properly splay, our foot and ankle muscles engage,',
+        },
+      ],
+      // "You'll Stop and Instead" — Figma 998:14859 (desktop) / 999:7200
+      // (mobile). Both frames pair the SAME lead-in/body text as each
+      // other, AND it's word-for-word identical to Sole Switch Pro's own
+      // `youllStop` copy above (same pain point/benefit framing reused
+      // across both course tiers) — no desktop/mobile disagreement to flag.
+      youllStop: {
+        stop: {
+          lead: "You'll stop",
+          body: 'feeling frustrated by confusing shoe feature terminology',
+        },
+        instead: {
+          lead: "and instead you'll",
+          body: 'gain confidence in your ability to look for key features when shoe shopping.',
+        },
+      },
+      // Comparison Chart — Figma-verbatim from node 998:14860 (desktop) /
+      // 999:7201 (mobile). Identical table (same columns/rows/values,
+      // literally byte-for-byte the same comparison Sole Switch Pro's own
+      // `comparison` block above already carries — it's the SAME two-tier
+      // comparison table shown on both course pages) — no desktop/mobile
+      // disagreement.
+      //
+      // COMPONENT-GAP FLAG: ComparisonChart.astro hardcodes its heading
+      // ("Sole Switch VS Sole Switch Pro") and CTA label ("View Sole Switch
+      // Pro Course") as static markup, and wires the CTA's href to
+      // `item.pdp.enrollHref` — correct for Sole Switch Pro (where
+      // `enrollHref` IS the Sole Switch Pro enrollment link, so "View Sole
+      // Switch Pro Course" points where it says), but WRONG here: this
+      // item's `enrollHref` above is the Sole Switch (Basic) enrollment
+      // link, so the button will read "View Sole Switch Pro Course" while
+      // actually enrolling the visitor in the Basic course. A real,
+      // Figma-confirmed mismatch (the heading/CTA text is correct verbatim
+      // Figma content — the component's hardcoded href wiring is what's
+      // wrong for a second course reusing this section) — flagged, not
+      // patched, per this task's no-component-changes brief.
+      comparison: {
+        columns: ['Sole Switch', 'Sole Switch Pro'],
+        rows: [
+          { label: 'Course Structure', values: ['Online', 'Online'] },
+          { label: 'Course Length', values: ['50 Minutes', '2 Hours 13 Min'] },
+          { label: 'Audience', values: ['Individuals', 'Professionals'] },
+          { label: 'Evidence Based', values: ['Yes', 'Yes'] },
+          { label: 'Continuing Education Credit', values: ['No', 'Yes'] },
+          { label: 'Course Price', values: ['$50', '$150'] },
+        ],
+      },
+      // Testimonial — Figma-verbatim from node 1000:9051 (desktop) /
+      // 1106:15235 (mobile). Identical quote/author/rating to Sole Switch
+      // Pro's own testimonial above — same Phyllis review, reused verbatim
+      // on both course pages, no desktop/mobile disagreement. See
+      // tests/testimonial.test.mjs — array shape required.
+      testimonial: [
+        {
+          quote: [
+            "This course put me on track for many positive changes in my foot health and strength!\nI also did Movement RX and also bought the Basic Foot health kit and have benefited in so many ways!",
+            'I am pain free and have stronger feet and up the chain benefits!',
+            'LOVE GAIT HAPPENS and follow along in podcasts, IG and YouTube!',
+          ],
+          author: 'Phyllis',
+          role: null,
+          rating: 5,
+        },
+      ],
+      // Your Instructors — Figma-verbatim from node 998:14861 (desktop) /
+      // 999:7202 (mobile). Identical 2 instructors/bios/credentials to Sole
+      // Switch Pro's own `instructors` above (same two clinicians teach both
+      // tiers) — `photo` swapped to this item's own PLP image (same
+      // per-item placeholder-photo convention every other course/product
+      // takes), everything else reused verbatim.
+      instructors: [
+        {
+          photo: '/images/plp/sole-switch.jpg',
+          name: 'Dr. Courtney Conley',
+          credential: 'Lakewood, Colorado',
+          bio: [
+            "Dr. Courtney Conley is a national bestselling author, international educator, and one of the world's foremost authorities on foot and gait health. Her book, Walk, hit both the USA Today and Amazon bestseller lists, resonating with readers eager to understand the profound connection between foot function and whole-body health. The book's success has brought Dr. Conley to some of the most respected platforms in health and wellness media, including appearances on The Peter Attia Drive Podcast, Diary of a CEO, Feel Better, Live More with Dr. Rangan Chatterjee, as well as national television features on CBS Mornings and Fox & Friends.",
+            "Dr. Conley holds a Doctorate in Chiropractic Medicine and two Bachelor's degrees in Kinesiology and Human Biology. With nearly 25 years of clinical practice, she has worked with professional athletes from organizations including the Phoenix Suns, New York Yankees, Cleveland Browns, New York Giants, and San Francisco 49ers. She has also collaborated with medical experts across the country, addressing complex foot and gait challenges at the highest level of performance. She currently serves as Head of Patient Care at Total Health Solutions and Total Health Performance in Lakewood, Colorado—premier clinics known for comprehensive, rehabilitation-focused patient care where she is committed to helping people improve their lives one step at a time.",
+            'That same commitment led her to found and lead Gait Happens, an education enterprise leading a paradigm shift in foot health by empowering people worldwide to reclaim optimal foot function through science-backed training and protocols. Gait Happens offers a comprehensive ecosystem of resources — from professional education for practitioners to consumer training programs and personalized consultations with top-of-field specialists — all grounded in research and designed to deliver real, measurable results. With a focus on natural, preventative approaches to foot and gait health, Gait Happens has built a global community of individuals committed to moving better and living pain-free, offering a proven alternative to unnecessary surgical intervention through education and evidence-based care.',
+            'An internationally recognized speaker, Dr. Conley shares her expertise to clinicians and consumers alike through in-person and online lectures on foot mechanics and gait dynamics. Her work spans authorship, mentorship, patent and curriculum development, and the creation of pioneering foot and gait methodologies. Yet at the heart of every lecture, protocol, and patient interaction is the same driving belief: real strength starts from the ground up, and healthy feet are the foundation every body needs to move through life with confidence and ease.',
+          ],
+        },
+        {
+          photo: '/images/plp/sole-switch.jpg',
+          name: 'Dr. Allison Riley, DPT',
+          credential: 'Salem, Massachusetts',
+          bio: [
+            'Dr. Allison Riley has a passion for helping people recognize that movement is a powerful way to get and stay healthy, active, and happy. She has had an interest in lower body injuries and gait since early in her career.',
+          ],
+        },
+      ],
+      // Cross-sell band — Figma-verbatim heading from the "Product Cards"
+      // frame, node 998:19178 (desktop) / 1106:15252 (mobile). Both frames'
+      // 3 cards (Toe Spacers / Combating Bunions / Fit Feet) are the EXACT
+      // same trio + heading + `/collections/all` "Shop All" every product
+      // PDP's own cross-sell already carries (see Toe Spacers' `crossSell`
+      // comment near the top of this file) — reused verbatim rather than
+      // treated as course-specific, since it genuinely is the same block.
+      // (Desktop's heading reads "More Resources for Your Movement
+      // Journey"; mobile's drops the leading "More" — "Resources For Your
+      // Movement Journey" — a wording-only diff, desktop kept canonical,
+      // same as every other divergence on this page.)
+      crossSell: {
+        heading: 'More Resources for Your Movement Journey',
+        itemIds: ['toe-spacers', 'combating-bunions', 'fit-feet'],
+        shopAllHref: '/collections/all',
+      },
+      // FAQs — Figma node 998:14863 (desktop) / 999:7208 (mobile). Same 4
+      // questions, same order, Figma-verbatim on both frames (no
+      // desktop/mobile wording disagreement).
+      //
+      // UNLIKE Sole Switch Pro's own FAQ section (whose header comment flags
+      // that NEITHER of its frames carried any answer copy, forcing authored
+      // placeholder content), this course's MOBILE frame (999:7208) renders
+      // the accordion in its EXPANDED state — every row shows real,
+      // Figma-verbatim answer copy, not just the collapsed question label.
+      // (Desktop 998:14863 only shows the collapsed state, same as Sole
+      // Switch Pro's desktop frame — but mobile fills the gap here.) Every
+      // `content` value below is therefore REAL pulled Figma content, not
+      // authored copy — confirmed via get_design_context on both node
+      // trees.
+      faqs: [
+        {
+          label: 'Is this mini-course right for me?',
+          content:
+            '<p>The Sole Switch mini-course is perfect for you if you are struggling to understand how to select functional footwear to fit your lifestyle. If you want to transition into using footwear that will protect your feet while helping you build foot strength and improve your foot health, this course is for you!</p>',
+        },
+        {
+          label: 'I wear orthotics, should I still take this course?',
+          content:
+            '<p>Yes! Whether you are looking to transition out of your orthotics or find shoes that fit your orthotics appropriately, this course has answers for you.</p>',
+        },
+        {
+          label: 'Do you talk about shoes for flat feet? What about high arches?',
+          content:
+            '<p>In this course we talk about the structure and function of feet and how different footwear options can be used to help all feet regardless of shape, size, or symptoms.</p>',
+        },
+        {
+          label: 'Does the Pro Course include everything in the regular course?',
+          content:
+            '<p>Yes! The Sole Switch Pro includes everything taught in the regular course but then expands deeper into the research and clinical applications of the shoe spectrum. We discuss specific diagnoses and assessments to utilize when making recommendations for your patients and clients.</p>',
+        },
+      ],
+      // Reviews placeholder — same static reviews-app-screenshot values
+      // every product/course PDP reuses (see Toe Spacers' `reviews` comment
+      // / PdpReviews.astro's note); this course's own "Reviews Plugin Here"
+      // frame (998:14864 / 999:7205) is the same unbuilt placeholder frame
+      // every other PDP has, not real review data.
+      reviews: {
+        rating: 4.75,
+        count: 12,
+        distribution: [
+          { stars: 5, count: 11 },
+          { stars: 4, count: 0 },
+          { stars: 3, count: 0 },
+          { stars: 2, count: 1 },
+          { stars: 1, count: 0 },
+        ],
+      },
+    },
   },
   {
     id: 'combating-bunions',

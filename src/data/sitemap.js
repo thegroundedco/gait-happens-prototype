@@ -72,7 +72,10 @@ export const routes = [
   r('/courses/combating-bunions', 'Combating Bunions', 'course', ['Home', 'Courses', 'Combating Bunions']),
   r('/courses/fit-feet', 'Fit Feet', 'course', ['Home', 'Courses', 'Fit Feet']),
   r('/courses/virtual-consultations', 'Virtual Consultations', 'course', ['Home', 'Courses', 'Virtual Consultations']),
-  r('/courses/sole-switch', 'Sole Switch', 'course', ['Home', 'Courses', 'Sole Switch']),
+  // Chunk B1 Task 2: flipped from placeholder to built (page + catalog
+  // `pdp` block now exist; see src/pages/courses/sole-switch.astro and
+  // catalog.js).
+  r('/courses/sole-switch', 'Sole Switch', 'course', ['Home', 'Courses', 'Sole Switch'], { status: 'built' }),
   // Task 1 (Course PDP Chunk A): first course PDP scaffold — flipped from
   // placeholder to built (page + catalog `pdp` block now exist; see
   // src/pages/courses/sole-switch-pro.astro and catalog.js).
