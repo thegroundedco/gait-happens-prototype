@@ -957,16 +957,23 @@ export const items = [
       // frame (Phyllis' attribution is name-only, no title/role line) —
       // kept `null` rather than omitted, since it's part of this task's
       // brief-mandated `{ quote, author, role, rating }` shape.
-      testimonial: {
-        quote: [
-          "This course put me on track for many positive changes in my foot health and strength!\nI also did Movement RX and also bought the Basic Foot health kit and have benefited in so many ways!",
-          'I am pain free and have stronger feet and up the chain benefits!',
-          'LOVE GAIT HAPPENS and follow along in podcasts, IG and YouTube!',
-        ],
-        author: 'Phyllis',
-        role: null,
-        rating: 5,
-      },
+      //
+      // Chunk B1 migrated this field to an ARRAY of testimonials (Sole
+      // Switch Pro still has exactly one entry) so Testimonial.astro's
+      // carousel and Tasks 2-5's data all share a single shape — see
+      // tests/testimonial.test.mjs.
+      testimonial: [
+        {
+          quote: [
+            "This course put me on track for many positive changes in my foot health and strength!\nI also did Movement RX and also bought the Basic Foot health kit and have benefited in so many ways!",
+            'I am pain free and have stronger feet and up the chain benefits!',
+            'LOVE GAIT HAPPENS and follow along in podcasts, IG and YouTube!',
+          ],
+          author: 'Phyllis',
+          role: null,
+          rating: 5,
+        },
+      ],
       // Task 7 (Your Instructors) — Figma-verbatim from node 1007:7830
       // (desktop, file FX7PDNvhZwyozODaq8Q8i7) / 1109:14383 (mobile — the
       // "Sole Switch Pro Page" > "Your Instructors" instance inside the
