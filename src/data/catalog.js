@@ -746,15 +746,13 @@ export const items = [
     // Task 1 (Course PDP Chunk A) — scaffolds the Sole Switch Pro course
     // PDP on the same data-driven Pdp.astro composer the 6 products use
     // (see their `sections` comments above). This 11-entry list is the
-    // FULL intended course-page section order. As of Task 7: `four-column`,
-    // `cross-sell`, `pdp-reviews`, `logo-wall` (reused-from-products),
-    // `course-details`, `course-overview`, `youll-stop-and-instead`,
-    // `comparison-chart`, `testimonial`, and `your-instructors`
-    // (course-only, built by Tasks 2-7) all have data below and a
-    // Pdp.astro REGISTRY entry — the one remaining course-only type
-    // (`faqs`) still has neither, so Pdp.astro renders nothing for it
-    // (dev-only console.warn, no crash) until a later task adds its
-    // component + data.
+    // FULL intended course-page section order. As of Task 8 (final task):
+    // every entry — `four-column`, `cross-sell`, `pdp-reviews`, `logo-wall`
+    // (reused-from-products), `course-details`, `course-overview`,
+    // `youll-stop-and-instead`, `comparison-chart`, `testimonial`,
+    // `your-instructors`, and `faqs` (course-only, built by Tasks 2-8) — has
+    // data below and a Pdp.astro REGISTRY entry, so the full course PDP now
+    // assembles end to end.
     pdp: {
       sections: [
         'course-details',
@@ -1024,6 +1022,58 @@ export const items = [
         itemIds: ['functional-gait-assessment-l1', 'gait-foundations', 'trainer-certification'],
         shopAllHref: '/collections/courses-professionals',
       },
+      // Task 8 (FAQs — final section, Sole Switch Pro assembly) —
+      // Figma-verbatim `label`s from node 1027:12323 (desktop, file
+      // FX7PDNvhZwyozODaq8Q8i7) / 1109:14385 (mobile — the "Sole Switch Pro
+      // Page" > "FAQs" instance inside the professional-courses mobile frame
+      // 1109:14374). Both frames show the identical 4 questions, same
+      // top-to-bottom order — no desktop/mobile disagreement to flag here.
+      //
+      // `content` is NOT Figma-verbatim, unlike every other field in this
+      // entry — see Faqs.astro's header comment for the full explanation:
+      // both frames are static mockups of the accordion's COLLAPSED state
+      // only, with no expanded-state panel, hidden layer, or component-doc
+      // string anywhere carrying real answer copy (confirmed via
+      // get_design_context on both node trees plus a search_design_system
+      // sweep of every library referenced from this file, including the
+      // "Question"/"FAQs" component_sets in the Gait Happens Design System
+      // library itself). Each row's `content` below is therefore AUTHORED
+      // copy, disclosed per-row:
+      //   - Row 1 ("right for me"): restates this SAME entry's already-
+      //     Figma-verbatim `overview.details` Audience line + `description`
+      //     — grounded in real, verified data, not invented.
+      //   - Row 4 ("Pro Course vs. regular course"): restates this SAME
+      //     entry's already-Figma-verbatim `comparison` table numbers
+      //     (course length, audience, CE credit) — grounded, not invented.
+      //   - Rows 2 & 3 (orthotics; flat feet/high arches): NO grounding
+      //     data exists anywhere in this file for either question. Written
+      //     conservatively — general framing, no new clinical claims — as a
+      //     clearly-flagged placeholder pending real client-approved copy.
+      // Flag this loudly in any downstream review: rows 2 & 3 in particular
+      // need real answers from Gait Happens before this ships past the
+      // reference build.
+      faqs: [
+        {
+          label: 'Is this mini-course right for me?',
+          content:
+            '<p>Yes — this course is built for healthcare professionals (physical therapists, chiropractors, trainers, and other clinicians) who want to give clients more individualized footwear recommendations. If foot health, gait, or movement is part of your practice, Sole Switch Pro was written for you.</p>',
+        },
+        {
+          label: 'I wear orthotics, should I still take this course?',
+          content:
+            "<p>Yes. The course covers the shoe spectrum and how to evaluate footwear features broadly, so the framework applies whether or not a client wears orthotics — you'll come away with a wider set of tools, not a one-size-fits-all rule.</p>",
+        },
+        {
+          label: 'Do you talk about shoes for flat feet? What about high arches?',
+          content:
+            "<p>Yes. The course walks through the shoe spectrum and how to find the right baseline across a range of foot shapes and arch types, so you'll leave with a framework you can apply to different client presentations.</p>",
+        },
+        {
+          label: 'Does the Pro Course include everything in the regular course?',
+          content:
+            '<p>Sole Switch Pro builds on the original Sole Switch course with expanded, professional-level content (2 hours 13 minutes vs. 50 minutes) plus Continuing Education Credit, which the original course does not offer.</p>',
+        },
+      ],
       // Reviews placeholder — same static reviews-app-screenshot values
       // every product PDP reuses (see Toe Spacers' `reviews` comment /
       // PdpReviews.astro's note); this course has no real review data any
