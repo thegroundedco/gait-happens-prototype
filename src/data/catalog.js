@@ -624,14 +624,341 @@ export const items = [
     title: 'WALK',
     kind: 'product',
     badges: ['Product'],
-    price: '$24 USD', // (sample)
+    // Chunk B1 Task 5 — was a `(sample)` guess ($24) before this task; now
+    // Figma-verified ($30.00 USD, node 721:7419 desktop / 1017:9559 mobile,
+    // both frames agree) and kept in sync with `pdp.priceExact` below, same
+    // pattern every other product's top-level `price` follows. This field
+    // (not `pdp.priceExact`) is also what ProductDetails.astro's Add-to-Cart
+    // handler puts on the cart line (`item.price ?? item.priceRange`), so
+    // leaving it at the old $24 guess would have put the WRONG price in the
+    // cart/drawer/subtotal despite the PDP itself showing $30.
+    price: '$30 USD',
     priceRange: null,
-    description: "WALK is Gait Happens' guide to understanding your feet and reclaiming a natural, pain-free stride.", // (sample)
+    description: "WALK is Gait Happens' guide to understanding your feet and reclaiming a natural, pain-free stride.", // (sample; out of this task's `pdp`-block scope — see PLP card copy)
     image: '/images/plp/walk.jpg',
     href: '/products/walk',
     cta: 'View Product',
+    // Figma PDP hero (721:7419 / 1017:9559): 5-star rating, "(12)" reviews —
+    // this item had no top-level rating/reviewCount at all before this task
+    // (StarRating would have rendered 0 stars / "(0)" without these).
+    rating: 5,
+    reviewCount: 12,
+    // Confirmed via both breakpoints' Figma hero (see `pdp.heroTitle`
+    // comment below): no size/variant pills and no size-chart accordion row
+    // on the CANONICAL desktop frame — Walk is a single-format hardcover
+    // book, not a sized product like Toe Spacers. (Mobile's OWN hero,
+    // 1017:9559, shows a "Size" label + Small/Medium/Large pills — see the
+    // CLIENT-CONTENT FLAG on `pdp.heroTitle` below for why that's treated as
+    // a template artifact, not real data, and not reproduced here.)
     variants: null,
     sizeChart: null,
+    // Chunk B1 Task 5 — Walk product PDP. Figma desktop frame 721:7417
+    // ("Walk", file FX7PDNvhZwyozODaq8Q8i7, in the Product PDP section
+    // 705:5988) / mobile "Walk Mobile" frame 1017:9557 (under the Product
+    // PDP's Mobile 390px section 1017:9514).
+    //
+    // ---- Section list — CORRECTS the task brief's own claim -----------
+    // The brief handed to this task states Walk's section list has "NO
+    // four-column and NO logo-wall". `four-column` is confirmed absent (no
+    // "4 Column" instance anywhere in either the desktop or mobile frame).
+    // `logo-wall` is NOT absent: `get_metadata` on 721:7417 (and its parent
+    // section 705:5988, cross-checked against all 6 other product frames)
+    // shows a real "Logo Wall" instance (1154:16663) as the frame's LAST
+    // child, positioned with the exact same off-canvas x/width
+    // (x:-534.2452392578125, width:2268.490478515625) every other product's
+    // own Logo Wall instance carries — not a stray leftover. A full-frame
+    // screenshot of 721:7417 confirms it renders, visually, as the same "As
+    // Seen In" press-logo strip every other product/course PDP ends on
+    // (Frame 4293 — the reviews placeholder — sits directly above it, also
+    // present and Figma-verbatim-identical to every other product's own
+    // "4.75 out of 5 / Based on 12 reviews / 11-0-0-1-0" reviews screenshot).
+    // `logo-wall` is therefore INCLUDED below, reproducing the real desktop
+    // frame rather than the brief's written claim — flagged here (and in
+    // the task report) precisely because it contradicts an explicit written
+    // instruction; LogoWall.astro takes no per-item data (`props: () =>
+    // ({ logos: pressLogos })`, the same site-wide press-logo array every
+    // page reuses), so including it carries no content-authoring risk.
+    //
+    // One real desktop/mobile section-PRESENCE divergence exists here (not
+    // just content): Walk's own "Walk Mobile" frame (1017:9557) has NO Logo
+    // Wall instance at all in its child list — unlike every other product's
+    // OWN mobile frame, which does carry one (e.g. Toe Spacers Mobile's
+    // 1017:9521). `brand-section` is ALSO absent from the mobile frame, but
+    // that's already expected/by-design (BrandSection.astro is desktop-only
+    // per its own `@media (max-width: 1023px) { display: none }`, no
+    // composer-level guard needed — see Pdp.astro's registry comment).
+    // Logo Wall has no such built-in mobile hide, so if this is a genuine
+    // per-page Figma decision (not an oversight) rather than the brief's
+    // claim, Walk's real mobile page will show a Logo Wall band the mobile
+    // FRAME itself never designed. Kept in per this file's own established
+    // "desktop canonical" convention (LogoWall renders on every breakpoint
+    // for every other product), but flagged here as a genuine, confirmed
+    // section-presence divergence, not a content-wording one.
+    //
+    // Every other entry below matches the brief's given order exactly
+    // (product-details -> testimonial -> brand-section -> cross-sell ->
+    // your-instructors -> pdp-reviews), confirmed against the real desktop
+    // frame's own child order.
+    pdp: {
+      sections: [
+        'product-details',
+        'testimonial',
+        'brand-section',
+        'cross-sell',
+        'your-instructors',
+        'pdp-reviews',
+        'logo-wall',
+      ],
+      // ---- Product Details hero -------------------------------------------
+      // Figma-verbatim from node 721:7419 (desktop) / 1017:9559 (mobile).
+      //
+      // `heroTitle` overrides this item's short catalog `title` ("WALK",
+      // used site-wide for nav/breadcrumbs/PLP cards/cross-sell tiles/the
+      // <title> tag) for just the PDP's own <h1> — the SAME
+      // `item.pdp?.heroTitle ?? item.title` fallback CourseDetails.astro
+      // already carries for its own courses (see that component's header
+      // comment), now also added to ProductDetails.astro since Walk is the
+      // first PRODUCT whose real Figma H1 isn't identical to its short
+      // catalog title. The em dash here is Figma's own literal character
+      // (U+2015 HORIZONTAL BAR, "―", not a standard em dash) — preserved
+      // verbatim rather than normalized. Figma's own H1 renders "Walk" in
+      // italics as a run within the larger heading (SemiBold Italic vs.
+      // plain SemiBold for the rest) — ProductDetails.astro's `<h1>` is a
+      // single plain-text interpolation with no rich-run support (and none
+      // of the 6 already-shipped products ever needed one), so that one
+      // typographic nuance is not reproduced; flagged here rather than
+      // silently dropped.
+      heroTitle:
+        'Walk: Rediscover the Most Natural Way to Boost Your Health and Longevity―One Step at a Time (Hardcover)',
+      priceExact: '$30.00 USD',
+      description:
+        'Discover the new rules of walking to increase your health, longevity, and overall wellbeing--from two go-to experts.',
+      // No `bullets` — Figma's hero copy block is this one paragraph only
+      // (no bullet list under it, unlike Toe Spacers/Foot Health Kit).
+      //
+      // Gallery — Figma's own gallery is 5 flat gray placeholder blocks (1
+      // main + 4 thumbnails, no real photography), same "reuse the one PLP
+      // shot" placeholder convention every other product's `gallery` takes.
+      gallery: [
+        '/images/plp/walk.jpg',
+        '/images/plp/walk.jpg',
+        '/images/plp/walk.jpg',
+        '/images/plp/walk.jpg',
+        '/images/plp/walk.jpg',
+      ],
+      // ---- CLIENT-CONTENT FLAG (mobile hero, 1017:9559) -------------------
+      // Mobile's OWN Product Details frame shows a "SIZE" label + a real
+      // Small (selected) / Medium / Large pill row between the intro
+      // paragraph and the Quantity/Add to Cart controls — byte-for-byte the
+      // same size-pill pattern the toe-spacer-family products use. This is
+      // NOT reproduced as `variants` above: the CANONICAL desktop frame
+      // (721:7419) has no such section at all, and this SAME item's own
+      // "Details" accordion row (both breakpoints, identical) lists "Format:
+      // Hardcover" as a single fixed fact with no size dimension anywhere —
+      // a book has no S/M/L. Treated as a mobile-only template artifact (the
+      // mobile frame was very likely built by duplicating a toe-spacer
+      // product's mobile frame and swapping copy, the same origin the
+      // branch's other mobile-only artifacts have had), not real product
+      // data — desktop kept canonical per this task's brief.
+      //
+      // ---- Accordion (Task 3/7 shape: array of { label, content }) --------
+      // Figma-verbatim from node I721:7419;309:842 (desktop) / 1088:15456
+      // (mobile) — both rows agree word-for-word on both breakpoints (no
+      // divergence here, unlike the hero above). Neither row is a
+      // `type: 'sizechart'` row (Walk has no size chart — see `sizeChart:
+      // null` above); both are plain `content` HTML, same as Toe Spacers'
+      // own Instructions/Research rows.
+      accordion: [
+        {
+          label: 'Did You Know...',
+          content: `
+            <ul>
+              <li>Your risk of falls and overall longevity can be measured by your foot health</li>
+              <li>Your walking speed can predict your overall health status and risk of early death</li>
+              <li>Increasing your walking cadence has been shown to help reduce knee, hip, and lower back pain</li>
+              <li>The number of daily optimal steps is not 10,000 (spoiler alert: it's fewer!)</li>
+            </ul>
+            <p>What James Nestor did for breathing, Christopher McDougall and Mark Cucuzzella did for running, and Kelly and Juliet Starrett have done for mobility, founder of Gait Happens Dr. Courtney Conley and Dr. Milica McDowell do for walking. Walking is as important to our health and longevity as sleep and proper breathing; it is the 6th vital sign. And yet we've almost engineered it out of our lives. Walk is an expert-driven, science-backed guide that not only underscores the power of movement to just about every aspect of our life, it restores walking to its rightful spot as one of the key pillars of health.</p>
+            <p>With the most up-to-date research, self-assessments, tips on choosing the best shoes for foot health, as well as easy movement snacks to help with low back pain and foot pain, and customizable programs to develop or enhance your own fitness, <em>Walk</em> is the definitive guide to optimizing wellness.</p>
+          `,
+        },
+        {
+          label: 'Details',
+          content: `
+            <ul>
+              <li>Authors: Courtney Conley DC, Milica McDowell MS DPT</li>
+              <li>Format: Hardcover</li>
+              <li>Price: $30</li>
+              <li>Available in: US and Canada only</li>
+              <li>Language: English</li>
+              <li>Ships: May 5th, 2026</li>
+            </ul>
+          `,
+        },
+      ],
+      // ---- Testimonial (array shape — see tests/testimonial.test.mjs) -----
+      // Figma-verbatim from node 721:7840 (desktop) / 1017:9560 (mobile) —
+      // identical quote/author/role/rating on both frames, no divergence.
+      // Only one testimonial in the data, so Testimonial.astro's carousel
+      // renders its prev/next arrows as inert decoration (same as Sole
+      // Switch Pro's single Phyllis testimonial) — real paging only turns on
+      // once an item carries more than one. A real external endorsement (the
+      // Vivobarefoot CEO), not a Gait Happens clinician — no `role` beyond
+      // his own title/company, carried verbatim.
+      testimonial: [
+        {
+          quote: [
+            'Modern health has forgotten something elemental: we are a bi-pedal walking species. This book restores walking to its rightful place not as exercise, but as a biological necessity. It reminds us that resilience, longevity, and agency begin at ground level, one step at a time.',
+          ],
+          author: 'Galahad Clark',
+          role: 'CEO & Co-Founder, Vivobarefoot',
+          rating: 5,
+        },
+      ],
+      // ---- Your Instructors ------------------------------------------------
+      // COMPONENT GAP — FOUND, NOT FIXED (per this task's explicit
+      // instruction not to self-edit Testimonial.astro/YourInstructors.astro
+      // — see the task report for full detail). Figma's own heading for this
+      // section, BOTH breakpoints (721:7907 desktop node I721:7907;173:318 /
+      // 1017:9594 mobile node I1017:9594;183:393), reads "Meet the Authors"
+      // — not "Your Instructors". YourInstructors.astro hardcodes a static
+      // `<h2>Your Instructors</h2>` (no data-driven override exists), so
+      // Walk's own page will render the wrong heading text for this section
+      // until a follow-up task generalizes it (the same "heading text is a
+      // static string" shape as the fix this branch already made for
+      // CourseDetails' pill-group block). `item.pdp.instructors` below is
+      // still authored in full — the section otherwise renders correctly —
+      // so that follow-up fix only needs to thread a heading override
+      // through, not touch this data.
+      //
+      // Neither instructor card shows a distinct teal credential/location
+      // line under the name on either breakpoint (unlike every course's own
+      // instructor cards) — `credential: null` on both entries below is
+      // Figma-accurate, not a missing-data gap. (InstructorCard.astro
+      // doesn't guard `credential` the way Testimonial.astro guards `role`,
+      // so this renders one small empty `<p>` per card — a pre-existing,
+      // very minor rendering quirk exposed by Walk being the first item to
+      // ever pass `credential: null`; not fixed here for the same
+      // "don't self-edit this component" reason as the heading above.)
+      //
+      // Conley's bio: this item's own Figma card (both breakpoints) opens
+      // with the EXACT same sentence Fit Feet's already-shipped Conley bio
+      // opens with ("Dr. Courtney Conley is a national bestselling
+      // author... Her book, Walk, hit both the USA Today and Amazon
+      // best[seller lists]..." — Walk literally IS the book that fit-feet
+      // bio references) — confirmed via `get_design_context` on the desktop
+      // hero's own hardcover-book blurb too ("Walk is an expert-driven,
+      // science-backed guide..."). Reused verbatim from fit-feet's own
+      // catalog entry (same "same clinician, same bio, reused across pages"
+      // precedent that entry's own comment already documents for
+      // Conley/Perez across Fit Feet/Combating Bunions).
+      //
+      // McDowell's bio: NEW instructor, never in this catalog before, and a
+      // genuine tooling limitation blocked full extraction — `get_metadata`
+      // /`get_design_context` on 721:7907 (and a forced full-page pull of
+      // 721:7417) all returned this section's instructor-card children as a
+      // literally EMPTY node (`<div ... />`, no text at all), even though
+      // the section visibly renders 2 populated cards on canvas. Screenshots
+      // (both breakpoints) DO show her card's text, but Figma's own card
+      // visually clamps the bio to ~4 lines behind a "Read More" toggle, and
+      // only the clamped preview is legible in any screenshot — the full
+      // reveal text was never retrievable by any tool available to this
+      // task. The paragraph below is a best-effort verbatim transcription of
+      // ONLY the confirmed-legible portion (cut at the last fully-legible
+      // complete word, "Health Sciences" — the next word is cut off
+      // mid-glyph as "Cent…" and NOT completed/guessed here), with one
+      // closing parenthesis added so the truncated sentence is syntactically
+      // valid rather than left visibly broken — no wording invented or
+      // paraphrased. NEEDS REAL CLIENT COPY — see task report.
+      instructors: [
+        {
+          photo: '/images/plp/walk.jpg',
+          name: 'Dr. Courtney Conley',
+          credential: null,
+          bio: [
+            "Dr. Courtney Conley is a national bestselling author, international educator, and one of the world's foremost authorities on foot and gait health. Her book, Walk, hit both the USA Today and Amazon bestseller lists, resonating with readers eager to understand the profound connection between foot function and whole-body health. The book's success has brought Dr. Conley to some of the most respected platforms in health and wellness media, including appearances on The Peter Attia Drive Podcast, Diary of a CEO, Feel Better, Live More with Dr. Rangan Chatterjee, as well as national television features on CBS Mornings and Fox & Friends.",
+            "Dr. Conley holds a Doctorate in Chiropractic Medicine and two Bachelor's degrees in Kinesiology and Human Biology. With nearly 25 years of clinical practice, she has worked with professional athletes from organizations including the Phoenix Suns, New York Yankees, Cleveland Browns, New York Giants, and San Francisco 49ers. She has also collaborated with medical experts across the country, addressing complex foot and gait challenges at the highest level of performance. She currently serves as Head of Patient Care at Total Health Solutions and Total Health Performance in Lakewood, Colorado—premier clinics known for comprehensive, rehabilitation-focused patient care where she is committed to helping people improve their lives one step at a time.",
+            'That same commitment led her to found and lead Gait Happens, an education enterprise leading a paradigm shift in foot health by empowering people worldwide to reclaim optimal foot function through science-backed training and protocols. Gait Happens offers a comprehensive ecosystem of resources — from professional education for practitioners to consumer training programs and personalized consultations with top-of-field specialists — all grounded in research and designed to deliver real, measurable results. With a focus on natural, preventative approaches to foot and gait health, Gait Happens has built a global community of individuals committed to moving better and living pain-free, offering a proven alternative to unnecessary surgical intervention through education and evidence-based care.',
+            'An internationally recognized speaker, Dr. Conley shares her expertise to clinicians and consumers alike through in-person and online lectures on foot mechanics and gait dynamics. Her work spans authorship, mentorship, patent and curriculum development, and the creation of pioneering foot and gait methodologies. Yet at the heart of every lecture, protocol, and patient interaction is the same driving belief: real strength starts from the ground up, and healthy feet are the foundation every body needs to move through life with confidence and ease.',
+          ],
+        },
+        {
+          photo: '/images/plp/walk.jpg',
+          name: 'Dr. Milica McDowell',
+          credential: null,
+          // Best-effort transcription of Figma's own clamped preview text —
+          // see the COMPONENT GAP comment above. Not a complete bio.
+          bio: [
+            "Dr. Milica McDowell holds two Bachelor of Science degrees (Exercise Physiology and Health Promotion, Montana State University), a master's degree (Physical Therapy, University of Colorado Health Sciences).",
+          ],
+        },
+      ],
+      // ---- Cross-sell — `shop-products` variant (Chunk B1 Task 5) ---------
+      // Figma-verbatim from the "Product Cards" instance, node 1046:10778
+      // (desktop) / 1044:10698 (mobile) — see CrossSell.astro's own header
+      // comment for the full "same component, extra description block, not
+      // a new section type" reasoning behind `variant: 'shop-products'`.
+      //
+      // CLIENT-CONTENT FLAG (heading, desktop vs. mobile): desktop reads
+      // "Shop Our Products"; mobile reads "Resources For Your Movement
+      // Journey" (closer to the generic "More Resources For Your Movement
+      // Journey" heading every other product/course crossSell already uses)
+      // — a genuine desktop/mobile wording disagreement. Desktop kept
+      // canonical per this file's established convention.
+      //
+      // CLIENT-CONTENT FLAG (per-card blurb, desktop vs. mobile — an
+      // INVERTED case of the usual convention): desktop's own 3 cards repeat
+      // the IDENTICAL placeholder paragraph verbatim ("This is a description
+      // about learning about certain things about a product and whatever
+      // the product does or how it works and all of that good stuff. It
+      // could be pretty long and it could be kinda short, but best to see
+      // how it looks if its really long.") — self-evidently Figma's own
+      // lorem-ipsum-style component-default filler, not real per-product
+      // copy, on all 3 cards. Mobile's 3 cards instead carry genuine,
+      // DIFFERENT, real per-product copy (one of which — the Toe Spacers
+      // card, about Dr. Conley's own use of the product — reads as
+      // authentic marketing copy, not a placeholder). Per this task's
+      // explicit instruction against shipping obvious internal-build/
+      // placeholder text as customer-facing copy, `blurbs` below uses
+      // MOBILE's real text for all 3 cards instead of the usual "desktop
+      // canonical" rule — a deliberate, disclosed exception, not an
+      // oversight (see task report for the full reasoning + both frames'
+      // evidence). `kickers` ("From the book on X:") agreed word-for-word
+      // between both breakpoints (including Figma's own inconsistent
+      // "The"/"the"/no-article usage per card) — those ARE Figma-verbatim
+      // and unaffected by the blurb exception above.
+      crossSell: {
+        variant: 'shop-products',
+        heading: 'Shop Our Products',
+        itemIds: ['foot-health-kit', 'fit-feet', 'toe-spacers'],
+        kickers: [
+          'From the book on The Foot Health Kit:',
+          'From the book on the Fit Feet Course:',
+          'From the book on Toe Spacers:',
+        ],
+        blurbs: [
+          'When the toes can properly splay, our foot and ankle muscles engage, creating a stronger, more stable platform from which to propel ourselves forward.',
+          'Foot muscles and the ability to splay your toes play an essential role in maintaining posture and balance. Compromising this critical function could lead to balance challenges or falls.',
+          "Consistently wearing toe spacers has reshaped Dr. Conley's feet, strengthening them and reducing her foot pain. She walks and runs in them and using them is one of the best pieces of advice she currently offers her patients.",
+        ],
+        shopAllHref: '/collections/all',
+      },
+      // Reviews placeholder — same static reviews-app-screenshot values
+      // every product/course PDP reuses (Figma-verified for Walk too, node
+      // 875:10798: "4.75 out of 5 / Based on 12 reviews" / 11-0-0-1-0 — an
+      // exact match, not just an assumed reuse).
+      reviews: {
+        rating: 4.75,
+        count: 12,
+        distribution: [
+          { stars: 5, count: 11 },
+          { stars: 4, count: 0 },
+          { stars: 3, count: 0 },
+          { stars: 2, count: 1 },
+          { stars: 1, count: 0 },
+        ],
+      },
+    },
   },
 
   // ---- Courses — Individuals -----------------------------------------

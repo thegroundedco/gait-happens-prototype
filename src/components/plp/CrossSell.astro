@@ -1,25 +1,76 @@
 ---
-// Full-width yellow cross-sell band, rendered below the PLP grid/pagination.
-// Row of 3 mini item cards (image + label + arrow, nav-card-like) plus a
-// teal "Shop All" CTA card mirroring the header mega-menu's teal NavCard.
+// Full-width yellow cross-sell band, rendered below the PLP grid/pagination
+// (and reused by the PDP composer's `cross-sell` section, see
+// ../pdp/Pdp.astro). Row of 3 mini item cards (image + label + arrow,
+// nav-card-like) plus a teal "Shop All" CTA card mirroring the header
+// mega-menu's teal NavCard.
+//
+// ---- `variant: 'shop-products'` (Chunk B1 Task 5, Walk PDP) --------------
+// Walk's own "Product Cards" instance (Figma 1046:10778 desktop / 1044:10698
+// mobile) is 650px/1923px tall against every other PDP's 447px/1276px — NOT
+// because it has more/larger cards (same 3-cards-plus-Shop-All layout, same
+// 252px card width, same teal label bar with the item's title), but because
+// each card carries an ADDITIONAL teal description block below the label bar
+// (a bold "From the book on X:" kicker + a body blurb) and a cart-icon glyph
+// in place of the arrow. Per this task's brief ("extend CrossSell with a
+// variant prop — do NOT fork it"), that's `crossSell.variant ===
+// 'shop-products'` below, gating three changes: the label-row icon (cart vs.
+// arrow), an extra `.cross-sell__blurb` block per card, and a desktop layout
+// switch from the standard 4-up CSS Grid to a flex row of 3 FIXED-252px cards
+// + 1 flexible Shop All card (Figma's own proportions: 1200 - 2*48 padding =
+// 1104; 3*252 + 3*32 gaps = 852; the Shop All card fills the remaining ~252,
+// not a `1fr` grid quarter). `kickers`/`blurbs` are parallel arrays indexed
+// the same as `itemIds` (only meaningful when `variant` is set) rather than
+// a richer `cards` array, since every other crossSell block on the site
+// already carries flat `itemIds` and this keeps that shape intact.
+//
+// The label-row cart icon reuses the site's existing `/images/nav/icon-
+// cart.svg` (same asset Header.astro's cart trigger uses) rendered as a
+// purely DECORATIVE glyph (`aria-hidden`, not a nested `<button>`) — Figma's
+// own component names this variant "Descriptions and Quick Cart", which
+// reads like it should genuinely quick-add, but the only place that real
+// affordance exists in this codebase is QuickAddModal.astro, mounted once
+// per PLP page by Plp.astro and absent from every PDP page's BaseLayout.
+// Wiring real quick-add here would mean mounting that modal (plus its
+// client script) on every PDP/course page just for this one band — a
+// layout-wide change well beyond this task's "extend CrossSell" scope, and
+// risky against the "six shipped products + four shipped courses render
+// unchanged" regression gate. So the whole card stays the same single
+// `<a href={item.href}>` (as the standard variant already is) and the cart
+// glyph is styling only — same "don't fake a control, but don't grow scope
+// either" call Testimonial.astro's decorative single-testimonial arrows
+// already make (see that file's header comment).
 import { getItem } from '../../data/catalog.js';
 
 const { crossSell } = Astro.props;
 const items = (crossSell?.itemIds ?? []).map(getItem);
+const isShopProducts = crossSell?.variant === 'shop-products';
 ---
-<section class="cross-sell">
+<section class:list={['cross-sell', { 'cross-sell--shop-products': isShopProducts }]}>
   <div class="cross-sell__pad">
     <h2 class="cross-sell__heading">{crossSell?.heading}</h2>
     <div class="cross-sell__row">
-      {items.map((item) => (
+      {items.map((item, i) => (
         <a class="cross-sell__card" href={item.href}>
           <span class="cross-sell__media">
             <img src={item.image} alt="" loading="lazy" />
           </span>
           <span class="cross-sell__label-row">
             <span class="cross-sell__label">{item.title}</span>
-            <img class="cross-sell__arrow" src="/images/nav/arrow.svg" width="24" height="24" alt="" />
+            {isShopProducts ? (
+              <span class="cross-sell__cart-icon" aria-hidden="true">
+                <img src="/images/nav/icon-cart.svg" alt="" width="16" height="16" />
+              </span>
+            ) : (
+              <img class="cross-sell__arrow" src="/images/nav/arrow.svg" width="24" height="24" alt="" />
+            )}
           </span>
+          {isShopProducts && (
+            <span class="cross-sell__blurb">
+              <strong class="cross-sell__kicker">{crossSell.kickers?.[i]}</strong>
+              <span class="cross-sell__blurb-text">{crossSell.blurbs?.[i]}</span>
+            </span>
+          )}
         </a>
       ))}
       <a class="cross-sell__card cross-sell__card--all" href={crossSell?.shopAllHref}>
@@ -147,6 +198,77 @@ const items = (crossSell?.itemIds ?? []).map(getItem);
   @media (max-width: 560px) {
     .cross-sell__row {
       grid-template-columns: 1fr;
+    }
+  }
+
+  /* ---- shop-products variant (Chunk B1 Task 5, Walk PDP) ------------------
+     See this file's header comment for the full "same component, extra
+     description block" reasoning. Overrides the base grid with a flex row
+     (fixed 252px cards + a flexible Shop All card, Figma's own proportions)
+     at desktop, and a full-width single-column stack below that — Figma
+     shows only these two states (1200 desktop / 390 mobile), no distinct
+     tablet 2-up state the way the base variant's 900px breakpoint has. */
+  .cross-sell--shop-products .cross-sell__row {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-6);
+  }
+  .cross-sell--shop-products .cross-sell__card {
+    height: auto;
+    justify-content: flex-start;
+    overflow: visible;
+  }
+  .cross-sell--shop-products .cross-sell__media {
+    position: relative;
+    aspect-ratio: 252 / 226;
+    flex-shrink: 0;
+  }
+  .cross-sell--shop-products .cross-sell__cart-icon {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border: 2px solid var(--color-paper);
+  }
+  .cross-sell--shop-products .cross-sell__cart-icon img {
+    /* Recolors the icon white on the teal label bar (same technique
+       .cross-sell__arrow already uses for its own white-on-teal filter). */
+    filter: brightness(0) invert(1);
+  }
+  .cross-sell--shop-products .cross-sell__blurb {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    background: var(--color-teal);
+    color: var(--color-paper);
+    padding: 0 var(--space-5) var(--space-4);
+    width: 100%;
+  }
+  .cross-sell--shop-products .cross-sell__kicker {
+    font: var(--type-body-sm);
+    font-weight: 700;
+  }
+  .cross-sell--shop-products .cross-sell__blurb-text {
+    font: var(--type-body-sm);
+  }
+  .cross-sell--shop-products .cross-sell__card--all {
+    height: auto;
+    min-height: 125px;
+  }
+
+  @media (min-width: 901px) {
+    .cross-sell--shop-products .cross-sell__row {
+      flex-direction: row;
+      align-items: stretch;
+    }
+    .cross-sell--shop-products .cross-sell__card:not(.cross-sell__card--all) {
+      flex: 0 0 252px;
+      width: 252px;
+    }
+    .cross-sell--shop-products .cross-sell__card--all {
+      flex: 1 1 0;
     }
   }
 </style>

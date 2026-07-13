@@ -62,7 +62,9 @@ export const routes = [
   // this task (unlike the other 4 rolled-out products above, which already
   // had placeholder routes to flip).
   r('/products/mobility-ball', 'Mobility Ball', 'pdp', ['Home', 'Shop', 'Mobility Ball'], { status: 'built' }),
-  r('/products/walk', 'WALK', 'pdp', ['Home', 'Shop', 'WALK']),
+  // Chunk B1 Task 5: flipped from placeholder to built (page + catalog `pdp`
+  // block now exist; see src/pages/products/walk.astro and catalog.js).
+  r('/products/walk', 'WALK', 'pdp', ['Home', 'Shop', 'WALK'], { status: 'built' }),
 
   // Courses
   r('/collections/courses-individuals', 'Courses for Individuals', 'plp', ['Home', 'Courses', 'Individuals'], { status: 'built' }),

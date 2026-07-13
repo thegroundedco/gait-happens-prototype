@@ -16,6 +16,21 @@
 // matching every other primary CTA on the site (plp-card__cta,
 // quick-add-modal__add) — not yellow.
 //
+// Chunk B1 Task 5 (Walk PDP) — `item.pdp?.heroTitle` overrides the
+// catalog's shorter `item.title` for just this <h1>, mirroring the exact
+// fallback CourseDetails.astro already carries for the same reason (see
+// that file's own header comment: "same targeted-override pattern as
+// ProductDetails' item.pdp.ctaLabel"). Every one of the 6 previously-shipped
+// products has an `item.title` that already IS its literal Figma H1 text
+// (e.g. "Toe Spacers"), so this fallback is a no-op for all of them — Walk
+// is the first product whose Figma H1 (710:6353's counterpart, node
+// 721:7419) is a long descriptive subtitle ("Walk: Rediscover the Most
+// Natural Way to Boost Your Health and Longevity―One Step at a Time
+// (Hardcover)") that can't also serve as `item.title` (used site-wide for
+// nav/breadcrumbs/PLP cards/cross-sell tiles/the <title> tag — see
+// BaseLayout.astro), same reasoning CourseDetails.astro's own `heroTitle`
+// comment documents for its courses.
+//
 // Task 3 adds the Product Details accordion (Size chart / Instructions /
 // Research), extracted to PdpAccordion.astro to keep this file readable.
 // It's rendered as a DOM child of `.pdp-details__buybox` (matching Figma
@@ -44,7 +59,7 @@ const gallery = item.pdp?.gallery?.length ? item.pdp.gallery : [item.image];
     <div class="pdp-details__layout">
       <div class="pdp-details__buybox">
         <div class="pdp-details__heading">
-          <h1 class="pdp-details__title">{item.title}</h1>
+          <h1 class="pdp-details__title">{item.pdp?.heroTitle ?? item.title}</h1>
           <div class="pdp-details__rating">
             <StarRating rating={item.rating ?? 0} count={item.reviewCount ?? 0} />
           </div>
