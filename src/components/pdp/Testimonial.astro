@@ -38,10 +38,16 @@
 //      single white raster, i.e. genuinely a different color per frame,
 //      not an oversight.
 // So the star row here is bespoke markup: 5 inline SVGs reusing
-// StarRating's own star path (for visual consistency across the site)
-// filled `--color-paper` (white), with a standalone visually-hidden
-// "Rated N out of 5 stars" string for the accessible label (no review
-// count concept applies to a single testimonial).
+// StarRating's own star path (for visual consistency across the site) —
+// the rated count filled `--color-paper` (white), the remainder
+// white-outlined, so the visual tracks `rating` (and can't diverge from
+// the sr-only label) exactly as StarRating's own filled/outline split
+// does. A standalone visually-hidden "Rated N out of 5 stars" string
+// carries the accessible label (no review-count concept applies to a
+// single testimonial). The quote + attribution are wrapped in a
+// figure/figcaption so the attribution is semantically tied to its quote
+// (a person's name is deliberately NOT a `<cite>` — the HTML spec limits
+// `<cite>` to titles of works, not people).
 //
 // ---- Carousel arrows: static placeholders, not a real slider ------------
 // Both frames show prev/next arrow affordances (desktop: flanking the
@@ -119,31 +125,32 @@ const STAR_PATH =
       <div class="testimonial__row">
         <div class="testimonial__card">
           <span class="testimonial__stars" aria-hidden="true">
-            {[1, 2, 3, 4, 5].map(() => (
-              <svg width="28" height="28" viewBox="0 0 24 24">
+            {[1, 2, 3, 4, 5].map((n) => (
+              <svg width="28" height="28" viewBox="0 0 24 24" class={n <= testimonial.rating ? 'is-filled' : ''}>
                 <path d={STAR_PATH} />
               </svg>
             ))}
           </span>
           <p class="testimonial__sr-only">{`Rated ${testimonial.rating} out of 5 stars`}</p>
 
-          <blockquote class="testimonial__quote">
-            {testimonial.quote.map((paragraph) => (
-              <p>
-                {paragraph.split('\n').map((line, i, lines) => (
-                  <>
-                    {line}
-                    {i < lines.length - 1 && <br />}
-                  </>
-                ))}
-              </p>
-            ))}
-          </blockquote>
-
-          <div class="testimonial__attribution">
-            <p class="testimonial__author">{testimonial.author}</p>
-            {testimonial.role && <p class="testimonial__role">{testimonial.role}</p>}
-          </div>
+          <figure class="testimonial__figure">
+            <blockquote class="testimonial__quote">
+              {testimonial.quote.map((paragraph) => (
+                <p>
+                  {paragraph.split('\n').map((line, i, lines) => (
+                    <>
+                      {line}
+                      {i < lines.length - 1 && <br />}
+                    </>
+                  ))}
+                </p>
+              ))}
+            </blockquote>
+            <figcaption class="testimonial__attribution">
+              <span class="testimonial__author">{testimonial.author}</span>
+              {testimonial.role && <span class="testimonial__role">{testimonial.role}</span>}
+            </figcaption>
+          </figure>
         </div>
 
         <div class="testimonial__arrows" aria-hidden="true">
@@ -166,7 +173,10 @@ const STAR_PATH =
   .testimonial__inner {
     max-width: var(--container-max);
     margin-inline: auto;
-    padding-inline: var(--space-5);
+    /* Mobile (1109:14382): the yellow band is edge-to-edge — zero outer
+       horizontal padding, the card's own px-24 provides the text inset.
+       Desktop re-adds side padding around the fixed 916px card below. */
+    padding-inline: 0;
     /* 96px literal — see header comment (bigger than --space-8, the
        largest step in this repo's scale); identical on both breakpoints
        per the Figma frames, so no responsive override needed. */
@@ -204,8 +214,28 @@ const STAR_PATH =
     display: inline-flex;
     gap: var(--space-2);
   }
+  /* Fill only the rated count; outline the rest (white stroke on the yellow
+     band) so the visual tracks `rating` and can't silently disagree with the
+     sr-only "Rated N out of 5" label — StarRating's own filled/outline
+     convention, kept generic for the Walk PDP reuse. */
   .testimonial__stars svg {
+    fill: none;
+    stroke: var(--color-paper);
+    stroke-width: 1.5;
+  }
+  .testimonial__stars svg.is-filled {
     fill: var(--color-paper);
+    stroke: none;
+  }
+
+  /* Quote + attribution are a figure/figcaption pair (associates the
+     attribution with its quote); the card gap handled blockquote->attribution
+     spacing before, so the figure reproduces it as its own column gap. */
+  .testimonial__figure {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-6);
   }
 
   .testimonial__quote {
@@ -289,6 +319,12 @@ const STAR_PATH =
          px-96 literal — see header comment, bigger than --space-8). */
       padding: var(--space-8) 96px;
       order: 2;
+    }
+    /* Desktop attribution gap is gap-16 (--space-4) vs mobile's gap-12
+       (--space-3) — a real per-breakpoint value (matters once a role line
+       exists, e.g. the Walk PDP reuse). */
+    .testimonial__attribution {
+      gap: var(--space-4);
     }
     /* Dissolve the mobile arrows-group wrapper so its two children become
        direct flex items of `.testimonial__row` — letting `order` flank
