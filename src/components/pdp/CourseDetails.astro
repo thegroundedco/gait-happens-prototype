@@ -135,9 +135,51 @@
 // same object-fit:cover-via-Figma-percentages idiom CourseOverview.astro's
 // own header comment already documents — reproduced as a plain
 // overflow:hidden + object-fit:cover box, not the literal percentages.
+//
+// ---- Review fix wave (Chunk B1 Task 3 shared-component findings) --------
+// Four latent pilot (Sole Switch Pro) assumptions baked into this file,
+// surfaced by rolling out `combating-bunions`:
+//
+// 1. CRITICAL — the "Select your course" tier block's wrapper `<div>` and
+//    label rendered UNCONDITIONALLY; only the inner pill was guarded on
+//    `item.pdp?.secondaryCta`. Combating Bunions correctly has no
+//    `secondaryCta` (single-tier course, no sibling to cross-link), so the
+//    old markup shipped a "SELECT YOUR COURSE" caption with nothing under
+//    it. The guard now wraps the whole `.course-details__tier` block, the
+//    same optional-block idiom `courseCard`/`heroImage` already use — a
+//    no-op for Sole Switch/Sole Switch Pro, which both set `secondaryCta`.
+//
+// 2. MINOR — `courseCard`/`heroImage` were two independent `&&` guards
+//    (this comment already asserted they're mutually exclusive, but nothing
+//    enforced it). Now an if/else (ternary), so an item that mistakenly set
+//    both can't render three children into the desktop flex row. No-op
+//    today: no item sets both.
+//
+// 3. MINOR — the instructor avatar pair was two hardcoded `<span>`s,
+//    correct for all three courses (all have exactly 2 instructors) but not
+//    derived from anything — a 1- or 3-instructor course would still render
+//    2 circles. Now mapped off `item.pdp.instructors`' own length (the
+//    photo/name per instructor aren't needed here, just the count — real
+//    per-instructor rendering is YourInstructors.astro's job further down
+//    the page). Byte-identical output for all three current courses.
+//
+// 4. MINOR — the enroll CTA hardcoded `target="_blank" rel="noopener
+//    noreferrer"`, assuming `enrollHref` is always external. Now reuses the
+//    `isExternal = /^https?:/.test(href)` predicate declared above
+//    (ComparisonChart.astro's own precedent) so an internal `enrollHref`
+//    wouldn't wrongly hijack a new tab. All three current enroll links are
+//    external Kajabi URLs, so this is a no-op today.
 import StarRating from '../plp/StarRating.astro';
 
 const { item } = Astro.props;
+// Enroll CTA — externality derived from the href itself, reusing the exact
+// `isExternal = /^https?:/.test(href)` predicate ComparisonChart.astro's own
+// header comment documents ("Internal-vs-external CTA fix"). All three
+// shipped courses' `enrollHref` values are external Kajabi URLs, so this
+// stays a no-op today; a future internal-route `enrollHref` would now
+// correctly omit `target`/`rel` instead of the previous hardcoded pair.
+const enrollHref = item.pdp?.enrollHref ?? '#';
+const isExternal = /^https?:/.test(enrollHref);
 ---
 <section class="course-details" data-pdp-id={item.id}>
   <div class="course-details__inner">
@@ -165,20 +207,19 @@ const { item } = Astro.props;
 
         {item.pdp?.description && <p class="course-details__intro">{item.pdp.description}</p>}
 
-        <div class="course-details__tier">
-          <span class="course-details__tier-label">Select your course</span>
-          {item.pdp?.secondaryCta && (
+        {item.pdp?.secondaryCta && (
+          <div class="course-details__tier">
+            <span class="course-details__tier-label">Select your course</span>
             <a class="course-details__pill" href={item.pdp.secondaryCta.href}>
               {item.pdp.secondaryCta.label}
             </a>
-          )}
-        </div>
+          </div>
+        )}
 
         <a
           class="course-details__enroll"
-          href={item.pdp?.enrollHref ?? '#'}
-          target="_blank"
-          rel="noopener noreferrer"
+          href={enrollHref}
+          {...(isExternal ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
         >
           {item.pdp?.enrollLabel ?? 'Enroll Now'}
         </a>
@@ -186,28 +227,27 @@ const { item } = Astro.props;
         {item.pdp?.instructorsByline && (
           <div class="course-details__instructors">
             <span class="course-details__avatars" aria-hidden="true">
-              <span class="course-details__avatar"></span>
-              <span class="course-details__avatar"></span>
+              {(item.pdp.instructors ?? []).map(() => (
+                <span class="course-details__avatar"></span>
+              ))}
             </span>
             <p class="course-details__instructors-text">{item.pdp.instructorsByline}</p>
           </div>
         )}
       </div>
 
-      {item.pdp?.courseCard && (
+      {item.pdp?.courseCard ? (
         <div class={`course-details__card${item.pdp.courseCard.variant === 'yellow' ? ' course-details__card--yellow' : ''}`}>
           <p class="course-details__card-title">
             {item.pdp.courseCard.titleLines.map((line) => <span>{line}</span>)}
           </p>
           {item.pdp.courseCard.tag && <span class="course-details__card-tag">{item.pdp.courseCard.tag}</span>}
         </div>
-      )}
-
-      {item.pdp?.heroImage && (
+      ) : item.pdp?.heroImage ? (
         <div class="course-details__hero-image">
           <img src={item.pdp.heroImage} alt="" />
         </div>
-      )}
+      ) : null}
     </div>
   </div>
 </section>

@@ -1323,19 +1323,27 @@ export const items = [
       //     Figma-verbatim `overview.details` Audience line + `description`.
       //   - Row 2 (exercises): restates this SAME entry's already-Figma-
       //     verbatim `overview.details` Course Style value ("Video Lecture
-      //     and Exercises").
+      //     and Exercises") in plain customer-facing prose.
       //   - Row 3 (Tailor's bunions included): restates this SAME entry's
       //     already-Figma-verbatim `description` + `features[0].text`,
       //     both of which explicitly name Tailor's bunions/bunionettes.
       //   - Rows 4 & 5 (equipment; course access length): NO grounding data
       //     exists anywhere in this file for either question, and neither
       //     answer can be inferred from real data without inventing a new
-      //     fact. Rather than author a plausible-sounding placeholder (the
-      //     exact mistake this task's brief warns against repeating), each
-      //     `content` value is an explicit, honest "no answer copy exists
-      //     yet" disclosure — not a fabricated answer.
-      // Flagged here AND in this task's report; rows 4 & 5 in particular
-      // need real client-approved answer copy before this ships past the
+      //     fact. Each `content` value is a short, neutral "copy pending"
+      //     placeholder — no invented factual claim about the course.
+      //
+      // REVIEW FIX (Chunk B1 Task 3 fix wave): rows 4 & 5 previously rendered
+      // an internal build note verbatim as the customer-facing "answer" (it
+      // literally said the copy didn't exist "in the Figma source" and
+      // needed approval "before this ships past the reference build") — that
+      // is build commentary, not something a client-facing page should ever
+      // render. Row 2 similarly leaked an internal parenthetical referencing
+      // the raw "Course Style" field name. All three are now plain,
+      // client-safe prose/placeholders; the disclosure that rows 4 & 5 are
+      // NOT yet client-approved copy belongs only here and in this task's
+      // report, never in the rendered HTML. Still flagged: rows 4 & 5 need
+      // real client-approved answer copy before this ships past the
       // reference build.
       faqs: [
         {
@@ -1345,8 +1353,7 @@ export const items = [
         },
         {
           label: 'Are there exercises in the Combating Bunions course?',
-          content:
-            '<p>Yes — the course pairs video lecture with exercises (its own Course Style is "Video Lecture and Exercises").</p>',
+          content: '<p>Yes — the course pairs video lecture with exercises.</p>',
         },
         {
           label: "Are Tailor's bunions included?",
@@ -1355,13 +1362,11 @@ export const items = [
         },
         {
           label: 'Do I need equipment',
-          content:
-            "<p>No answer copy for this question exists in the Figma source (only the collapsed accordion label was provided, and no equipment information appears anywhere else in this course's content) — needs real copy from Gait Happens before this ships past the reference build.</p>",
+          content: '<p>Details on equipment for this course are coming soon.</p>',
         },
         {
           label: 'How long do I have access to the course?',
-          content:
-            "<p>No answer copy for this question exists in the Figma source (only the collapsed accordion label was provided, and no access-duration information appears anywhere else in this course's content) — needs real copy from Gait Happens before this ships past the reference build.</p>",
+          content: '<p>Details on course access are coming soon.</p>',
         },
       ],
       // Reviews placeholder — same static reviews-app-screenshot values
