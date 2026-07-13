@@ -21,17 +21,31 @@
 // a future comparison table's frame ever DOES show a check/× glyph, that
 // table's data can express it as `true`/`false` without a component change.
 //
-// The heading ("Sole Switch VS Sole Switch Pro") and the closing CTA
-// button ("View Sole Switch Pro Course") have no field in the brief's
-// exact `{ columns, rows }` contract — same "static markup, not data"
-// treatment CourseOverview.astro gives its own unlisted "Course
-// Overview"/"Course Concepts" labels — so both are hardcoded here,
-// verbatim on both frames. The CTA's href has no data field either; it
-// reuses `item.pdp.enrollHref` (the same Kajabi placeholder
-// CourseDetails.astro's primary "Enroll Now" CTA already points at) with
-// the same external-link treatment (`target="_blank"
-// rel="noopener noreferrer"`), rather than inventing a new catalog field
-// for a single button.
+// The heading ("Sole Switch VS Sole Switch Pro") has no field in the
+// brief's exact `{ columns, rows }` contract — same "static markup, not
+// data" treatment CourseOverview.astro gives its own unlisted "Course
+// Overview"/"Course Concepts" labels — so it's hardcoded here, verbatim on
+// both frames (both this page's own frame AND Sole Switch's reuse of this
+// same section literally read "Sole Switch VS Sole Switch Pro").
+//
+// ---- Component-generalization fix (Chunk B1 Task 2 follow-up) -----------
+// The CTA used to be hardcoded to a static label ("View Sole Switch Pro
+// Course") wired to `item.pdp.enrollHref` — correct on Sole Switch Pro's
+// OWN page (where `enrollHref` IS the Pro enrollment link) but wrong on
+// Sole Switch's page, whose `enrollHref` is its OWN (Basic) enrollment
+// link, not a route to the Pro course this CTA is supposed to upsell.
+// `item.pdp.comparison.cta = { label, href }` now supplies both, sourced
+// per-item in catalog.js: Sole Switch Pro's `cta.href` reproduces its old
+// `enrollHref` value byte-for-byte (same external Kajabi link, so this
+// page's rendered HTML is unchanged); Sole Switch's `cta.href` instead
+// points at `/courses/sole-switch-pro` (an internal upsell route, confirmed
+// against Figma — the CTA's copy is a "View Sole Switch Pro Course" upsell
+// on BOTH course pages, not a self-enroll link). The `target="_blank"
+// rel="noopener noreferrer"` external-link treatment is kept static/
+// unconditional (not data-driven) purely to keep Sole Switch Pro's markup
+// byte-identical to its pre-fix output; it's a minor UX quirk that Sole
+// Switch's now-internal link also opens a new tab, flagged here rather than
+// adding an unrequested external/internal heuristic.
 //
 // The intro paragraph directly under the heading is the one place desktop
 // and mobile genuinely DISAGREE on content, not just wording: desktop
@@ -164,14 +178,14 @@ const comparison = item.pdp?.comparison;
         </table>
       </div>
 
-      {item.pdp?.enrollHref && (
+      {comparison.cta && (
         <a
           class="comparison-chart__cta"
-          href={item.pdp.enrollHref}
+          href={comparison.cta.href}
           target="_blank"
           rel="noopener noreferrer"
         >
-          View Sole Switch Pro Course
+          {comparison.cta.label}
         </a>
       )}
     </div>

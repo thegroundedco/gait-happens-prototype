@@ -706,17 +706,16 @@ export const items = [
       // targeted-override pattern Sole Switch Pro's own `heroTitle` uses.
       heroTitle: 'Sole Switch Course',
       //
-      // CLIENT-CONTENT / COMPONENT-GAP FLAG (price): both frames show a SALE
-      // price — "$40.00 USD" in red plus a struck-through "$50 USD" original
-      // — not a single flat price. `priceExact` below carries the real
-      // current price (matches this item's own top-level `price`), but
-      // CourseDetails.astro (built against Sole Switch Pro's frame, which
-      // has no sale price) has no `compareAtPrice` field/render path the way
-      // ProductDetails.astro does for products — so the "$50 USD"
-      // strikethrough is silently dropped on this page. Not fixed here per
-      // this task's brief ("no new components and no code" — a real content/
-      // component gap is a finding, not something to work around).
+      // Both frames show a SALE price — "$40.00 USD" in red plus a
+      // struck-through "$50 USD" original — not a single flat price.
+      // `priceExact` carries the real current price (matches this item's
+      // own top-level `price`); `compareAtPrice` is the Figma-verbatim
+      // original, now rendered via CourseDetails.astro's `compareAtPrice`
+      // field/render path (the component-generalization fix — see that
+      // file's header comment; same OPTIONAL field/idiom ProductDetails.astro
+      // already established for sale prices).
       priceExact: '$40.00 USD',
+      compareAtPrice: '$50 USD',
       // Matches this item's own top-level `description` verbatim — Figma's
       // intro paragraph is identical on both breakpoints, no divergence to
       // flag here (unlike Sole Switch Pro's own hero intro).
@@ -737,23 +736,21 @@ export const items = [
       // the Pro course's own page (already `built` — see sitemap.js).
       secondaryCta: { label: 'Sole Switch Pro', href: '/courses/sole-switch-pro' },
       //
-      // CLIENT-CONTENT / COMPONENT-GAP FLAG (course card): Figma's branded
-      // card (right column) is a flattened screenshot, same situation Sole
-      // Switch Pro's own `courseCard` comment describes — but on THIS page
-      // it's genuinely different in two ways CourseDetails.astro can't
-      // express: (1) the card is YELLOW (`--color-yellow`), not teal —
-      // CourseDetails.astro hardcodes `--color-teal` for `.course-details__
-      // card` with no per-item override; (2) there is NO "For X" tag pill
-      // under the title — the component unconditionally renders a
-      // `.course-details__card-tag` span regardless of whether `tag` is
-      // set, so omitting it here (Figma-verbatim: no tag text) still leaves
-      // an empty tag-shaped box in the markup. Both are real component gaps
-      // against a second course's Figma frame, not something this
-      // data-only task can fix — flagged, not worked around. `titleLines`
-      // is the frame's own 2-line break ("SOLESWITCH" / "COURSE"), same
-      // array-of-lines shape Sole Switch Pro's card uses.
+      // Figma's branded card (right column) is a flattened screenshot, same
+      // situation Sole Switch Pro's own `courseCard` comment describes — but
+      // on THIS page it's genuinely different: (1) the card is YELLOW
+      // (`--color-yellow`), not teal — `variant: 'yellow'` selects
+      // CourseDetails.astro's `--yellow` modifier class (component-
+      // generalization fix; unset defaults to the base teal card, see
+      // Sole Switch Pro's own `courseCard` below); (2) there is NO "For X"
+      // tag pill under the title — `tag` is simply omitted here, and
+      // CourseDetails.astro now guards its render with the same optional-
+      // field idiom the rest of this file uses, so no empty pill artifact
+      // renders. `titleLines` is the frame's own 2-line break ("SOLESWITCH"
+      // / "COURSE"), same array-of-lines shape Sole Switch Pro's card uses.
       courseCard: {
         titleLines: ['SoleSwitch', 'Course'],
+        variant: 'yellow',
       },
       // Same byline text as Sole Switch Pro's page (same 2 instructors teach
       // both tiers) — Figma-verbatim, identical on both breakpoints.
@@ -850,19 +847,19 @@ export const items = [
       // comparison table shown on both course pages) — no desktop/mobile
       // disagreement.
       //
-      // COMPONENT-GAP FLAG: ComparisonChart.astro hardcodes its heading
-      // ("Sole Switch VS Sole Switch Pro") and CTA label ("View Sole Switch
-      // Pro Course") as static markup, and wires the CTA's href to
-      // `item.pdp.enrollHref` — correct for Sole Switch Pro (where
-      // `enrollHref` IS the Sole Switch Pro enrollment link, so "View Sole
-      // Switch Pro Course" points where it says), but WRONG here: this
-      // item's `enrollHref` above is the Sole Switch (Basic) enrollment
-      // link, so the button will read "View Sole Switch Pro Course" while
-      // actually enrolling the visitor in the Basic course. A real,
-      // Figma-confirmed mismatch (the heading/CTA text is correct verbatim
-      // Figma content — the component's hardcoded href wiring is what's
-      // wrong for a second course reusing this section) — flagged, not
-      // patched, per this task's no-component-changes brief.
+      // ComparisonChart.astro's heading ("Sole Switch VS Sole Switch Pro")
+      // stays hardcoded (identical verbatim text on both course pages' own
+      // frames, no data slot needed). The CTA is data-driven per the
+      // component-generalization fix: `cta.label` is the frame's own
+      // Figma-verbatim button text ("View Sole Switch Pro Course",
+      // confirmed via get_design_context on THIS item's own comparison node
+      // 998:14860 — same text as Sole Switch Pro's own CTA, since both
+      // pages' frames show the same upsell button); `cta.href` is
+      // `/courses/sole-switch-pro` — an internal route to the Pro course
+      // this button is upselling, NOT this item's own `enrollHref` above
+      // (that would incorrectly self-enroll the visitor in the Basic course
+      // a button reading "View Sole Switch Pro Course" — the bug this fix
+      // corrects; see ComparisonChart.astro's header comment).
       comparison: {
         columns: ['Sole Switch', 'Sole Switch Pro'],
         rows: [
@@ -873,6 +870,7 @@ export const items = [
           { label: 'Continuing Education Credit', values: ['No', 'Yes'] },
           { label: 'Course Price', values: ['$50', '$150'] },
         ],
+        cta: { label: 'View Sole Switch Pro Course', href: '/courses/sole-switch-pro' },
       },
       // Testimonial — Figma-verbatim from node 1000:9051 (desktop) /
       // 1106:15235 (mobile). Identical quote/author/rating to Sole Switch
@@ -1250,6 +1248,14 @@ export const items = [
       // ComparisonChart.astro's cell renderer still supports a `true`/
       // `false` value (rendered as an accessible check/× glyph) for any
       // future comparison table whose Figma frame actually uses one.
+      //
+      // `cta` (component-generalization fix): this course's own CTA
+      // upsells nothing beyond itself — it IS the Pro course's own page —
+      // so `cta.href` reproduces this item's `enrollHref` above byte-for-
+      // byte (the same external Kajabi link ComparisonChart.astro's CTA
+      // already pointed at before this field existed), preserving today's
+      // rendered output exactly. `cta.label` is the frame's own
+      // Figma-verbatim button text.
       comparison: {
         columns: ['Sole Switch', 'Sole Switch Pro'],
         rows: [
@@ -1260,6 +1266,10 @@ export const items = [
           { label: 'Continuing Education Credit', values: ['No', 'Yes'] },
           { label: 'Course Price', values: ['$50', '$150'] },
         ],
+        cta: {
+          label: 'View Sole Switch Pro Course',
+          href: 'https://gaithappens.mykajabi.com/offers/sole-switch-pro-course',
+        },
       },
       // Task 6 (Testimonial band) — Figma-verbatim from node 1106:15576
       // (desktop, file FX7PDNvhZwyozODaq8Q8i7) / 1109:14382 (mobile — the

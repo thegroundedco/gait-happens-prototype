@@ -54,6 +54,36 @@
 // No client script: every interactive element here is a plain <a> (real
 // navigation), so there's nothing to init/leak. `data-pdp-id` is kept on
 // the <section> for parity with ProductDetails/debugging only.
+//
+// ---- Component-generalization fixes (Chunk B1 Task 2 follow-up) ----------
+// Sole Switch (Basic)'s Figma frame (998:14854/999:7197) genuinely diverges
+// from the Sole Switch Pro frame this component was originally built
+// against, in three ways now made data-driven instead of hardcoded:
+//
+// 1. Sale price. `item.pdp.compareAtPrice` is the same OPTIONAL field
+//    ProductDetails.astro already uses (its guard idiom + class names
+//    `-sale`/`-compare` are reused verbatim here) — when absent (Sole
+//    Switch Pro), the price renders exactly as before (no wrapping <span>,
+//    same single text node); when present (Sole Switch: "$50 USD"), a
+//    struck-through compare-at price renders beside the sale price.
+//
+// 2. Course card colour. `item.pdp.courseCard.variant` is an OPTIONAL
+//    string ('yellow' | unset), same variant-name idiom `NavCard.astro`
+//    already uses for `sitemap.js`'s nav cards (`card.variant` ->
+//    `nav-card--${variant}`). Unset (Sole Switch Pro) keeps the base
+//    `.course-details__card` teal background byte-for-byte; `'yellow'`
+//    (Sole Switch) adds a `--yellow` modifier class. Figma's own flattened
+//    card image confirms the title text stays WHITE on both the teal AND
+//    yellow cards (get_design_context + a close crop of the yellow card's
+//    raster asset both show white "SOLESWITCH COURSE" text), so no
+//    additional text-colour variant is needed for the title. The tag pill
+//    (used only on the teal/Health-Professionals card) is unaffected.
+//
+// 3. Course card tag. `item.pdp.courseCard.tag` was already read but
+//    unconditionally rendered as an empty pill when absent — now guarded
+//    with the same optional-field idiom the rest of this file/Testimonial's
+//    `role` already use (`item.pdp.courseCard.tag && <span>...</span>`), so
+//    Sole Switch's tag-less Figma card renders no pill artifact.
 import StarRating from '../plp/StarRating.astro';
 
 const { item } = Astro.props;
@@ -71,7 +101,16 @@ const { item } = Astro.props;
           </div>
         </div>
 
-        <p class="course-details__price">{item.pdp?.priceExact ?? item.price}</p>
+        <p class="course-details__price">
+          {item.pdp?.compareAtPrice ? (
+            <>
+              <span class="course-details__price-sale">{item.pdp?.priceExact ?? item.price}</span>
+              <span class="course-details__price-compare">{item.pdp.compareAtPrice}</span>
+            </>
+          ) : (
+            item.pdp?.priceExact ?? item.price
+          )}
+        </p>
 
         {item.pdp?.description && <p class="course-details__intro">{item.pdp.description}</p>}
 
@@ -105,11 +144,11 @@ const { item } = Astro.props;
       </div>
 
       {item.pdp?.courseCard && (
-        <div class="course-details__card">
+        <div class={`course-details__card${item.pdp.courseCard.variant === 'yellow' ? ' course-details__card--yellow' : ''}`}>
           <p class="course-details__card-title">
             {item.pdp.courseCard.titleLines.map((line) => <span>{line}</span>)}
           </p>
-          <span class="course-details__card-tag">{item.pdp.courseCard.tag}</span>
+          {item.pdp.courseCard.tag && <span class="course-details__card-tag">{item.pdp.courseCard.tag}</span>}
         </div>
       )}
     </div>
@@ -166,8 +205,24 @@ const { item } = Astro.props;
   }
 
   .course-details__price {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-3);
     font: var(--type-h4);
     color: var(--color-ink);
+  }
+  /* Optional sale/compare-at price — same fields/idiom as
+     ProductDetails.astro's `.pdp-details__price-sale`/`-compare` (Figma
+     `--feedback-error` #c62828, not yet a DS token; `--color-ink-70` for the
+     struck-through original). Inert (no red, no strikethrough) whenever
+     `item.pdp.compareAtPrice` is unset, e.g. Sole Switch Pro. */
+  .course-details__price-sale {
+    color: #c62828;
+  }
+  .course-details__price-compare {
+    font: var(--type-body-large);
+    color: var(--color-ink-70);
+    text-decoration: line-through;
   }
 
   .course-details__intro {
@@ -271,6 +326,16 @@ const { item } = Astro.props;
     padding: var(--space-5);
     background: var(--color-teal);
     height: 210px;
+  }
+  /* Optional colour variant — same variant-name idiom NavCard.astro already
+     uses for sitemap.js's `card.variant` ('yellow'/'teal' ->
+     `nav-card--${variant}`). Sole Switch's card (998:14856) is yellow with
+     no tag; Sole Switch Pro's stays the base teal (no `variant` set) +
+     its "For Health Professionals" tag. Figma's own flattened card raster
+     confirms the title text stays white on both colours, so only the
+     background changes here. */
+  .course-details__card--yellow {
+    background: var(--color-yellow);
   }
   .course-details__card-title {
     display: flex;
