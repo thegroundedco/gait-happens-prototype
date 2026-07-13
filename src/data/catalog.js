@@ -1394,6 +1394,13 @@ export const items = [
     badges: ['Course', 'Product'],
     price: '$185 USD',
     priceRange: null,
+    // This item already had a top-level rating before this task. Figma's own
+    // Course Details hero (675:8156/999:7170) also shows a 5-star rating but
+    // "(21)" reviews, not 32 — the same systemic catalog-vs-Figma
+    // review-count disagreement already flagged on Sole Switch/Sole Switch
+    // Pro/Combating Bunions (each item's own Figma count disagrees with its
+    // catalog `reviewCount`). NOT changed here, per this task's brief
+    // (batched for the client, not a per-item patch).
     rating: 5,
     reviewCount: 32,
     description: 'Online program to help you build a healthier body starting with your feet.',
@@ -1402,6 +1409,388 @@ export const items = [
     cta: 'View Course',
     variants: null,
     sizeChart: null,
+    // Chunk B1 Task 4 — Fit Feet course PDP. Figma desktop frame 675:8154
+    // ("Fit Feet Course", file FX7PDNvhZwyozODaq8Q8i7) / mobile "Fit Feet
+    // Course Mobile" frame 999:7168 (under mobile section 999:7142). Same
+    // 11-section order the first 3 shipped courses use — every type below
+    // already has a Pdp.astro REGISTRY entry, so this assembles end to end
+    // with no new components, matching this task's "data-only" brief.
+    //
+    // ---- COMPONENT GAP FOUND — NOT FIXED (per this task's explicit "stop
+    // and report; do not work around; do not edit the component" instruction)
+    // Unlike any of the first 3 shipped courses, this course's Course Details
+    // hero (675:8156 desktop / 999:7170 mobile) shows a real "LANGUAGE"
+    // selector row between the intro paragraph and the Add to Cart/Enroll
+    // button: 4 pills ("English" filled/selected; "Spanish"/"French"/
+    // "Japanese" outline), present identically on BOTH breakpoints (not a
+    // one-off single-frame artifact — confirmed via get_design_context on
+    // both node trees). CourseDetails.astro has no render path for this
+    // content at all — unlike the 8 earlier findings on this branch (all
+    // "component hardcodes something THIS course's Figma doesn't show"),
+    // this is the inverse: Figma shows real, repeated content the component
+    // has no field name or branch for. Left completely UNSET/unrendered
+    // here — no data field invented, no component touched — and reported as
+    // this task's 9th finding for a follow-up task to add a
+    // `pdp.languages`-shaped field + render branch to CourseDetails.astro.
+    //
+    // ---- CLIENT-CONTENT FLAG (systemic, recurs a 4th time — worse this
+    // time) — this course's MOBILE frames again carry content that reads
+    // like an un-updated copy-paste, but this time it's not just wording
+    // drift: "You'll Stop and Instead" mobile (999:7173) shows COMBATING
+    // BUNIONS' own copy VERBATIM ("...thinking surgery is your only
+    // option" / "...reduce bunion pain and foot limitations" — nothing to
+    // do with Fit Feet), and the Comparison Chart's CTA button ("View Sole
+    // Switch Pro Course") disagrees with BOTH compared courses (Fit Feet vs
+    // Virtual Consultations) on BOTH breakpoints, not just mobile. Every
+    // instance is called out at its own field below; DESKTOP is kept
+    // canonical throughout per this task's brief.
+    pdp: {
+      sections: [
+        'course-details',
+        'course-overview',
+        'four-column',
+        'youll-stop-and-instead',
+        'comparison-chart',
+        'testimonial',
+        'your-instructors',
+        'cross-sell',
+        'faqs',
+        'pdp-reviews',
+        'logo-wall',
+      ],
+      // Course Details hero — Figma-verbatim from node 675:8156 (desktop) /
+      // 999:7170 (mobile). `heroTitle` overrides the catalog's longer
+      // `title` for just the hero <h1> (both frames read "Fit Feet Course").
+      heroTitle: 'Fit Feet Course',
+      // Both frames show a single flat price, no sale/compare-at price —
+      // `priceExact` matches this item's own top-level `price` (just with
+      // Figma's own ".00"), so no `compareAtPrice` field is set.
+      priceExact: '$185.00 USD',
+      // Hero intro paragraph — desktop text kept canonical (trailing Figma
+      // text-node whitespace trimmed, curly apostrophe normalized to
+      // straight per this file's convention). Identical wording on mobile
+      // (999:7170) — no desktop/mobile disagreement on this field, unlike
+      // most others on this item.
+      description:
+        "Online program taught by Gait Happens' Doctors Conley and Perez to help you build a healthier body starting with your feet.",
+      // Primary CTA (enroll, external — see CourseDetails.astro's Sole
+      // Switch/Sole Switch Pro/Combating Bunions remap precedent: Figma's
+      // own buybox is a cart/quantity-stepper "Add to Cart" flow, remapped
+      // to a Kajabi enrollment link). Realistic Kajabi placeholder URL;
+      // swap for the real offer/checkout URL once the course is live on
+      // Kajabi.
+      enrollHref: 'https://gaithappens.mykajabi.com/offers/fit-feet-course',
+      enrollLabel: 'Enroll Now',
+      // No `secondaryCta` — like Combating Bunions, neither of this course's
+      // Course Details frames shows a second course pill next to the CTA
+      // (single-tier course, no sibling tier to cross-link from the hero).
+      //
+      // No `courseCard` — like Combating Bunions, this course's Figma hero
+      // right column (675:8156 node I675:8156;173:147 / 999:7170 node
+      // I999:7170;181:674) is a plain close-up PHOTO of feet, no overlaid
+      // text/colored background (confirmed via get_design_context on both
+      // breakpoints) — `heroImage` is used instead (mutually exclusive with
+      // `courseCard`, see CourseDetails.astro's header comment).
+      heroImage: '/images/plp/fit-feet.jpg',
+      // Same placeholder PLP course shot every other image slot on this item
+      // already reuses (`overview.image`, `features[].image`,
+      // `instructors[].photo` below) — no dedicated hero photography exists
+      // for this course yet.
+      instructorsByline: 'Course By: Dr. Conley and Dr. Perez',
+      // CLIENT-CONTENT FLAG: mobile's own instructors byline (999:7170)
+      // reads "Course By: Dr. Conley and Dr. Riley" instead — Dr. Riley
+      // doesn't teach this course (this page's own Your Instructors section,
+      // both breakpoints, lists Conley + Perez, not Riley) — the same
+      // mobile-only copy-paste error Combating Bunions' own byline hit.
+      // Desktop's "Dr. Conley and Dr. Perez" is kept canonical (matches this
+      // item's own top-level `description` and the real instructor roster
+      // below).
+      //
+      // Course Overview — Figma 675:8157 (desktop) / 999:7171 (mobile).
+      // Desktop kept canonical for `details`/`body` — mobile disagrees on
+      // MORE than wording here (see the CLIENT-CONTENT FLAG below).
+      overview: {
+        image: '/images/plp/fit-feet.jpg',
+        details: [
+          { label: 'Course Length', value: '12 Weeks' },
+          { label: 'Evidence Based', value: 'Yes' },
+          { label: 'Course Structure', value: 'Online on demand' },
+          { label: 'Course Style', value: 'Follow-Along Video Workouts' },
+          {
+            label: 'Audience',
+            value:
+              'Individuals with foot or lower body aches and pains that are keeping you from moving freely.',
+          },
+        ],
+        // CLIENT-CONTENT FLAG: mobile's Audience value (999:7171) reads
+        // "Anyone looking to understand how to choose healthy shoes for
+        // themselves" — that's Sole Switch's own Audience sentence
+        // (byte-for-byte, see that item's own `overview.details` above),
+        // not this course's, and has nothing to do with Fit Feet — another
+        // Sole-Switch-template copy-paste error. Mobile's 3rd/4th detail
+        // labels also rename to "Course Format"/"Course Style" (dropping
+        // "Follow-Along Video Workouts" down to just "Video lecture") —
+        // desktop's 5-fact set above is kept canonical throughout. Mobile's
+        // Course Concepts paragraph also carries 2 typos ("individualize",
+        // "more with greater ease" instead of "individualized"/"move with
+        // greater ease") not present in desktop's grammatically-correct
+        // version below.
+        body: 'This 12-week, clinician-informed program introduces foundational concepts centered on restoring foot function through individualized, progressive movement. Over a 12-week framework, participants explore how foot structure influences movement patterns while developing strength, mobility, and stability tailored to their specific foot type. This program helps individuals move with greater ease and confidence.',
+      },
+      // 4 Column feature band — Figma-verbatim heading + 4 blurbs from node
+      // 675:8158 (desktop) / 999:7172 (mobile). No dedicated feature
+      // photography exists for this course — `image` reuses this item's own
+      // PLP course shot for all 4 cards, same placeholder approach every
+      // other course's `features` array takes.
+      featuresHeading: "What's Included:",
+      features: [
+        {
+          image: '/images/plp/fit-feet.jpg',
+          label: null,
+          text: 'The Fit Feet Program includes a structured 12-week progression divided into four phases.',
+        },
+        {
+          image: '/images/plp/fit-feet.jpg',
+          label: null,
+          text: 'Fifteen 25 minute follow-along workouts led by clinicians, with built-in modifications and progressions.',
+        },
+        {
+          image: '/images/plp/fit-feet.jpg',
+          label: null,
+          text: 'Clinically curated exercises to target your feet and connect your feet to your hips, core, and more.',
+        },
+        {
+          image: '/images/plp/fit-feet.jpg',
+          label: null,
+          // CLIENT-CONTENT FLAG: mobile's 4th blurb (999:7172) reads "When
+          // the toes can properly splay, our foot and ankle muscles engage,
+          // creating a stronger, more stable platform from which to propel
+          // ourselves forward." — that's Sole Switch/Sole Switch Pro's own
+          // 4th blurb verbatim, not written for this course. Desktop's
+          // Fit-Feet-specific text is kept canonical.
+          text: "You'll gain access to the Fit Feet community where you can ask questions and share your progress.",
+        },
+      ],
+      // "You'll Stop and Instead" — Figma 996:8331 (desktop) / 999:7173
+      // (mobile).
+      youllStop: {
+        stop: {
+          lead: "You'll stop",
+          body: 'chasing symptoms',
+        },
+        instead: {
+          lead: "and instead you'll",
+          body: 'focus on restoring the foundation of healthy movement through your feet.',
+        },
+      },
+      // CLIENT-CONTENT FLAG (severe — not just wording drift): mobile's own
+      // "You'll Stop and Instead" (999:7173) shows COMBATING BUNIONS' full
+      // copy verbatim instead of this course's own — "You'll stop / thinking
+      // surgery is your only option" and "and instead you'll / gain
+      // confidence in your ability to reduce bunion pain and foot
+      // limitations." has nothing to do with Fit Feet. Desktop's real
+      // "chasing symptoms" / "restoring the foundation of healthy movement"
+      // copy above is kept canonical.
+      //
+      // Comparison Chart — Figma-verbatim rows from node 996:8332 (desktop) /
+      // 1037:16515 (mobile). This course's own comparison is "Fit Feet VS
+      // Virtual Consultations" — `columns` uses the correct course names
+      // exactly as they appear in the table's own column headers/CTA target
+      // (see CLIENT-CONTENT FLAG below re: the big heading's own typo).
+      comparison: {
+        columns: ['Fit Feet', 'Virtual Consultations'],
+        intro:
+          'Trying to figure out which program is right for you? This table provides a brief overview of the differences between the Fit Feet Course and Virtual Consultations.',
+        // CLIENT-CONTENT FLAG: mobile's own intro paragraph (1037:16515)
+        // instead reads "...between the Sole Switch and Sole Switch Pro
+        // courses." — a verbatim copy of Sole Switch's own intro text, not
+        // updated for this course's actual Fit Feet/Virtual Consultations
+        // comparison. Desktop's correct intro is kept canonical.
+        //
+        // CLIENT-CONTENT FLAG (the big <h2>, both breakpoints): the pulled
+        // heading text literally reads "Feet Fit VS Virtual Consultation"
+        // (word order swapped + singular "Consultation") — disagreeing with
+        // this SAME frame's own column headers ("Fit Feet" / "Virtual
+        // Consultations", used above and in every row). Since the rendered
+        // `<h2>` is DERIVED from `columns` (ComparisonChart.astro), it can
+        // only carry one canonical form of the course names — `columns`
+        // above uses the correct, real course names (matching the table body
+        // and this course's own catalog `title`/route), not the big
+        // heading's own typo'd text.
+        rows: [
+          { label: 'Course Structure', values: ['Online', 'Online'] },
+          { label: 'Course Length', values: ['12 Weeks', '3-6 Weeks'] },
+          { label: 'Audience', values: ['Individuals', 'Individuals'] },
+          { label: 'Evidence Based', values: ['Yes', 'Yes'] },
+          { label: 'Continuing Education Credit', values: ['Yes', 'No'] },
+          { label: 'Course Price', values: ['$185', '$699'] },
+        ],
+        // Rows agree byte-for-byte between desktop and mobile — no data
+        // divergence here (unlike Combating Bunions' CE-Credit row).
+        //
+        // CTA — Figma-verbatim button text on BOTH frames ("View Sole Switch
+        // Pro Course").
+        //
+        // CLIENT-CONTENT FLAG: this CTA text names neither course in this
+        // table (Fit Feet vs Virtual Consultations) — it's Sole Switch's own
+        // CTA copy, apparently baked into this shared "Comparison Chart"
+        // component's default state rather than updated per-instance, and
+        // unlike every prior mismatch on this branch it's identical on BOTH
+        // breakpoints (not just a mobile-only drift). Kept Figma-verbatim
+        // (label text unchanged) and pointed at the internal route that
+        // literally matches that label (`/courses/sole-switch-pro`, an
+        // existing built route) rather than inventing a different target
+        // (e.g. a "View Virtual Consultations" link, which — beyond not
+        // being what Figma's text says — would point at a still-unbuilt
+        // placeholder route). Needs a real client decision before this ships
+        // past the reference build.
+        cta: { label: 'View Sole Switch Pro Course', href: '/courses/sole-switch-pro' },
+      },
+      // Testimonial — Figma-verbatim from node 675:8160 (desktop) / 999:7175
+      // (mobile). Identical quote/author/rating on both frames — no
+      // desktop/mobile disagreement here, unlike every other section on this
+      // page. No `role` line on either frame (name-only attribution, same as
+      // Sole Switch Pro's Phyllis). See tests/testimonial.test.mjs — array
+      // shape required.
+      testimonial: [
+        {
+          quote: [
+            "I'm very thankful for this program. Your exercises are easy to do anywhere, especially those first couple weeks. The videos are great. I've learned so much about my foot. I'm thankful to be able to walk without excruciating pain like I experienced for 8 months before starting this program.",
+          ],
+          author: 'Michele Banfield',
+          role: null,
+          rating: 5,
+        },
+      ],
+      // Your Instructors — Figma-verbatim from node 675:8161 (desktop) /
+      // 999:7176 (mobile). Identical 2 instructors/bios/credentials on both
+      // frames — no desktop/mobile disagreement here. Both instructors and
+      // both bios are byte-for-byte the SAME ones Combating Bunions already
+      // carries (same 2 clinicians teach all 3 courses) — reused verbatim.
+      // `photo` reuses this item's own PLP course shot for both cards (no
+      // dedicated instructor photography exists yet, same placeholder
+      // convention every other course takes).
+      instructors: [
+        {
+          photo: '/images/plp/fit-feet.jpg',
+          name: 'Dr. Courtney Conley',
+          credential: 'Lakewood, Colorado',
+          bio: [
+            "Dr. Courtney Conley is a national bestselling author, international educator, and one of the world's foremost authorities on foot and gait health. Her book, Walk, hit both the USA Today and Amazon bestseller lists, resonating with readers eager to understand the profound connection between foot function and whole-body health. The book's success has brought Dr. Conley to some of the most respected platforms in health and wellness media, including appearances on The Peter Attia Drive Podcast, Diary of a CEO, Feel Better, Live More with Dr. Rangan Chatterjee, as well as national television features on CBS Mornings and Fox & Friends.",
+            "Dr. Conley holds a Doctorate in Chiropractic Medicine and two Bachelor's degrees in Kinesiology and Human Biology. With nearly 25 years of clinical practice, she has worked with professional athletes from organizations including the Phoenix Suns, New York Yankees, Cleveland Browns, New York Giants, and San Francisco 49ers. She has also collaborated with medical experts across the country, addressing complex foot and gait challenges at the highest level of performance. She currently serves as Head of Patient Care at Total Health Solutions and Total Health Performance in Lakewood, Colorado—premier clinics known for comprehensive, rehabilitation-focused patient care where she is committed to helping people improve their lives one step at a time.",
+            'That same commitment led her to found and lead Gait Happens, an education enterprise leading a paradigm shift in foot health by empowering people worldwide to reclaim optimal foot function through science-backed training and protocols. Gait Happens offers a comprehensive ecosystem of resources — from professional education for practitioners to consumer training programs and personalized consultations with top-of-field specialists — all grounded in research and designed to deliver real, measurable results. With a focus on natural, preventative approaches to foot and gait health, Gait Happens has built a global community of individuals committed to moving better and living pain-free, offering a proven alternative to unnecessary surgical intervention through education and evidence-based care.',
+            'An internationally recognized speaker, Dr. Conley shares her expertise to clinicians and consumers alike through in-person and online lectures on foot mechanics and gait dynamics. Her work spans authorship, mentorship, patent and curriculum development, and the creation of pioneering foot and gait methodologies. Yet at the heart of every lecture, protocol, and patient interaction is the same driving belief: real strength starts from the ground up, and healthy feet are the foundation every body needs to move through life with confidence and ease.',
+          ],
+        },
+        {
+          photo: '/images/plp/fit-feet.jpg',
+          name: 'Dr. Jenifer Perez, DC',
+          credential: 'Lafayette, Colorado',
+          bio: [
+            'Dr. Jen Perez is the co-owner and Vice President of Gait Happens. As both an educator and a clinician, her mission is to empower as many people as possible to take charge of their lower body health so they can get back to what they love.',
+          ],
+        },
+      ],
+      // Cross-sell band — Figma-verbatim heading from the "Product Cards"
+      // frame, node 1006:7484 (desktop) / 1106:15515 (mobile). Identical
+      // content on both breakpoints — no desktop/mobile disagreement here.
+      //
+      // CLIENT-CONTENT FLAG: this course's own 3 cards read "Combating
+      // Bunions" / "Fit Feet Course" / "Sole Switch Course" — the SECOND
+      // card literally cross-sells THIS SAME course from its own page (a
+      // self-referencing link), the same "Product Cards" shared/reused-frame
+      // artifact already flagged on Combating Bunions' own crossSell (that
+      // item's first card self-referenced instead). Kept Figma-verbatim per
+      // this task's "content is Figma-verbatim, never invent" instruction
+      // rather than editorially swapping it for a 4th course.
+      crossSell: {
+        heading: 'More Resources For Your Movement Journey',
+        itemIds: ['combating-bunions', 'fit-feet', 'sole-switch'],
+        shopAllHref: '/collections/all',
+      },
+      // FAQs — Figma node 1002:10523 (desktop) / 999:7178 (mobile).
+      //
+      // CRITICAL FLAG: mobile's FAQ accordion doesn't just disagree on
+      // wording — it shows 5 ENTIRELY DIFFERENT questions ("Virtual
+      // Consultations", "Gait Happens Education", "Online Courses",
+      // "Memberships", "Gait Happens Products" — generic site-wide category
+      // labels, not course questions), confirmed via get_design_context on
+      // both node trees — the same mobile-FAQ artifact already flagged on
+      // Combating Bunions (in fact these are the SAME 5 generic labels).
+      // Desktop's 7 real, course-specific question labels are used below
+      // instead, per this task's "keep desktop canonical" brief.
+      //
+      // Neither frame contains any ANSWER copy for its own questions (both
+      // are static mockups of the collapsed state only) — same situation
+      // Sole Switch Pro's/Combating Bunions' own FAQ sections hit. Per this
+      // task's explicit instruction NOT to author plausible-sounding
+      // invented answers, each row below is handled per its own actual
+      // grounding:
+      //   - Row 1 (athletic ability): restates this SAME entry's already-
+      //     Figma-verbatim `features[1]` text ("built-in modifications and
+      //     progressions") in plain customer-facing prose.
+      //   - Row 6 (Fit Feet vs. Virtual Consultation): restates this SAME
+      //     entry's already-Figma-verbatim `comparison` rows (length,
+      //     structure, price).
+      //   - Rows 2, 3, 4, 5 & 7 (equipment; watch-count/access; app;
+      //     diagnosis suitability x2): NO grounding data exists anywhere in
+      //     this file for any of these, and none can be answered from real
+      //     data without inventing a new fact — 2 of them (5 & 7) are
+      //     medical-suitability questions, where inventing an answer would
+      //     be an unfounded clinical claim, not just a content gap. Each
+      //     `content` value is a short, neutral "copy pending" placeholder —
+      //     no invented factual claim about the course. This disclosure
+      //     lives only here and in this task's report, never in the
+      //     rendered HTML (see Combating Bunions' own FAQ comment for the
+      //     precedent this follows).
+      faqs: [
+        {
+          label: "I'm not very athletic, can I still do this program?",
+          content:
+            "<p>Yes — the program's fifteen 25-minute follow-along workouts include built-in modifications and progressions, so they can be adapted to different fitness levels.</p>",
+        },
+        {
+          label: 'What equipment will I need to use in this program?',
+          content: '<p>Details on equipment for this program are coming soon.</p>',
+        },
+        {
+          label: 'How many times will I be able to watch the program?',
+          content: '<p>Details on program access are coming soon.</p>',
+        },
+        {
+          label: 'Is there an app I can use?',
+          content: '<p>Details on a companion app are coming soon.</p>',
+        },
+        {
+          label: 'I have a specific diagnosis. Will the Fit Feet Program work for me?',
+          content: "<p>Details on this program's suitability for specific diagnoses are coming soon.</p>",
+        },
+        {
+          label: "What's the difference between the Fit Feet Program and a Virtual Consultation?",
+          content:
+            '<p>The Fit Feet Program is a $185, 12-week structured, on-demand program for individuals. Virtual Consultations run $699 over 3-6 weeks. See the comparison table above for the full breakdown.</p>',
+        },
+        {
+          label: 'Will the Fit Feet Program treat my specific diagnosis?',
+          content: '<p>Details on treating specific diagnoses are coming soon.</p>',
+        },
+      ],
+      // Reviews placeholder — same static reviews-app-screenshot values
+      // every product/course PDP reuses (see Toe Spacers' `reviews` comment
+      // / PdpReviews.astro's note); this course has no real review data any
+      // more than the others do.
+      reviews: {
+        rating: 4.75,
+        count: 12,
+        distribution: [
+          { stars: 5, count: 11 },
+          { stars: 4, count: 0 },
+          { stars: 3, count: 0 },
+          { stars: 2, count: 1 },
+          { stars: 1, count: 0 },
+        ],
+      },
+    },
   },
   {
     id: 'virtual-consultations',

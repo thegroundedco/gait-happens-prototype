@@ -73,7 +73,9 @@ export const routes = [
   // block now exist; see src/pages/courses/combating-bunions.astro and
   // catalog.js).
   r('/courses/combating-bunions', 'Combating Bunions', 'course', ['Home', 'Courses', 'Combating Bunions'], { status: 'built' }),
-  r('/courses/fit-feet', 'Fit Feet', 'course', ['Home', 'Courses', 'Fit Feet']),
+  // Chunk B1 Task 4: flipped from placeholder to built (page + catalog `pdp`
+  // block now exist; see src/pages/courses/fit-feet.astro and catalog.js).
+  r('/courses/fit-feet', 'Fit Feet', 'course', ['Home', 'Courses', 'Fit Feet'], { status: 'built' }),
   r('/courses/virtual-consultations', 'Virtual Consultations', 'course', ['Home', 'Courses', 'Virtual Consultations']),
   // Chunk B1 Task 2: flipped from placeholder to built (page + catalog
   // `pdp` block now exist; see src/pages/courses/sole-switch.astro and
