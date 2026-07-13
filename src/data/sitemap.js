@@ -62,17 +62,27 @@ export const routes = [
   // this task (unlike the other 4 rolled-out products above, which already
   // had placeholder routes to flip).
   r('/products/mobility-ball', 'Mobility Ball', 'pdp', ['Home', 'Shop', 'Mobility Ball'], { status: 'built' }),
-  r('/products/walk', 'WALK', 'pdp', ['Home', 'Shop', 'WALK']),
+  // Chunk B1 Task 5: flipped from placeholder to built (page + catalog `pdp`
+  // block now exist; see src/pages/products/walk.astro and catalog.js).
+  r('/products/walk', 'WALK', 'pdp', ['Home', 'Shop', 'WALK'], { status: 'built' }),
 
   // Courses
   r('/collections/courses-individuals', 'Courses for Individuals', 'plp', ['Home', 'Courses', 'Individuals'], { status: 'built' }),
   r('/collections/courses-professionals', 'Courses for Professionals', 'plp', ['Home', 'Courses', 'Professionals'], { status: 'built' }),
   r('/collections/all-courses', 'All Courses', 'plp', ['Home', 'Courses', 'All Courses'], { status: 'built' }),
   r('/courses/foot-fest', 'Foot Fest', 'course', ['Home', 'Courses', 'Foot Fest']),
-  r('/courses/combating-bunions', 'Combating Bunions', 'course', ['Home', 'Courses', 'Combating Bunions']),
-  r('/courses/fit-feet', 'Fit Feet', 'course', ['Home', 'Courses', 'Fit Feet']),
+  // Chunk B1 Task 3: flipped from placeholder to built (page + catalog `pdp`
+  // block now exist; see src/pages/courses/combating-bunions.astro and
+  // catalog.js).
+  r('/courses/combating-bunions', 'Combating Bunions', 'course', ['Home', 'Courses', 'Combating Bunions'], { status: 'built' }),
+  // Chunk B1 Task 4: flipped from placeholder to built (page + catalog `pdp`
+  // block now exist; see src/pages/courses/fit-feet.astro and catalog.js).
+  r('/courses/fit-feet', 'Fit Feet', 'course', ['Home', 'Courses', 'Fit Feet'], { status: 'built' }),
   r('/courses/virtual-consultations', 'Virtual Consultations', 'course', ['Home', 'Courses', 'Virtual Consultations']),
-  r('/courses/sole-switch', 'Sole Switch', 'course', ['Home', 'Courses', 'Sole Switch']),
+  // Chunk B1 Task 2: flipped from placeholder to built (page + catalog
+  // `pdp` block now exist; see src/pages/courses/sole-switch.astro and
+  // catalog.js).
+  r('/courses/sole-switch', 'Sole Switch', 'course', ['Home', 'Courses', 'Sole Switch'], { status: 'built' }),
   // Task 1 (Course PDP Chunk A): first course PDP scaffold — flipped from
   // placeholder to built (page + catalog `pdp` block now exist; see
   // src/pages/courses/sole-switch-pro.astro and catalog.js).

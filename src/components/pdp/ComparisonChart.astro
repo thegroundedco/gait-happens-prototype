@@ -21,27 +21,83 @@
 // a future comparison table's frame ever DOES show a check/× glyph, that
 // table's data can express it as `true`/`false` without a component change.
 //
-// The heading ("Sole Switch VS Sole Switch Pro") and the closing CTA
-// button ("View Sole Switch Pro Course") have no field in the brief's
-// exact `{ columns, rows }` contract — same "static markup, not data"
-// treatment CourseOverview.astro gives its own unlisted "Course
-// Overview"/"Course Concepts" labels — so both are hardcoded here,
-// verbatim on both frames. The CTA's href has no data field either; it
-// reuses `item.pdp.enrollHref` (the same Kajabi placeholder
-// CourseDetails.astro's primary "Enroll Now" CTA already points at) with
-// the same external-link treatment (`target="_blank"
-// rel="noopener noreferrer"`), rather than inventing a new catalog field
-// for a single button.
+// The heading ("Sole Switch VS Sole Switch Pro" on both pulled frames) is
+// DERIVED from `comparison.columns` — `{columns[0]} VS` as the (mobile-only-
+// recolored) prefix `<span>`, `{columns[1]}` as the tail — not hardcoded
+// (review fix wave 2). An earlier version of this comment defended the
+// hardcode by analogy to CourseOverview.astro's static "Course Overview"/
+// "Course Concepts" section labels, but that analogy didn't hold: those are
+// generic labels every course page reuses, while "Sole Switch"/"Sole Switch
+// Pro" are THIS pair of courses' names, baked into a shared component that
+// eight still-unbuilt course routes will also render. `columns` already
+// carries both names for the table itself, so no new data field is needed —
+// both pulled frames' headings are exactly `${columns[0]} VS` + a single
+// literal space + `${columns[1]}` (confirmed against the built HTML), so the
+// derivation reproduces both verbatim, whitespace included.
 //
-// The intro paragraph directly under the heading is the one place desktop
-// and mobile genuinely DISAGREE on content, not just wording: desktop
-// reads a Dr. Courtney Conley bio ("...holds a Doctorate in Chiropractic
-// Medicine..."); mobile reads a table-purpose explainer ("Trying to figure
-// out which course is right for you?..."). Since this text has no data
-// slot in the brief's schema either, desktop is kept as the one canonical
-// source at both breakpoints — same "pull desktop first, flag the
-// disagreement" precedent CourseOverview.astro's header comment sets for
-// its own `details`/Audience conflict — flagged here, not silently merged.
+// ---- Component-generalization fix (Chunk B1 Task 2 follow-up) -----------
+// The CTA used to be hardcoded to a static label ("View Sole Switch Pro
+// Course") wired to `item.pdp.enrollHref` — correct on Sole Switch Pro's
+// OWN page (where `enrollHref` IS the Pro enrollment link) but wrong on
+// Sole Switch's page, whose `enrollHref` is its OWN (Basic) enrollment
+// link, not a route to the Pro course this CTA is supposed to upsell.
+// `item.pdp.comparison.cta = { label, href }` now supplies both, sourced
+// per-item in catalog.js: Sole Switch Pro's `cta.href` reproduces its old
+// `enrollHref` value byte-for-byte (same external Kajabi link, so this
+// page's rendered HTML is unchanged); Sole Switch's `cta.href` instead
+// points at `/courses/sole-switch-pro` (an internal upsell route, confirmed
+// against Figma — the CTA's copy is a "View Sole Switch Pro Course" upsell
+// on BOTH course pages, not a self-enroll link).
+//
+// ---- Internal-vs-external CTA fix (review fix wave 2) -------------------
+// `target="_blank" rel="noopener noreferrer"` were previously left static/
+// unconditional purely to keep Sole Switch Pro's markup byte-identical —
+// but that made Sole Switch's now-internal `/courses/sole-switch-pro` link
+// wrongly hijack a new tab (and `rel="noopener noreferrer"` also stripped
+// the same-site referrer on it). That byte-identity-vs-correctness
+// trade-off was a false dilemma: `isExternal = isExternalHref(comparison.
+// cta.href)` derives externality from the href itself, and the two
+// attributes are spread onto the `<a>` only when `isExternal`. Sole Switch
+// Pro's `cta.href` is still the external `https://…mykajabi.com/…` Kajabi
+// link, so `isExternal` is true there and its markup stays byte-identical;
+// Sole Switch's `cta.href` is the internal `/courses/sole-switch-pro`
+// route, so `isExternal` is false and the attributes are correctly
+// omitted. `isExternalHref` (`src/scripts/links.js`) is this repo's one
+// shared internal/external link predicate — CourseDetails.astro's enroll
+// CTA reuses the same import (final review fix wave; previously each
+// component declared its own copy of the same `/^https?:/` regex).
+//
+// ---- Intro paragraph is per-course data (review fix wave 2) -------------
+// The intro paragraph directly under the heading is `comparison.intro`, an
+// OPTIONAL per-course data field — NOT a desktop/mobile divergence as an
+// earlier version of this comment claimed. That claim was only ever true
+// of Sole Switch Pro's OWN frame (675:4357), whose paragraph is a Dr.
+// Courtney Conley bio ("...holds a Doctorate in Chiropractic Medicine...").
+// Sole Switch's OWN frame (998:14860) genuinely reads a different,
+// table-purpose explainer ("Trying to figure out which course is right for
+// you?...") — and it does so at DESKTOP too, not just mobile; that frame
+// was never actually pulled before this fix. Each course's `comparison.
+// intro` is sourced Figma-verbatim from that course's own comparison node
+// in catalog.js; the field is optional (the `<p>` only renders when
+// present) so a future comparison table with no intro paragraph of its own
+// doesn't force one. Rendered via plain `{comparison.intro}` text
+// interpolation, NOT `set:html` (review fix wave 2, reverting an earlier
+// version of this fix): neither course's `intro` value contains any HTML
+// markup, so `set:html` bought nothing here, and the PdpAccordion/Faqs
+// precedent it cited doesn't apply — those fields genuinely carry markup
+// (a real `<a>` hyperlink lives in one accordion `content` value), a plain
+// prose paragraph doesn't. Astro's HTML-escaping of the interpolated text
+// does turn Sole Switch Pro's "bachelor's" into "bachelor&#39;s" in the
+// built output, but that's a cosmetic entity-escape, not a rendering
+// change (the two are visually identical in a browser) — and the pilot
+// page already emits `&#39;` six times via InstructorCard.astro's plain
+// `{paragraph}` bios ("two Bachelor&#39;s degrees"), so text interpolation
+// here makes this paragraph consistent with the rest of the page's prose
+// instead of the one outlier escaping apostrophes via raw HTML. This is a
+// reference build a client dev team is porting to Shopify: `set:html`
+// signals "this field carries HTML" and invites wiring it to an unescaped
+// merchant-editable field, which breaks on ordinary copy (an `&` in "R&D")
+// even setting XSS aside.
 //
 // ---- Table semantics + a11y (the point of this task) --------------------
 // A real `<table>`: `<thead>` has one sr-only corner `<th scope="col">`
@@ -113,20 +169,23 @@
 // 424px panels use. The CTA button's 20px horizontal padding is a literal
 // (this repo's --space scale has 16px/24px on either side of it, no exact
 // 20px step) — also flagged per the same allowance.
+import { isExternalHref } from '../../scripts/links.js';
+
 const { item } = Astro.props;
 const comparison = item.pdp?.comparison;
+// See "Internal-vs-external CTA fix" above — externality is derived from
+// the href, not hardcoded, so `target`/`rel` are only spread onto the CTA
+// when it actually leaves the site.
+const isExternal = comparison?.cta ? isExternalHref(comparison.cta.href) : false;
 ---
 {comparison && (
   <section class="comparison-chart" data-pdp-id={item.id}>
     <div class="comparison-chart__inner">
       <div class="comparison-chart__intro-group">
         <h2 class="comparison-chart__heading">
-          <span class="comparison-chart__heading-prefix">Sole Switch VS</span> Sole Switch Pro
+          <span class="comparison-chart__heading-prefix">{comparison.columns[0]} VS</span> {comparison.columns[1]}
         </h2>
-        <p class="comparison-chart__intro">
-          Dr. Courtney Conley holds a Doctorate in Chiropractic Medicine as well as two bachelor's
-          degrees in Kinesiology and Human Biology. The founder and creator of Gait Happens.
-        </p>
+        {comparison.intro && <p class="comparison-chart__intro">{comparison.intro}</p>}
       </div>
 
       <div class="comparison-chart__table-wrap">
@@ -164,14 +223,13 @@ const comparison = item.pdp?.comparison;
         </table>
       </div>
 
-      {item.pdp?.enrollHref && (
+      {comparison.cta && (
         <a
           class="comparison-chart__cta"
-          href={item.pdp.enrollHref}
-          target="_blank"
-          rel="noopener noreferrer"
+          href={comparison.cta.href}
+          {...(isExternal ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
         >
-          View Sole Switch Pro Course
+          {comparison.cta.label}
         </a>
       )}
     </div>

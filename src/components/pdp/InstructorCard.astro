@@ -14,8 +14,64 @@
 // object its caller already has to hand — no extra `index`/`key` prop —
 // while still producing a real, unique id for the toggle's `aria-controls`
 // to target.
+//
+// ---- `credential` guard (review-fix wave, post-Walk) ---------------------
+// Walk's own instructor entries are the first ever to pass `credential:
+// null` (neither of its cards shows the teal location line other courses'
+// cards do). This used to render unconditionally (`<p>{instructor.credential}</p>`),
+// so a null value shipped one small empty `<p></p>` per Walk card. Guarded
+// the same optional-field way every other section here treats an absent
+// field (e.g. Testimonial.astro's `role`, FourColumn.astro's `label`) — no
+// existing course instructor is affected, since all of them already carry a
+// real, non-null `credential` string.
+//
+// ---- `bioExpandable` guard (review-fix wave, post-Walk) -------------------
+// The "Read More" toggle used to render unconditionally too. Walk's
+// Dr. Milica McDowell exposed why that's wrong: her authored `bio` above is
+// a disclosed, KNOWN-INCOMPLETE transcript (see catalog.js's comment on her
+// entry) — Figma clamps her real card behind a "Read More" whose expanded
+// text this task's tooling could never retrieve, so what we ship is only
+// the legible collapsed preview. Rendering a real toggle over that preview
+// promises access to hidden content that, in OUR data, genuinely doesn't
+// exist — a false affordance, the same call Testimonial.astro's decorative
+// prev/next arrows already make when there's nothing to page between (see
+// that component's header comment). `item.pdp.instructors[].bioExpandable`
+// is an optional per-instructor override — defaulting to `true` (render the
+// toggle), so every already-shipped course instructor (Conley/Riley/Perez)
+// is entirely unaffected and keeps rendering its toggle exactly as before
+// (regression-diff verified byte-identical) — set to `false` only on
+// McDowell's entry.
+//
+// This is deliberately an authored data flag, not a computed heuristic —
+// but the earlier version of this comment overstated why, claiming a
+// computed "is this bio actually clamped" check is unsound in general. It
+// isn't, for the right instrument: a live DOM measurement taken during this
+// fix (`scrollHeight` vs. clamped `clientHeight` at this card's real
+// 384px/body-sm rendering) showed Dr. Allison Riley's existing, COMPLETE,
+// Figma-verbatim single-paragraph bio (219 characters) does NOT overflow the
+// 4-line clamp on Sole Switch Pro today. What that measurement actually
+// disproves is a CHARACTER-LENGTH heuristic ("N chars ≈ clamped") — Riley's
+// bio is short enough to sit under 219 characters and still legitimately
+// need its toggle on a narrower card, so no static length threshold can be
+// right at both widths. A MEASURED overflow check
+// (`bio.scrollHeight > bio.clientHeight`, re-evaluated on resize, since
+// whether 4 lines of body-sm text overflow this card is genuinely
+// width-dependent — mobile vs. desktop reflow the same bio differently) is
+// the correct instrument for "does this bio need a toggle", and would
+// correctly turn Riley's toggle off at the width where it doesn't overflow.
+// Implementing that — hiding the toggle when the bio doesn't overflow,
+// which subsumes today's authored `bioExpandable: false` skip for cards
+// that already know they don't need it — is deferred to a follow-up task:
+// it needs a real both-widths browser pass to verify against, out of this
+// review wave's scope. Until then, the authored flag stays the honest
+// mechanism for the one case we DO know about (McDowell's disclosed partial
+// excerpt); Riley's/Perez's short-but-complete bios are a pre-existing,
+// undiagnosed minor inconsistency (their toggle is likely also inert at
+// today's widths) left alone pending that follow-up, not treated as
+// evidence that measurement itself doesn't work.
 const { instructor } = Astro.props;
 const bioId = `instructor-bio-${instructor.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')}`;
+const showToggle = instructor.bioExpandable !== false;
 ---
 <div class="instructor-card">
   <div class="instructor-card__photo">
@@ -24,23 +80,25 @@ const bioId = `instructor-bio-${instructor.name.toLowerCase().replace(/[^a-z0-9]
   <div class="instructor-card__body">
     <div class="instructor-card__intro">
       <h3 class="instructor-card__name">{instructor.name}</h3>
-      <p class="instructor-card__credential">{instructor.credential}</p>
+      {instructor.credential && <p class="instructor-card__credential">{instructor.credential}</p>}
     </div>
-    <div class="instructor-card__bio" id={bioId} data-collapsed>
+    <div class="instructor-card__bio" id={bioId} data-collapsed={showToggle ? '' : undefined}>
       {instructor.bio.map((paragraph) => <p>{paragraph}</p>)}
     </div>
-    <button
-      type="button"
-      class="instructor-card__toggle"
-      data-instructor-toggle
-      aria-expanded="false"
-      aria-controls={bioId}
-    >
-      <span data-instructor-toggle-label>Read More</span>
-      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-        <path d="M5 1L12 8L5 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-      </svg>
-    </button>
+    {showToggle && (
+      <button
+        type="button"
+        class="instructor-card__toggle"
+        data-instructor-toggle
+        aria-expanded="false"
+        aria-controls={bioId}
+      >
+        <span data-instructor-toggle-label>Read More</span>
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+          <path d="M5 1L12 8L5 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+      </button>
+    )}
   </div>
 </div>
 <style>

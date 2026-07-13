@@ -53,6 +53,19 @@
 // correct rather than mirroring Figma's shared style name into a duplicate
 // `<h2>`.
 //
+// `item.pdp.instructorsHeading` is an optional per-item override of the
+// heading text, defaulting to every course's existing "Your Instructors" —
+// the same "optional field, existing content is the default" idiom
+// FourColumn.astro's `item.pdp.featuresHeading` already establishes (the
+// closest precedent: a section whose heading varies per item). Added
+// because Walk — the first PRODUCT to render this section (see file header)
+// — is a book, so its own Figma heading (BOTH breakpoints, node
+// `I721:7907;173:318` desktop / `I1017:9594;183:393` mobile) reads "Meet the
+// Authors", not "Your Instructors" (its 2 cards are the book's authors, not
+// course instructors). Every course keeps rendering the unmodified default
+// by simply never setting this field — confirmed byte-identical via this
+// branch's regression diff.
+//
 // ---- "Read More" bio toggle --------------------------------------------
 // Both frames show every bio visually truncated (a fixed-height box, ending
 // mid-sentence with "…") with a real "Read More" button + chevron below it.
@@ -98,11 +111,12 @@ import InstructorCard from './InstructorCard.astro';
 
 const { item } = Astro.props;
 const instructors = item.pdp?.instructors ?? [];
+const heading = item.pdp?.instructorsHeading ?? 'Your Instructors';
 ---
 {instructors.length > 0 && (
   <section class="your-instructors" data-pdp-id={item.id}>
     <div class="your-instructors__inner">
-      <h2 class="your-instructors__heading">Your Instructors</h2>
+      <h2 class="your-instructors__heading">{heading}</h2>
       <div class="your-instructors__row">
         {instructors.map((instructor) => (
           <InstructorCard instructor={instructor} />

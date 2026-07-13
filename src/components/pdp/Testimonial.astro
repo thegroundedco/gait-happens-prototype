@@ -1,26 +1,36 @@
 ---
-// Testimonial band (Task 6, Course PDP Chunk A) — Figma desktop 1106:15576
-// (file FX7PDNvhZwyozODaq8Q8i7) / mobile 1109:14382 (the "Sole Switch Pro
-// Page" > "Testimonial" instance inside the professional-courses mobile
-// frame 1109:14374). Prop is `{ item }` (same shape as CourseOverview /
-// YoullStopAndInstead / ComparisonChart), reading `item.pdp.testimonial`.
-// Deliberately generic — nothing course-specific is hardcoded — so it can
-// also serve the deferred Walk product PDP later without changes.
+// Testimonial band (Task 6, Course PDP Chunk A; carousel wired up in Task 1,
+// Chunk B1) — Figma desktop 1106:15576 (file FX7PDNvhZwyozODaq8Q8i7) /
+// mobile 1109:14382 (the "Sole Switch Pro Page" > "Testimonial" instance
+// inside the professional-courses mobile frame 1109:14374). Prop is `{ item
+// }` (same shape as CourseOverview / YoullStopAndInstead / ComparisonChart),
+// reading `item.pdp.testimonial`. Deliberately generic — nothing
+// course-specific is hardcoded — so it can also serve the deferred Walk
+// product PDP later without changes.
 //
-// `item.pdp.testimonial` = `{ quote, author, role, rating }`, this task's
-// brief-mandated single-testimonial shape (an array is also accepted, see
-// below, for a future carousel — but Sole Switch Pro only has one
-// testimonial, so nothing here builds carousel logic). `quote` is an array
-// of paragraph strings, one per `<p>` in the pulled Figma code, not a
-// single string: the frame's first paragraph has a genuine, DELIBERATE
-// internal line break (`<br aria-hidden />` in the pulled code) between two
-// sentences — it lands on both the 916px-wide desktop card AND the 342px
+// `item.pdp.testimonial` is an ARRAY of `{ quote, author, role, rating }`
+// (Chunk B1's migrated, brief-mandated shape — see tests/testimonial.test.mjs,
+// which asserts every catalog item's `pdp.testimonial` is a non-empty array).
+// That's the ONE contract: the catalog carries the array shape exclusively,
+// this component reads `testimonials` straight off it below with no
+// normalization branch, and Pdp.astro's registry guard
+// (`item.pdp?.testimonial?.length > 0`) matches the same array shape — no
+// bare-object form exists anywhere in the composer/catalog/component chain
+// to keep in sync (an earlier draft normalized a bare object into a
+// 1-element array here "for un-migrated items"; that branch is dead code
+// against a catalog the test suite already forbids from carrying that shape,
+// so it was removed rather than left to muddy the contract for the Shopify
+// porting team). `quote` is an array of paragraph strings, one per
+// `<p>` in the pulled Figma code, not a single string: Sole Switch Pro's
+// only testimonial has a genuine, DELIBERATE internal line break (`<br
+// aria-hidden />` in the pulled code) between two sentences in its first
+// paragraph — it lands on both the 916px-wide desktop card AND the 342px
 // mobile card, so it isn't a width-based reflow artifact, it's real data.
 // That literal break is kept as a `\n` inside the one paragraph string and
 // rendered as a `<br>` below (same "deliberate break kept as data, not
 // markup" precedent CourseDetails.astro's `courseCard.titleLines` set).
-// `role` is part of the shape per the brief but is `null` here — Phyllis'
-// attribution in both frames is name-only, no title/role line — and the
+// `role` is part of the shape per the brief but is `null` for Phyllis'
+// testimonial — her attribution is name-only, no title/role line — and the
 // markup only renders a role line when one is present, same optional-field
 // guard every other section here uses (e.g. `item.pdp.description`).
 //
@@ -49,28 +59,75 @@
 // (a person's name is deliberately NOT a `<cite>` — the HTML spec limits
 // `<cite>` to titles of works, not people).
 //
-// ---- Carousel arrows: static placeholders, not a real slider ------------
+// ---- Carousel: real slider, DOM-state + event delegation (Task 1, B1) ---
 // Both frames show prev/next arrow affordances (desktop: flanking the
-// card; mobile: stacked below it). Per this task's brief a real slider is
-// DEFERRED — there's only one testimonial in the data today, nothing to
-// page between — so the arrows render as pure decoration: an
-// `aria-hidden="true"` wrapper around plain, non-interactive `<span>`s,
-// NOT `<button>`s. A `<button>`, even `disabled`, still promises "this is
-// a control" to some assistive tech (added to a rotor/buttons list,
-// announced as unavailable) — for markup that currently does nothing and
-// isn't even styled to LOOK disabled (Figma renders them fully opaque, no
-// dimming), that would be a false affordance. A plain hidden decorative
-// element matches what sighted users see too: static artwork with no
-// hover/focus treatment, same as it reads to a screen reader (nothing).
-// No `cursor: pointer` either, for the same reason. When a real slider is
-// built (its own task), swap these for real `<button aria-label="Previous
-// testimonial">` / `aria-label="Next testimonial"` elements wired to
-// prev/next state; that slider must be keyboard-operable, respect
-// `prefers-reduced-motion` for any transition, and initialize via this
-// project's init-on-load / `astro:after-swap` pattern (listeners attached
-// once at module scope) so it doesn't leak across Astro page transitions.
-// This task adds no client `<script>` at all — every element here is
-// inert markup, so there is nothing to init or leak.
+// card; mobile: stacked below it). Sole Switch Pro's data has exactly one
+// testimonial, so there — and for any other single-testimonial item — the
+// arrows still render as pure decoration: an `aria-hidden="true"` wrapper
+// around plain, non-interactive `<span>`s, NOT `<button>`s, no `cursor:
+// pointer`, no client `<script>` at all. A `<button>`, even styled inert,
+// still promises "this is a control" to some assistive tech, and a control
+// that does nothing is a false affordance — see `isCarousel` below, which
+// gates every difference between the two renders. This is Chunk A's
+// original reasoning, preserved unchanged for the single-testimonial case.
+//
+// Once an item carries MORE than one testimonial (`isCarousel`), the arrows
+// become real `<button type="button" aria-label="Previous/Next
+// testimonial">`s wired to `src/scripts/testimonial.js`, reusing the exact
+// same `ARROW_PATH` SVG and `--prev` 180°-rotation as the decorative
+// version — only the element type and interactivity change, not the
+// artwork. Every testimonial renders into the DOM as its own
+// `[data-testimonial-slide]`, toggled via `hidden`/`inert` (never removed
+// or re-created) — that's what prevents layout shift on paging and keeps
+// off-screen quotes out of the accessibility tree at the same time. Active-
+// slide state lives on the DOM itself (`data-testimonial-active` on the
+// `<section data-testimonial>`), not in a module variable, and
+// `testimonial.js` registers exactly ONE document-level delegated click
+// listener at module scope that resolves the section/slides fresh on every
+// click via `closest()`/`querySelectorAll()` — nothing is ever cached, so
+// there is nothing to re-init or leak across Astro ClientRouter page swaps.
+// No `astro:page-load` / `astro:after-swap` hook is used (that idiom
+// belongs to Header.astro, which DOES cache element references); this is
+// the same delegation idiom YourInstructors.astro's read-more toggle
+// already uses. The `<script>` itself is only emitted `{isCarousel && ...}`
+// — a single-testimonial item ships no script at all, same as today.
+//
+// Slides crossfade on paging, following ProductDetails.astro's own
+// `selectThumb` gallery-swap idiom (same `--motion-fast`/`--ease-standard`
+// tokens, same `matchMedia('(prefers-reduced-motion: reduce)')` short-
+// circuit to an instant swap) — adapted from ProductDetails' one `<img>`
+// whose `src` changes to N always-mounted slides whose `hidden`/`inert`
+// toggle. The adaptation keeps the a11y guarantee `hidden`+`inert` exist
+// for: `testimonial.js`'s `page()` only ever unhides ONE slide at a time —
+// it fades the outgoing slide's opacity to 0, and only once that finishes
+// does it flip `hidden`/`inert` (hiding the old slide, unhiding the new one
+// at opacity 0) before fading the new slide's opacity back to 1. So at
+// every instant exactly one slide is in the accessibility tree and in the
+// flex layout, never two at once — the crossfade is a sequential fade-out-
+// then-fade-in around that single swap, not two overlapping visible
+// elements, so it can't reintroduce layout shift or expose off-screen quotes
+// to assistive tech the way a simultaneous two-element crossfade would
+// without also solving that overlap (this is also why `transition-behavior:
+// allow-discrete`/`@starting-style` was considered and passed over: it
+// would keep both slides rendered simultaneously for the transition's
+// duration, which is exactly the overlap this design avoids).
+// `role="region" aria-label="Testimonials" aria-live="polite"` sits on
+// `.testimonial__row` (the always-present parent of every slide AND the
+// arrows, never itself hidden) rather than on a new wrapper div, so the
+// live region has a stable root for its content mutations to be detected
+// against — an aria-live host that itself gets hidden/shown is the
+// unreliable pattern, not this one. All three are gated behind `isCarousel`
+// — a live region that can never update, and a named landmark around one
+// static quote, is semantics serving nothing, the same reasoning that
+// (correctly) keeps the arrows non-interactive `<span>`s rather than inert
+// `<button>`s in the single-testimonial case. The focus-visible ring the brief calls
+// for on the now-real buttons needs no component-local CSS: global.css
+// already applies `:focus-visible` to every focusable element site-wide;
+// the decorative `<span>` case gets none "for free" the same way, since a
+// non-focusable element never matches `:focus-visible`. The button variant
+// resets browser chrome (background/border/padding) to keep the exact same
+// visual footprint as the `<span>` it replaces — same reset convention
+// InstructorCard.astro's own toggle button uses.
 //
 // Figma's own arrow icon is a flattened raster in the pulled code
 // (`imgVector5`/`imgVector6` — no reusable vector path data), and neither
@@ -110,65 +167,90 @@
 // there), so it reuses --space-5 as a reasonable approximation, flagged
 // inline rather than presented as a precise pull.
 const { item } = Astro.props;
-// Accepts a single object (this task's real shape) or an array (a light
-// future-proofing allowance the brief offers for the deferred carousel,
-// not a feature built here) — always renders just the first testimonial.
-const raw = item.pdp?.testimonial;
-const testimonial = Array.isArray(raw) ? raw[0] : raw;
+// `item.pdp.testimonial` is always an array — see header comment. Read
+// straight off it; Pdp.astro's registry guard already keeps this component
+// from rendering at all when the array is absent/empty.
+const testimonials = item.pdp?.testimonial ?? [];
+const isCarousel = testimonials.length > 1;
 const ARROW_PATH = 'M4 12H20M20 12L14 6M20 12L14 18';
 const STAR_PATH =
   'M12 .587l3.668 7.568 8.332 1.151-6.064 5.828 1.48 8.279L12 19.771l-7.416 3.642 1.48-8.279L0 9.306l8.332-1.151z';
 ---
-{testimonial && (
-  <section class="testimonial" data-pdp-id={item.id}>
+{testimonials.length > 0 && (
+  <section class="testimonial" data-pdp-id={item.id} data-testimonial data-testimonial-active="0">
     <div class="testimonial__inner">
-      <div class="testimonial__row">
-        <div class="testimonial__card">
-          <span class="testimonial__stars" aria-hidden="true">
-            {[1, 2, 3, 4, 5].map((n) => (
-              <svg width="28" height="28" viewBox="0 0 24 24" class={n <= testimonial.rating ? 'is-filled' : ''}>
-                <path d={STAR_PATH} />
-              </svg>
-            ))}
-          </span>
-          <p class="testimonial__sr-only">{`Rated ${testimonial.rating} out of 5 stars`}</p>
+      <div
+        class="testimonial__row"
+        role={isCarousel ? 'region' : undefined}
+        aria-label={isCarousel ? 'Testimonials' : undefined}
+        aria-live={isCarousel ? 'polite' : undefined}
+      >
+        {testimonials.map((testimonial, i) => (
+          <div data-testimonial-slide hidden={i !== 0} inert={i !== 0}>
+            <div class="testimonial__card">
+              <span class="testimonial__stars" aria-hidden="true">
+                {[1, 2, 3, 4, 5].map((n) => (
+                  <svg width="28" height="28" viewBox="0 0 24 24" class={n <= testimonial.rating ? 'is-filled' : ''}>
+                    <path d={STAR_PATH} />
+                  </svg>
+                ))}
+              </span>
+              <p class="testimonial__sr-only">{`Rated ${testimonial.rating} out of 5 stars`}</p>
 
-          <figure class="testimonial__figure">
-            <blockquote class="testimonial__quote">
-              {testimonial.quote.map((paragraph) => (
-                <p>
-                  {paragraph.split('\n').map((line, i, lines) => (
-                    <>
-                      {line}
-                      {i < lines.length - 1 && <br />}
-                    </>
+              <figure class="testimonial__figure">
+                <blockquote class="testimonial__quote">
+                  {testimonial.quote.map((paragraph) => (
+                    <p>
+                      {paragraph.split('\n').map((line, i, lines) => (
+                        <>
+                          {line}
+                          {i < lines.length - 1 && <br />}
+                        </>
+                      ))}
+                    </p>
                   ))}
-                </p>
-              ))}
-            </blockquote>
-            <figcaption class="testimonial__attribution">
-              <span class="testimonial__author">{testimonial.author}</span>
-              {testimonial.role && <span class="testimonial__role">{testimonial.role}</span>}
-            </figcaption>
-          </figure>
-        </div>
+                </blockquote>
+                <figcaption class="testimonial__attribution">
+                  <span class="testimonial__author">{testimonial.author}</span>
+                  {testimonial.role && <span class="testimonial__role">{testimonial.role}</span>}
+                </figcaption>
+              </figure>
+            </div>
+          </div>
+        ))}
 
-        <div class="testimonial__arrows" aria-hidden="true">
-          <span class="testimonial__arrow testimonial__arrow--prev">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-              <path d={ARROW_PATH} stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-            </svg>
-          </span>
-          <span class="testimonial__arrow testimonial__arrow--next">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-              <path d={ARROW_PATH} stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-            </svg>
-          </span>
-        </div>
+        {isCarousel ? (
+          <div class="testimonial__arrows">
+            <button type="button" class="testimonial__arrow testimonial__arrow--prev" data-testimonial-nav="prev" aria-label="Previous testimonial">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                <path d={ARROW_PATH} stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+            </button>
+            <button type="button" class="testimonial__arrow testimonial__arrow--next" data-testimonial-nav="next" aria-label="Next testimonial">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                <path d={ARROW_PATH} stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+            </button>
+          </div>
+        ) : (
+          <div class="testimonial__arrows" aria-hidden="true">
+            <span class="testimonial__arrow testimonial__arrow--prev">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                <path d={ARROW_PATH} stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+            </span>
+            <span class="testimonial__arrow testimonial__arrow--next">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                <path d={ARROW_PATH} stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+            </span>
+          </div>
+        )}
       </div>
     </div>
   </section>
 )}
+{isCarousel && <script>import '../../scripts/testimonial.js';</script>}
 <style>
   .testimonial__inner {
     max-width: var(--container-max);
@@ -191,6 +273,38 @@ const STAR_PATH =
     gap: var(--space-5);
   }
 
+  /* Each testimonial's card lives inside its own slide wrapper so all
+     slides can stay mounted (see header comment: prevents layout shift on
+     paging, keeps off-screen quotes out of the a11y tree via hidden+inert).
+     The wrapper — not .testimonial__card — is now the actual flex item of
+     .testimonial__row, so it owns the flex-positioning props (order, and
+     the width that sizes it as a flex item) that .testimonial__card used to
+     carry. `order` on .testimonial__card had no effect once it stopped
+     being a flex item, so it was removed there (see .testimonial__card
+     below); its `width` rules stay, since `width` isn't flex-item-only —
+     they still size the card's own box inside this wrapper.
+     `opacity`/`transition` here drive the paging crossfade (see header
+     comment): `testimonial.js` only ever adds `.is-fading` to the ONE slide
+     currently mid-swap (never two at once), and only toggles `hidden`/
+     `inert` between the two fade legs — so the transition only ever runs on
+     an element that is genuinely visible (never across a `display` change,
+     which CSS transitions can't animate), and reduced motion is honored for
+     real via the JS `matchMedia` short-circuit below, not just this
+     (redundant, belt-and-suspenders) media query. */
+  [data-testimonial-slide] {
+    width: 100%;
+    order: 1;
+    transition: opacity var(--motion-fast) var(--ease-standard);
+  }
+  [data-testimonial-slide].is-fading {
+    opacity: 0;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    [data-testimonial-slide] {
+      transition: none;
+    }
+  }
+
   /* ---- Card ------------------------------------------------------------ */
   .testimonial__card {
     display: flex;
@@ -203,11 +317,6 @@ const STAR_PATH =
     /* Mobile padding (Figma 1109:14382: px-24/py-32) — both exact token
        matches. */
     padding: var(--space-6) var(--space-5);
-    /* Visual order fixed to 1 explicitly (see .testimonial__row below —
-       the arrows-group is `order: 2` at mobile, `display: contents` at
-       desktop so its own children take the `order` that flanks the card
-       there instead). */
-    order: 1;
   }
 
   .testimonial__stars {
@@ -264,7 +373,9 @@ const STAR_PATH =
     color: var(--color-ink);
   }
 
-  /* ---- Arrows (static placeholders — see header comment) --------------- */
+  /* ---- Arrows ------------------------------------------------------------
+     Decorative span styling (see header comment) unless [data-testimonial-nav]
+     matches below, which only ever renders on the real <button> variant. */
   .testimonial__arrows {
     display: flex;
     align-items: center;
@@ -277,14 +388,29 @@ const STAR_PATH =
   .testimonial__arrow {
     display: inline-flex;
     color: var(--color-ink);
-    /* Not a control yet — no pointer cursor, no hover/focus treatment
-       (see header comment: matches its "nothing" a11y presentation). */
+    /* Not a control in the decorative (single-testimonial) case — no
+       pointer cursor, no hover/focus treatment (see header comment: matches
+       its "nothing" a11y presentation). Overridden below for the real
+       <button> variant. */
     cursor: default;
   }
   .testimonial__arrow--prev svg {
     /* Same technique as the pulled Figma code: one arrow asset, the
        "prev" copy rotated 180deg rather than mirrored/duplicated. */
     transform: rotate(180deg);
+  }
+  /* Real control (isCarousel) — button-chrome reset back to the same
+     visual footprint as the decorative <span>, plus the cursor the header
+     comment's withheld-affordance reasoning no longer applies to. No
+     component-local :focus-visible rule is needed — global.css already
+     applies one to every focusable element site-wide, and the decorative
+     <span> never matches :focus-visible since it isn't focusable. */
+  .testimonial__arrow[data-testimonial-nav] {
+    background: none;
+    border: 0;
+    padding: 0;
+    font: inherit;
+    cursor: pointer;
   }
 
   .testimonial__sr-only {
@@ -310,6 +436,13 @@ const STAR_PATH =
       /* Arrow<->card gap (Figma `gap-48`, exact --space-7 match). */
       gap: var(--space-7);
     }
+    [data-testimonial-slide] {
+      /* Mobile's width:100% only makes sense stacked in a column; at
+         desktop the card's own fixed 916px (below) governs the wrapper's
+         shrink-wrapped size instead. */
+      width: auto;
+      order: 2;
+    }
     .testimonial__card {
       /* 916px literal — see header comment (fixed card width on the
          1200-wide desktop frame, not a fluid/full-bleed section). */
@@ -318,7 +451,6 @@ const STAR_PATH =
       /* Desktop padding (Figma 1106:15576: py-64 exact --space-8 match;
          px-96 literal — see header comment, bigger than --space-8). */
       padding: var(--space-8) 96px;
-      order: 2;
     }
     /* Desktop attribution gap is gap-16 (--space-4) vs mobile's gap-12
        (--space-3) — a real per-breakpoint value (matters once a role line
@@ -330,9 +462,9 @@ const STAR_PATH =
        direct flex items of `.testimonial__row` — letting `order` flank
        the card with them (arrow, card, arrow) the way the desktop frame
        actually lays them out, instead of the mobile "card, then a paired
-       arrows row below it" grouping. The wrapper stays `aria-hidden` and
-       carries no accessible content either way, so `display: contents`
-       here has no a11y-semantics cost. */
+       arrows row below it" grouping. The wrapper stays `aria-hidden`
+       (decorative case) or unlabeled (real-button case) either way, so
+       `display: contents` here has no a11y-semantics cost. */
     .testimonial__arrows {
       display: contents;
     }

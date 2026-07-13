@@ -35,6 +35,13 @@ test('getCollection / getItem work', () => {
 // FourColumn/PdpReviews/CrossSell all read from, and that block's own
 // cross-references (crossSell.itemIds, crossSell.shopAllHref) must resolve
 // to real items/routes, same as the top-level assertions above.
+//
+// `sections` is asserted here too (final review fix wave), matching the
+// built-course test below byte-for-byte: Walk (Chunk B1) is the first
+// PRODUCT with a NON-STANDARD section list driving the same Pdp.astro
+// composer that every course route already reads `pdp.sections` from, so
+// products need the identical "composer has something to iterate, not a
+// silently-empty page" guard courses already have.
 test('every built product route has a pdp block whose crossSell resolves', () => {
   const builtProductPaths = new Set(
     routes.filter(r => r.status === 'built' && r.kind === 'pdp').map(r => r.path)
@@ -47,7 +54,38 @@ test('every built product route has a pdp block whose crossSell resolves', () =>
 
   for (const it of productItems) {
     assert.ok(it.pdp, `built product missing pdp block: ${it.id}`);
+    assert.ok(Array.isArray(it.pdp.sections) && it.pdp.sections.length > 0,
+      `built product missing pdp.sections: ${it.id}`);
     assert.ok(it.pdp.crossSell, `built product pdp missing crossSell: ${it.id}`);
+    for (const id of it.pdp.crossSell.itemIds) {
+      assert.ok(getItem(id), `${it.id} pdp.crossSell bad itemId: ${id}`);
+    }
+    assert.ok(
+      routePaths.has(it.pdp.crossSell.shopAllHref),
+      `${it.id} pdp.crossSell.shopAllHref not a route: ${it.pdp.crossSell.shopAllHref}`
+    );
+  }
+});
+
+// Chunk B1: the course counterpart of the built-product guard above. Every
+// course route the sitemap marks `built` must carry the `pdp` block the
+// course sections read, an ordered `sections` list for the composer, and a
+// resolvable crossSell — otherwise the page silently renders empty sections
+// (the composer's unknown/guarded-off types render nothing by design).
+test('every built course route has a pdp block with sections and a resolving crossSell', () => {
+  const builtCoursePaths = new Set(
+    routes.filter(r => r.status === 'built' && r.kind === 'course').map(r => r.path)
+  );
+  const courseItems = items.filter(it => it.kind === 'course' && builtCoursePaths.has(it.href));
+
+  // Sanity-check the filter — an empty set would make everything below pass vacuously.
+  assert.ok(courseItems.length >= 4, `expected >=4 built course items, found ${courseItems.length}`);
+
+  for (const it of courseItems) {
+    assert.ok(it.pdp, `built course missing pdp block: ${it.id}`);
+    assert.ok(Array.isArray(it.pdp.sections) && it.pdp.sections.length > 0,
+      `built course missing pdp.sections: ${it.id}`);
+    assert.ok(it.pdp.crossSell, `built course pdp missing crossSell: ${it.id}`);
     for (const id of it.pdp.crossSell.itemIds) {
       assert.ok(getItem(id), `${it.id} pdp.crossSell bad itemId: ${id}`);
     }
