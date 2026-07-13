@@ -43,6 +43,7 @@ function page(section, dir) {
   // that window would compute against stale state. Once `show()` runs, the
   // flag clears immediately; a click during the (purely visual) fade-in leg
   // that follows is safe to act on, since the DOM state is already settled.
+  if (section.hasAttribute('data-testimonial-animating')) return;
 
   const slides = section.querySelectorAll('[data-testimonial-slide]');
   const total = slides.length;
@@ -50,7 +51,7 @@ function page(section, dir) {
   const next = nextIndex(current, total, dir);
   if (next === current) return;
 
-  const reduced = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   if (reduced) {
     show(section, next);
     return;
