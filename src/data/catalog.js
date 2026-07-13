@@ -746,14 +746,15 @@ export const items = [
     // Task 1 (Course PDP Chunk A) — scaffolds the Sole Switch Pro course
     // PDP on the same data-driven Pdp.astro composer the 6 products use
     // (see their `sections` comments above). This 11-entry list is the
-    // FULL intended course-page section order. As of Task 6: `four-column`,
+    // FULL intended course-page section order. As of Task 7: `four-column`,
     // `cross-sell`, `pdp-reviews`, `logo-wall` (reused-from-products),
     // `course-details`, `course-overview`, `youll-stop-and-instead`,
-    // `comparison-chart`, and `testimonial` (course-only, built by Tasks
-    // 2-6) all have data below and a Pdp.astro REGISTRY entry — the
-    // remaining course-only types (`your-instructors`, `faqs`) still have
-    // neither, so Pdp.astro renders nothing for them (dev-only
-    // console.warn, no crash) until Task 7 adds their components + data.
+    // `comparison-chart`, `testimonial`, and `your-instructors`
+    // (course-only, built by Tasks 2-7) all have data below and a
+    // Pdp.astro REGISTRY entry — the one remaining course-only type
+    // (`faqs`) still has neither, so Pdp.astro renders nothing for it
+    // (dev-only console.warn, no crash) until a later task adds its
+    // component + data.
     pdp: {
       sections: [
         'course-details',
@@ -968,6 +969,46 @@ export const items = [
         role: null,
         rating: 5,
       },
+      // Task 7 (Your Instructors) — Figma-verbatim from node 1007:7830
+      // (desktop, file FX7PDNvhZwyozODaq8Q8i7) / 1109:14383 (mobile — the
+      // "Sole Switch Pro Page" > "Your Instructors" instance inside the
+      // professional-courses mobile frame 1109:14374). Both frames show the
+      // identical 2 instructors, same names/credential-lines/bios — no
+      // desktop/mobile disagreement to flag here, unlike `overview` above.
+      //
+      // `credential` holds each card's teal second line as the frame
+      // actually renders it — a LOCATION ("Lakewood, Colorado" / "Salem,
+      // Massachusetts"), not a professional credential (Riley's real
+      // credential, "DPT", is already part of her `name` string below) —
+      // see YourInstructors.astro's header comment for why the field keeps
+      // this name regardless. `bio` is an array of paragraph strings, one
+      // per real `<p>` in the pulled Figma code (Conley's is a genuine
+      // 4-paragraph biography; Riley's is a single paragraph).
+      //
+      // No dedicated instructor photography exists yet (see this file's
+      // `instructorsByline` comment above) — `photo` reuses the same PLP
+      // course shot every other slot on this page already reuses.
+      instructors: [
+        {
+          photo: '/images/plp/sole-switch-pro.jpg',
+          name: 'Dr. Courtney Conley',
+          credential: 'Lakewood, Colorado',
+          bio: [
+            "Dr. Courtney Conley is a national bestselling author, international educator, and one of the world's foremost authorities on foot and gait health. Her book, Walk, hit both the USA Today and Amazon bestseller lists, resonating with readers eager to understand the profound connection between foot function and whole-body health. The book's success has brought Dr. Conley to some of the most respected platforms in health and wellness media, including appearances on The Peter Attia Drive Podcast, Diary of a CEO, Feel Better, Live More with Dr. Rangan Chatterjee, as well as national television features on CBS Mornings and Fox & Friends.",
+            "Dr. Conley holds a Doctorate in Chiropractic Medicine and two Bachelor's degrees in Kinesiology and Human Biology. With nearly 25 years of clinical practice, she has worked with professional athletes from organizations including the Phoenix Suns, New York Yankees, Cleveland Browns, New York Giants, and San Francisco 49ers. She has also collaborated with medical experts across the country, addressing complex foot and gait challenges at the highest level of performance. She currently serves as Head of Patient Care at Total Health Solutions and Total Health Performance in Lakewood, Colorado—premier clinics known for comprehensive, rehabilitation-focused patient care where she is committed to helping people improve their lives one step at a time.",
+            'That same commitment led her to found and lead Gait Happens, an education enterprise leading a paradigm shift in foot health by empowering people worldwide to reclaim optimal foot function through science-backed training and protocols. Gait Happens offers a comprehensive ecosystem of resources — from professional education for practitioners to consumer training programs and personalized consultations with top-of-field specialists — all grounded in research and designed to deliver real, measurable results. With a focus on natural, preventative approaches to foot and gait health, Gait Happens has built a global community of individuals committed to moving better and living pain-free, offering a proven alternative to unnecessary surgical intervention through education and evidence-based care.',
+            'An internationally recognized speaker, Dr. Conley shares her expertise to clinicians and consumers alike through in-person and online lectures on foot mechanics and gait dynamics. Her work spans authorship, mentorship, patent and curriculum development, and the creation of pioneering foot and gait methodologies. Yet at the heart of every lecture, protocol, and patient interaction is the same driving belief: real strength starts from the ground up, and healthy feet are the foundation every body needs to move through life with confidence and ease.',
+          ],
+        },
+        {
+          photo: '/images/plp/sole-switch-pro.jpg',
+          name: 'Dr. Allison Riley, DPT',
+          credential: 'Salem, Massachusetts',
+          bio: [
+            'Dr. Allison Riley has a passion for helping people recognize that movement is a powerful way to get and stay healthy, active, and happy. She has had an interest in lower body injuries and gait since early in her career.',
+          ],
+        },
+      ],
       // Cross-sell band — Figma-verbatim heading from the "Product Cards"
       // frame, node 1021:14005. That frame's 3 cards ("Functional Gait
       // Assessment 1", "Gait Foundations Course", "Gait Happens Trainer

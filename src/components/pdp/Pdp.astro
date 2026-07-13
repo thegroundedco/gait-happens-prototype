@@ -20,22 +20,23 @@
 // empty `data-reveal` wrapper either, matching the pre-refactor
 // `{condition && (<div data-reveal>...)}` output byte-for-byte.
 //
-// A `type` with no registry entry (the course sections Task 7 hasn't built
-// yet: your-instructors, faqs) renders nothing — no crash, no markup, just
-// a dev-only console.warn — so a course item can list its full intended
-// section order today and have the not-yet-built slots fill in silently as
-// later tasks add registry entries. Task 2 added `course-details` (the
-// course hero, CourseDetails.astro); Task 3 added `course-overview`
+// A `type` with no registry entry (the one course section still unbuilt:
+// faqs) renders nothing — no crash, no markup, just a dev-only
+// console.warn — so a course item can list its full intended section order
+// today and have the not-yet-built slots fill in silently as later tasks
+// add registry entries. Task 2 added `course-details` (the course hero,
+// CourseDetails.astro); Task 3 added `course-overview`
 // (CourseOverview.astro); Task 4 added `youll-stop-and-instead`
 // (YoullStopAndInstead.astro); Task 5 added `comparison-chart`
-// (ComparisonChart.astro); Task 6 adds `testimonial` (Testimonial.astro)
-// below.
+// (ComparisonChart.astro); Task 6 added `testimonial` (Testimonial.astro);
+// Task 7 adds `your-instructors` (YourInstructors.astro) below.
 import ProductDetails from './ProductDetails.astro';
 import CourseDetails from './CourseDetails.astro';
 import CourseOverview from './CourseOverview.astro';
 import YoullStopAndInstead from './YoullStopAndInstead.astro';
 import ComparisonChart from './ComparisonChart.astro';
 import Testimonial from './Testimonial.astro';
+import YourInstructors from './YourInstructors.astro';
 import FourColumn from './FourColumn.astro';
 import BrandSection from './BrandSection.astro';
 import PdpReviews from './PdpReviews.astro';
@@ -89,6 +90,12 @@ const REGISTRY = {
     // real `item.pdp.testimonial` data render this section.
     Component: Testimonial,
     props: (item) => (item.pdp?.testimonial ? { item } : null),
+  },
+  'your-instructors': {
+    // Guarded like the other course-only sections above — only items with
+    // real `item.pdp.instructors` data render this section.
+    Component: YourInstructors,
+    props: (item) => (item.pdp?.instructors?.length > 0 ? { item } : null),
   },
   'brand-section': {
     // Desktop-only per BrandSection.astro's own `@media (max-width: 1023px)

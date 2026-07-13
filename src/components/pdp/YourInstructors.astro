@@ -1,0 +1,183 @@
+---
+// Your Instructors band (Task 7, Course PDP Chunk A) — Figma desktop
+// 1007:7830 (file FX7PDNvhZwyozODaq8Q8i7) / mobile 1109:14383 (the "Sole
+// Switch Pro Page" > "Your Instructors" instance inside the
+// professional-courses mobile frame 1109:14374). Prop is `{ item }` (same
+// shape as CourseOverview/YoullStopAndInstead/ComparisonChart/Testimonial),
+// reading `item.pdp.instructors`. Deliberately generic — nothing
+// course-specific is hardcoded — so it can also serve the deferred Walk
+// product PDP later without changes.
+//
+// `item.pdp.instructors` = an array of `{ photo, name, credential, bio }`,
+// this task's brief-mandated shape, one entry per instructor card. Both
+// pulled frames show the identical 2 instructors, same content on desktop
+// and mobile — no disagreement to flag here, unlike CourseOverview's
+// `details`/Audience conflict.
+//
+// `credential` is a slight misnomer against what the frame actually shows:
+// the styled teal line under each name reads a LOCATION ("Lakewood,
+// Colorado" / "Salem, Massachusetts"), not a professional credential —
+// actual credentials live inline in `name` itself (the "Dr." honorific,
+// the "DPT" suffix on Riley's). Populated per the brief's exact field name
+// anyway (same "keep the brief's shape, document the reality" precedent
+// Testimonial.astro's near-always-null `role` field sets) rather than
+// renaming the field to `location` and drifting from the brief's contract.
+//
+// `bio` is an array of paragraph strings — one per real `<p>` in the pulled
+// Figma code, same convention Testimonial.astro's `quote` field uses.
+// Conley's bio is a genuine 4-paragraph biography; Riley's is a single
+// paragraph — both frames agree on both bios verbatim.
+//
+// ---- Photo ---------------------------------------------------------------
+// No dedicated instructor photography exists (this course has never had a
+// PDP before; catalog.js's `instructorsByline` comment already flags this —
+// "the 2 avatar circles are flat placeholders" — as this task's job to
+// address). `photo` reuses the same PLP course shot every other image slot
+// on this page already reuses (see catalog.js's `overview`/`features`
+// comments), rendered in a circular crop box (overflow:hidden + object-fit:
+// cover — same placeholder-media idiom CourseOverview/FourColumn use,
+// `border-radius:50%` added for Figma's circular mask, `--color-border`
+// background while the image loads — see InstructorCard.astro). `alt=""` —
+// decorative: the placeholder is a generic product shot, not an actual
+// likeness of the named instructor, so a name-echoing alt (e.g. "Dr.
+// Courtney Conley") would misrepresent the image rather than describe it;
+// once real headshots replace this placeholder, that alt should become the
+// instructor's name.
+//
+// ---- Heading semantics -----------------------------------------------
+// The section heading is a real `<h2>` (sibling to CourseOverview's/
+// ComparisonChart's own `<h2>`s). Each instructor name (InstructorCard.astro)
+// is a real `<h3>` — Figma binds it to the SAME 32px `text-h3` style as the
+// section heading (visual sizing only), but semantically it's one level
+// down, keeping this page's h1 hero -> h2 sections -> h3 names outline
+// correct rather than mirroring Figma's shared style name into a duplicate
+// `<h2>`.
+//
+// ---- "Read More" bio toggle --------------------------------------------
+// Both frames show every bio visually truncated (a fixed-height box, ending
+// mid-sentence with "…") with a real "Read More" button + chevron below it.
+// Unlike Testimonial.astro's prev/next arrows (built as inert decoration
+// because there's nothing to page between with only one testimonial in the
+// data), the full bio text for BOTH instructors is already present in the
+// pulled Figma data here, so there's a real "more" to reveal. A working
+// toggle costs nothing extra and avoids shipping a button that visibly does
+// nothing — see InstructorCard.astro for the toggle markup (CSS line-clamp
+// + a real `<button aria-expanded>`); the delegated click listener below is
+// the same event-delegation idiom ProductDetails.astro's buy box uses.
+// Figma only designed the COLLAPSED state; the expanded state's "Read Less"
+// label + 90°-rotated chevron are this component's own reasonable
+// counterpart to a real toggle, not a literal Figma pull. This repo's other
+// interactive PDP controls (e.g. ProductDetails' Add to Cart) already
+// assume JS is available; this toggle makes the same assumption, no
+// `<noscript>` fallback.
+//
+// ---- Layout / tokens -------------------------------------------------
+// Desktop (1007:7830): a centered flex row (`flex-wrap`, `justify-content:
+// center`, --space-8 gap) of fixed-384px-wide cards. Mobile (1109:14383):
+// the same cards stacked full-width (capped at the same 384px so they don't
+// stretch past it on a wider mobile viewport) — reproduced as a single
+// mobile-first column layout, switched to a wrapped row at
+// `min-width: 1024px`, rather than duplicating markup per breakpoint. Both
+// the 384px card cap and InstructorCard.astro's 222px circular photo are
+// literals measured directly off the frames (no dedicated token for
+// either) — same "literal px value, flagged inline" allowance every
+// sibling section here takes. Every other spacing value in both frames (the
+// 48/64/32/24/16/8px gaps and paddings) maps onto an exact --space token,
+// used unmodified below.
+//
+// Name = --type-h3 (600/32) at both breakpoints even though mobile's own
+// pulled code shows 24px — same "one non-responsive h3 token" precedent
+// CourseOverview.astro's own heading sets. Credential/location = --type-h4
+// (500/24), same precedent (mobile's pulled code shows 20px); Figma's own
+// color binding for it, `var(--text-inverse,#047791)`, is an oddly-named
+// variable but its hex is an EXACT match to `--color-teal`, so no literal
+// is needed despite the confusing token name. Bio = --type-body-sm (400/14),
+// an exact match. Toggle button text = --type-cta (600/16), an exact match
+// to Figma's SemiBold/16 "cta" text style.
+import InstructorCard from './InstructorCard.astro';
+
+const { item } = Astro.props;
+const instructors = item.pdp?.instructors ?? [];
+---
+{instructors.length > 0 && (
+  <section class="your-instructors" data-pdp-id={item.id}>
+    <div class="your-instructors__inner">
+      <h2 class="your-instructors__heading">Your Instructors</h2>
+      <div class="your-instructors__row">
+        {instructors.map((instructor) => (
+          <InstructorCard instructor={instructor} />
+        ))}
+      </div>
+    </div>
+  </section>
+)}
+<style>
+  .your-instructors__inner {
+    max-width: var(--container-max);
+    margin-inline: auto;
+    padding-inline: var(--space-5);
+    padding-block: var(--space-7);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-6);
+  }
+
+  .your-instructors__heading {
+    font: var(--type-h3);
+    color: var(--color-ink);
+    text-align: center;
+    width: 100%;
+  }
+
+  .your-instructors__row {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-6);
+    width: 100%;
+  }
+
+  /* ---- Desktop (Figma 1007:7830, ≥1024) -------------------------------- */
+  @media (min-width: 1024px) {
+    .your-instructors__inner {
+      padding-inline: var(--space-7);
+    }
+    .your-instructors__row {
+      flex-direction: row;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: var(--space-8);
+    }
+  }
+</style>
+
+<script>
+  // Bio expand/collapse — delegated click listener at module scope (same
+  // event-delegation idiom ProductDetails.astro's buy box uses). Each
+  // instructor card's bio starts visually clamped (`data-collapsed` — see
+  // InstructorCard.astro's styles); clicking its "Read More"/"Read Less"
+  // toggle flips `aria-expanded` on the button and removes/restores the
+  // `data-collapsed` attribute on that card's own bio element, found fresh
+  // via the button's `aria-controls` id (never a cached reference) —
+  // nothing to leak or go stale across Astro's ClientRouter swaps, and no
+  // `astro:after-swap` re-init is needed either: a fresh page load already
+  // renders every card collapsed by default, the same state this handler
+  // resets to.
+  document.addEventListener('click', (e) => {
+    const target = e.target;
+    if (!(target instanceof Element)) return;
+    const toggle = target.closest('[data-instructor-toggle]');
+    if (!toggle) return;
+
+    const bio = document.getElementById(toggle.getAttribute('aria-controls') ?? '');
+    if (!bio) return;
+
+    const wasExpanded = toggle.getAttribute('aria-expanded') === 'true';
+    toggle.setAttribute('aria-expanded', String(!wasExpanded));
+    bio.toggleAttribute('data-collapsed', wasExpanded);
+
+    const label = toggle.querySelector('[data-instructor-toggle-label]');
+    if (label) label.textContent = wasExpanded ? 'Read More' : 'Read Less';
+  });
+</script>
