@@ -87,7 +87,11 @@ export const routes = [
   // placeholder to built (page + catalog `pdp` block now exist; see
   // src/pages/courses/sole-switch-pro.astro and catalog.js).
   r('/courses/sole-switch-pro', 'Sole Switch Pro', 'course', ['Home', 'Courses', 'Sole Switch Pro'], { status: 'built' }),
-  r('/courses/gait-guru-membership', 'Gait Guru Membership', 'course', ['Home', 'Courses', 'Gait Guru Membership']),
+  // Task 7 (Course PDP Chunk B2): flipped from placeholder to built (page +
+  // catalog `pdp` block now exist; see src/pages/courses/gait-guru-membership.astro
+  // and catalog.js). This is the LAST course PDP on this branch — its own
+  // section list is the shortest (no `course-overview`, no `pdp-reviews`).
+  r('/courses/gait-guru-membership', 'Gait Guru Membership', 'course', ['Home', 'Courses', 'Gait Guru Membership'], { status: 'built' }),
   // Task 4 (Course PDP Chunk B2): flipped from placeholder to built (page +
   // catalog `pdp` block now exist; see src/pages/courses/trainer-certification.astro
   // and catalog.js).

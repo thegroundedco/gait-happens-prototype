@@ -4076,6 +4076,418 @@ export const items = [
     cta: 'View Course',
     variants: null,
     sizeChart: null,
+    // ---- COMPONENT GAP — FOUND, NOT FIXED (Task 7, Course PDP Chunk B2) ----
+    // No top-level `rating`/`reviewCount` is added here (unlike every other
+    // course on this branch, which all had a real 5-star + review-count
+    // instance in their own Course Details hero node to source these from).
+    // This course's own hero (682:9761 desktop / 1129:16046 mobile) has NO
+    // rating row at all — confirmed via get_design_context on both
+    // breakpoints (neither pulled tree contains a "Rating"/StarRating
+    // instance, and neither screenshot shows one) — genuinely absent, not an
+    // oversight. CourseDetails.astro's own `.course-details__rating` block,
+    // however, is UNCONDITIONAL: `<StarRating rating={item.rating ?? 0}
+    // count={item.reviewCount ?? 0} />` always renders, with no `item.rating
+    // &&` guard the way PlpCard.astro's own rating row already has
+    // (`{item.rating && <StarRating .../>}`). Leaving `rating`/`reviewCount`
+    // unset therefore does NOT make this hero's rating row disappear the way
+    // omitting `heroCaption`/`buybox`/etc. does elsewhere on this same
+    // component — it will instead render a 5-outline-star, "(0)" row that
+    // doesn't exist in Figma at all. This is a genuine, previously
+    // undiscovered component gap (this is the first course whose Figma hero
+    // has no rating row), reported per this task's brief rather than fixed
+    // (fixing it means editing CourseDetails.astro, out of scope for a
+    // pure-data task) or worked around (inventing a fake rating/review count
+    // would violate the Figma-verbatim rule this task is bound by). The PLP
+    // grid card is unaffected (PlpCard.astro's own guard correctly renders no
+    // rating chip for this item, same as any other item with no `rating`
+    // set) — only this PDP's own Course Details hero shows the artifact.
+    //
+    // Task 7 (Course PDP Chunk B2) — Gait Guru Membership course PDP, the
+    // LAST course PDP on this branch. Figma desktop frame 682:9759 (file
+    // FX7PDNvhZwyozODaq8Q8i7) / mobile "Gait Guru Membership" frame
+    // 1129:16044 (under the professional-courses mobile section 1109:14374).
+    // This course's own section list is the SHORTEST of any course on this
+    // branch and deliberately has NEITHER `course-overview` NOR `pdp-reviews`
+    // — confirmed via get_metadata on both the desktop frame and the mobile
+    // frame's own child list: neither contains a "Course Overview" instance
+    // nor a "Reviews Plugin Here" placeholder frame (every other course's own
+    // mobile frame has one of the latter; this course's mobile frame — the
+    // very last one in the professional-courses mobile section — genuinely
+    // has none). Every value below was pulled from THIS course's own nodes
+    // independently of every sibling course's already-shipped `pdp` block.
+    pdp: {
+      sections: [
+        'course-details',
+        'four-column',
+        'three-column-info',
+        'testimonial',
+        'your-instructors',
+        'cross-sell',
+        'faqs',
+        'logo-wall',
+      ],
+      // Course Details hero — Figma-verbatim from node 682:9761 (desktop) /
+      // 1129:16046 (mobile). Both frames read "The Gait Guru Membership"
+      // (the catalog's own shorter `title`, "Gait Guru Membership", is left
+      // alone — used elsewhere for nav/breadcrumbs/PLP cards/page <title>,
+      // same override pattern every other course's `heroTitle` already
+      // takes).
+      heroTitle: 'The Gait Guru Membership',
+      // CLIENT-CONTENT FLAG: both frames' own hero price reads
+      // "$35-49.99 USD/Month" — a recurring MONTHLY price RANGE, disagreeing
+      // in both figure AND structure with this item's top-level `price`
+      // ("$150 USD", a flat one-time figure, predating this task). Same "PDP
+      // hero shows the Figma-verbatim exact price, top-level `price` is a
+      // separate figure" split every other course's own `priceExact`
+      // comment already documents — flagged here, not silently reconciled
+      // (the top-level catalog field is out of this task's scope). No
+      // `compareAtPrice` — this is a genuine range, not a struck-through
+      // was/now pair; neither frame shows a second, crossed-out price.
+      priceExact: '$35-49.99 USD/Month',
+      // Hero intro paragraph — identical wording on both frames (no
+      // desktop/mobile disagreement here).
+      description:
+        'An exclusive membership created for passionate health practitioners ready to advance their knowledge and collaborate with peers who share their values. Lead the way in functional care!',
+      // Hero caption — Figma-verbatim (including the leading "*") from both
+      // frames' own text-block node (682:9761;173:130 desktop /
+      // 1129:16046;181:664 mobile), a short line in its own <p> directly
+      // above `description`. Identical on both breakpoints, no
+      // desktop/mobile disagreement.
+      heroCaption: '*New Content Unlocked Every 10 Days',
+      //
+      // No `buybox` — neither frame shows any pill row or select control at
+      // all (confirmed via get_design_context on both breakpoints): this
+      // membership has no course-type/tier/location selector the way other
+      // courses' own "Course Type" blocks do. The whole
+      // `.course-details__tier` block correctly renders nothing when
+      // `buybox` is unset (see CourseDetails.astro's own guard).
+      //
+      // Primary CTA — both frames' own buybox is a literal teal "Join Now"
+      // button (NOT "Add to Cart"/"Enroll Now" like every other course on
+      // this branch) — Figma-verbatim label kept as-is rather than
+      // normalized to this repo's usual "Enroll Now" default. Realistic
+      // placeholder Kajabi offer URL (this is a membership, not a course, so
+      // the URL drops the "-course" suffix every other course's own
+      // placeholder link uses); swap for the real offer/checkout URL once
+      // this membership is live on Kajabi.
+      enrollHref: 'https://gaithappens.mykajabi.com/offers/gait-guru-membership',
+      enrollLabel: 'Join Now',
+      //
+      // No `courseCard` — this course's Figma hero right column (682:9761
+      // node `I682:9761;173:147` desktop / 1129:16046 node
+      // `I1129:16046;181:674` mobile) is a single flattened raster image
+      // (`imgRectangle41` in both pulled trees, same variable name every
+      // other course's own plain-photo hero raster uses) — a YouTube-style
+      // video thumbnail (play button, two floating headshot inset photos, a
+      // "GAIT HAPPENS" wordmark, and a "WHAT IS THE GAIT GURU MEMBERSHIP?"
+      // caption baked into the one image), NOT the simple solid-background +
+      // title-lines + tag shape `courseCard` models (see CourseDetails
+      // .astro's own header comment: that field exists specifically for a
+      // flattened SOLID-COLOR branded card, e.g. Sole Switch Pro's teal
+      // card). Neither pulled tree exposes any prototype/link interaction on
+      // this image (no play-button click-through target), so it's reused
+      // here as a plain, non-interactive `heroImage` — the same "flattened
+      // raster photo, not a branded card" precedent every other course's own
+      // heroImage already follows — rather than inventing new
+      // click-to-play behavior this component has no field/precedent for.
+      // No dedicated video-thumbnail asset exists in this repo — reuses this
+      // item's own PLP course shot, the same "no dedicated photography yet"
+      // placeholder approach every other heroImage-using course takes.
+      heroImage: '/images/plp/gait-guru-membership.jpg',
+      // Byline — desktop's own byline (682:9761;173:137) reads "Mentored By:
+      // Dr. Conley, Dr. Perez, and Dr. Schilling," — Figma-verbatim,
+      // INCLUDING its own trailing comma (a Figma typo, preserved per this
+      // task's "never invent, improve, or paraphrase; preserve even Figma's
+      // own typos" rule). Matches this course's real 3-instructor roster
+      // below exactly (Conley + Perez + Schilling — the 3 avatar circles
+      // both frames show).
+      instructorsByline: 'Mentored By: Dr. Conley, Dr. Perez, and Dr. Schilling,',
+      // CLIENT-CONTENT FLAG: mobile's own byline (1129:16046;181:673)
+      // instead reads "Course By: Dr. Conley and Dr. Riley" — different
+      // label wording ("Course By:" vs "Mentored By:"), drops Dr. Perez AND
+      // Dr. Schilling, and names Dr. Riley, who doesn't mentor this
+      // membership at all (not in the real roster below) — the SAME
+      // systemic mobile-byline copy-paste artifact every other course's own
+      // `instructorsByline` comment on this branch already flags (now
+      // recurring on the very last course too). Desktop's own text is kept
+      // canonical (matches the real 3-instructor roster below).
+      //
+      // 4 Column feature band — Figma-verbatim heading from node 687:6575
+      // (desktop) / 1129:16047 (mobile). Both frames agree on the heading
+      // and all 4 card TITLES — no desktop/mobile disagreement on those (see
+      // the COMPONENT GAP flag below for the one thing that DOES differ).
+      featuresHeading: 'What’s Included:',
+      // ---- COMPONENT GAP — FOUND, NOT FIXED (Task 7, Course PDP Chunk B2) --
+      // Every card in both frames shows TWO distinct pieces of copy: a bold
+      // 16px TITLE ("Video Library") and a separate, regular-weight 14px
+      // BODY sentence below it ("Unlock over 165 videos of assessments &
+      // treatments for the lower body."). No course before this one has
+      // needed that shape — every prior course's own `features` card is ONE
+      // bold sentence (FourColumn.astro's `columns[].text`), optionally
+      // preceded by a small uppercase CAPTION (`columns[].label`) ABOVE it —
+      // never a bold title followed by a separate regular-weight paragraph
+      // BELOW it. `columns[].text` renders at exactly `font: 700 16px` — an
+      // exact style match to THIS course's own bold titles below — but
+      // `columns[].label` renders as a 12px uppercase caption, which does
+      // NOT match either the title's style (bold 16px, sentence case) or
+      // the body's style (regular 14px) Figma actually shows. There is no
+      // field/slot in FourColumn.astro for a second, regular-weight
+      // paragraph under the bold text at all.
+      // Per this task's brief ("stop and report, don't work around it, don't
+      // edit the component"): each card's own bold TITLE is authored into
+      // `text` below (the one value that genuinely matches that field's own
+      // rendered style) and `label` is left unset; each card's own BODY
+      // sentence — genuinely present in Figma, listed here for the record so
+      // it isn't silently lost — has NO fitting field and is THEREFORE NOT
+      // AUTHORED:
+      //   - Video Library: "Unlock over 165 videos of assessments &
+      //     treatments for the lower body."
+      //   - Member's Only Case Study Calls: "Access monthly live video
+      //     discussions via Zoom with case study presentations and Q&A
+      //     sessions."
+      //   - Expert Interviews: "Learn directly from various experts in the
+      //     functional foot health field."
+      //   - The Gait Guru Community: "Where you can interact and learn from
+      //     people who are leading the way in functional treatment of foot
+      //     and gait related conditions."
+      // Reported as a genuine component gap requiring FourColumn.astro to
+      // grow a second, optional per-card body field (the same kind of
+      // generalization CourseDetails.astro's own buybox/hero-image fields
+      // already went through) — not fixed here.
+      features: [
+        {
+          image: '/images/plp/gait-guru-membership.jpg',
+          label: null,
+          text: 'Video Library',
+        },
+        {
+          image: '/images/plp/gait-guru-membership.jpg',
+          label: null,
+          text: 'Member’s Only Case Study Calls',
+        },
+        {
+          image: '/images/plp/gait-guru-membership.jpg',
+          label: null,
+          text: 'Expert Interviews',
+        },
+        {
+          image: '/images/plp/gait-guru-membership.jpg',
+          label: null,
+          // CLIENT-CONTENT FLAG: this card's TITLE agrees on both
+          // breakpoints ("The Gait Guru Community"), but if a future fix
+          // adds the dropped body field above, note that mobile's own body
+          // sentence (1129:16047;181:2406) reads "When the toes can properly
+          // splay, our foot and ankle muscles engage, creating a stronger,
+          // more stable platform from which to propel ourselves forward." —
+          // that's Sole Switch/Sole Switch Pro's own 4th-card body verbatim,
+          // not written for this course — the SAME systemic mobile-4th-card
+          // copy-paste artifact every other course's own `features` comment
+          // on this branch already flags. Desktop's own on-topic body
+          // sentence (listed in the COMPONENT GAP comment above) should be
+          // kept canonical whenever that field exists to hold it.
+          text: 'The Gait Guru Community',
+        },
+      ],
+      // Three Column Info — Figma-verbatim from node 1057:31197 (desktop) /
+      // 1129:16048 (mobile). Both frames agree word-for-word on the heading
+      // and every column heading/item/CTA (including each column's own
+      // Figma-verbatim typos — see below) — no desktop/mobile disagreement
+      // on CONTENT here, only trivial mobile-only typos (noted, not treated
+      // as a content divergence): mobile's "Topics Covered" column drops the
+      // trailing period on its first two items and misspells "gait cycle" as
+      // "gait cyccle" (double c) on its third; desktop's own clean
+      // punctuation/spelling is kept canonical throughout.
+      threeColumn: {
+        heading: 'About The Gait Guru Membership',
+        columns: [
+          {
+            heading: 'What to expect',
+            items: [
+              'Helpful lectures led by Gait Happens foot and gait specialists',
+              'Lab demonstrations for better knowledge retention',
+              'Rewatch anytime to refresh your knowledge',
+              'A welcoming Gait Guru community!',
+            ],
+          },
+          {
+            heading: 'Topics Covered',
+            items: [
+              // Figma-verbatim typo preserved: "posteriror tibal tendinitis"
+              // (both should read "posterior tibial tendinitis") — kept
+              // as-is per this task's "preserve even Figma's own typos" rule.
+              'Assessment and treatment strategies of common conditions and biomechanical patterns of the lower quarter.',
+              'Conditions like hallux valgus, plantar fasciitis, and posteriror tibal tendinitis.',
+              'How patterns and limitations such as restricted ankle dorsiflexion or anterior pelvic tilt affect the gait cycle.',
+            ],
+          },
+          {
+            heading: 'Additional Benefits',
+            items: [
+              'Interviews with power players in the foot and gait world such as authors Thomas Michaud, Gary Ward, Katie Bowman and more!',
+              'Monthly research reviews providing clinical insights into new and relevant research.',
+              'Exclusive discounts on Gait Happens courses.',
+              'A library of follow along mobility workshops with Dr. Conley and Dr. Perez.',
+              'and much more!',
+            ],
+          },
+        ],
+        // CTA label is Figma-verbatim on both frames ("Step Up My Assessment
+        // Skills" — identical to every other course's own Three Column Info
+        // CTA on this branch). Neither frame's pulled design context exposes
+        // a prototype link target, so `href` points at this item's own
+        // `enrollHref`, the same "CTA names the course it sits on -> point
+        // at that course's own enroll link" precedent every other course's
+        // own Three Column Info CTA already sets.
+        cta: {
+          label: 'Step Up My Assessment Skills',
+          href: 'https://gaithappens.mykajabi.com/offers/gait-guru-membership',
+        },
+      },
+      // Testimonial — Figma-verbatim from node 687:6622 (desktop) /
+      // 1129:16049 (mobile). Identical quote/author/rating on both frames —
+      // no desktop/mobile disagreement here. Unlike most other courses' own
+      // testimonials, THIS course's own quote text carries its own literal
+      // curly-quote characters (“ ”) as part of the Figma text layer itself
+      // (confirmed via get_design_context on both breakpoints) — kept
+      // verbatim since Testimonial.astro adds no quote-glyph styling of its
+      // own (no `content: open-quote` CSS), so keeping them in the data is
+      // both Figma-accurate and renders correctly. No `role` — attribution
+      // is name-only on both frames, same optional-field precedent every
+      // other role-less testimonial on this branch already sets.
+      testimonial: [
+        {
+          quote: [
+            '“I would recommend the Gait Guru program to anyone interested in developing a detailed understanding of gait, both how to assess it and also how to treat injuries that are caused by it. It opened my eyes to critical aspects of lower body function and I use the information daily to the benefit of my patients. I already have had several patients where I can now clearly see the cause of their lower extremity injuries and have helped them where prior to this program I would have been off the mark. Thank you so much Gait Gurus!”',
+          ],
+          author: 'Dr. Adam Sundberg',
+          rating: 5,
+        },
+      ],
+      // Your Instructors — Figma-verbatim from node 687:6639 (desktop) /
+      // 1129:16050 (mobile). Both frames show the SAME 3 instructors,
+      // byte-identical names/credentials/bios — no desktop/mobile
+      // disagreement here. Conley's and Perez's bios are byte-for-byte the
+      // same bios already reused on Gait Foundations/Sole Switch Pro/
+      // Functional Gait Assessment L1/L2 above (Perez's bio here matches
+      // Gait Foundations' own wording, "...get back to what they love" —
+      // NOT Trainer Certification's one-word-longer "...get back to doing
+      // what they love" variant; read independently off THIS course's own
+      // node, confirmed matching Gait Foundations' rather than assumed).
+      // Schilling's bio is byte-for-byte the same single-paragraph bio
+      // already shipped on Functional Gait Assessment L1 above — her first
+      // appearance on THIS course's own roster, read independently and
+      // confirmed matching. No dedicated instructor photography exists for
+      // this course — `photo` reuses this item's own PLP course shot for
+      // all 3 cards, same placeholder approach every other course's
+      // `instructors` array takes.
+      instructors: [
+        {
+          photo: '/images/plp/gait-guru-membership.jpg',
+          name: 'Dr. Courtney Conley, DC',
+          credential: 'Lakewood, Colorado',
+          bio: [
+            "Dr. Courtney Conley is a national bestselling author, international educator, and one of the world's foremost authorities on foot and gait health. Her book, Walk, hit both the USA Today and Amazon bestseller lists, resonating with readers eager to understand the profound connection between foot function and whole-body health. The book's success has brought Dr. Conley to some of the most respected platforms in health and wellness media, including appearances on The Peter Attia Drive Podcast, Diary of a CEO, Feel Better, Live More with Dr. Rangan Chatterjee, as well as national television features on CBS Mornings and Fox & Friends.",
+            "Dr. Conley holds a Doctorate in Chiropractic Medicine and two Bachelor's degrees in Kinesiology and Human Biology. With nearly 25 years of clinical practice, she has worked with professional athletes from organizations including the Phoenix Suns, New York Yankees, Cleveland Browns, New York Giants, and San Francisco 49ers. She has also collaborated with medical experts across the country, addressing complex foot and gait challenges at the highest level of performance. She currently serves as Head of Patient Care at Total Health Solutions and Total Health Performance in Lakewood, Colorado—premier clinics known for comprehensive, rehabilitation-focused patient care where she is committed to helping people improve their lives one step at a time.",
+            'That same commitment led her to found and lead Gait Happens, an education enterprise leading a paradigm shift in foot health by empowering people worldwide to reclaim optimal foot function through science-backed training and protocols. Gait Happens offers a comprehensive ecosystem of resources — from professional education for practitioners to consumer training programs and personalized consultations with top-of-field specialists — all grounded in research and designed to deliver real, measurable results. With a focus on natural, preventative approaches to foot and gait health, Gait Happens has built a global community of individuals committed to moving better and living pain-free, offering a proven alternative to unnecessary surgical intervention through education and evidence-based care.',
+            'An internationally recognized speaker, Dr. Conley shares her expertise to clinicians and consumers alike through in-person and online lectures on foot mechanics and gait dynamics. Her work spans authorship, mentorship, patent and curriculum development, and the creation of pioneering foot and gait methodologies. Yet at the heart of every lecture, protocol, and patient interaction is the same driving belief: real strength starts from the ground up, and healthy feet are the foundation every body needs to move through life with confidence and ease.',
+          ],
+        },
+        {
+          photo: '/images/plp/gait-guru-membership.jpg',
+          name: 'Dr. Jenifer Perez, DC',
+          credential: 'Lafayette, Colorado',
+          bio: [
+            'Dr. Jen Perez is the co-owner and Vice President of Gait Happens. As both an educator and a clinician, her mission is to empower as many people as possible to take charge of their lower body health so they can get back to what they love.',
+          ],
+        },
+        {
+          photo: '/images/plp/gait-guru-membership.jpg',
+          name: 'Dr. Emily Schilling, DC',
+          credential: 'Lakewood, Colorado',
+          bio: [
+            'Dr. Emily Schilling began her career in the medical field at the University of Wisconsin-Madison where she graduated with a double major in Neurology and Nutritional Science.',
+          ],
+        },
+      ],
+      // Cross-sell band — Figma-verbatim heading from the "Product Cards"
+      // frame, node 1113:14665 (desktop) / 1129:16051 (mobile). Identical
+      // content on both breakpoints — no desktop/mobile disagreement here.
+      // Byte-identical to Trainer Certification's own crossSell (same 3
+      // sibling courses, same shopAllHref) — read independently off this
+      // course's own node, confirmed matching: none of the 3 cross-sold
+      // courses is Gait Guru Membership itself.
+      crossSell: {
+        heading: 'More Courses for Professionals',
+        itemIds: ['sole-switch-pro', 'gait-foundations', 'functional-gait-assessment-l1'],
+        shopAllHref: '/collections/courses-professionals',
+      },
+      // FAQs — Figma node 1086:28702 (desktop) / 1129:16052 (mobile).
+      //
+      // CLIENT-CONTENT FLAG (row-set divergence): desktop's own 7 rows are
+      // ALL real, genuine, course-specific QUESTIONS (unlike most other
+      // courses' own FAQ rows on this branch, which are frequently generic
+      // unfilled category chips) — "Is there an app I can use on my phone?"
+      // / "How does the community work?" / "Will the monthly Zoom calls be
+      // recorded?" / "How do I get access to all of the videos?" / "Am I
+      // able to cancel my membership at any time?" / "Will there be new
+      // content after the first three months?" / "What teaching methods are
+      // used in this membership?". Mobile's own frame (1129:16052) agrees on
+      // the first 5 rows verbatim, but its LAST 2 rows instead both read the
+      // generic, unfilled "Gait Happens Products" category chip (nodes
+      // `442:2701`/`442:2706`, byte-identical to each other) in place of
+      // desktop's genuine "Will there be new content..."/"What teaching
+      // methods..." questions — the SAME "duplicated generic category chip"
+      // authoring artifact Trainer Certification's own FAQ section already
+      // hit (there, the SAME chip repeated 3x on desktop itself). Desktop's
+      // 7 genuine, on-topic questions are kept canonical throughout; the 2
+      // mobile-only generic duplicate rows are dropped, not shipped.
+      //
+      // CLIENT-CONTENT DISCLOSURE: neither frame contains any ANSWER copy —
+      // both are static mockups of the accordion's COLLAPSED state only
+      // (confirmed via get_design_context on both node trees). Labels are
+      // kept Figma-verbatim (including row 1's own trailing space, a Figma
+      // typo, preserved per this task's rule); each `content` value below is
+      // a short, neutral "coming soon"-style placeholder that makes no
+      // factual or medical claim — the same established precedent every
+      // other course's own un-answered FAQ rows use on this branch. Real
+      // client-approved answer copy should replace these before this goes
+      // further than this reference build.
+      faqs: [
+        {
+          label: 'Is there an app I can use on my phone? ',
+          content: '<p>Details on the Gait Guru Membership app are coming soon.</p>',
+        },
+        {
+          label: 'How does the community work?',
+          content: '<p>Details on how the Gait Guru community works are coming soon.</p>',
+        },
+        {
+          label: 'Will the monthly Zoom calls be recorded?',
+          content: '<p>Details on Zoom call recordings are coming soon.</p>',
+        },
+        {
+          label: 'How do I get access to all of the videos?',
+          content: '<p>Details on video library access are coming soon.</p>',
+        },
+        {
+          label: 'Am I able to cancel my membership at any time?',
+          content: '<p>Details on membership cancellation are coming soon.</p>',
+        },
+        {
+          label: 'Will there be new content after the first three months?',
+          content: '<p>Details on new content after the first three months are coming soon.</p>',
+        },
+        {
+          label: 'What teaching methods are used in this membership?',
+          content: '<p>Details on the teaching methods used in this membership are coming soon.</p>',
+        },
+      ],
+      // No `reviews` — this course's own section list has no `pdp-reviews`
+      // entry (see this item's own top comment/this task's brief): neither
+      // the desktop frame nor the mobile frame contains a "Reviews Plugin
+      // Here" placeholder at all, unlike every other course on this branch.
+      // Confirmed via get_metadata on both, not omitted by oversight.
+    },
   },
   {
     id: 'trainer-certification',
