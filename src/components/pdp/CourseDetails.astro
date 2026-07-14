@@ -431,6 +431,23 @@
 // Figma exactly with no new CSS needed. `.course-details__pills`/
 // `.course-details__select`/`.course-details__pill*` are reused verbatim,
 // unchanged, per control.
+//
+// ---- Rating row guard (Chunk B2 review fix wave: component gap fix) -----
+// Gait Guru Membership's own Course Details hero (682:9761 desktop /
+// 1129:16046 mobile) is the first on this branch whose Figma frame has NO
+// rating row at all (confirmed via get_design_context on both breakpoints —
+// no StarRating instance in either pulled tree). `.course-details__rating`
+// used to render UNCONDITIONALLY (`<StarRating rating={item.rating ?? 0}
+// count={item.reviewCount ?? 0} />`), unlike PlpCard.astro's own correctly
+// guarded rating row (`{item.rating && <StarRating .../>}`) — so an item
+// with no `rating` rendered a false "☆☆☆☆☆ (0)" row (and announced "Rated 0
+// out of 5, 0 reviews" to screen readers) that doesn't exist in Figma.
+// Fixed by guarding the WHOLE `.course-details__rating` wrapper on
+// `item.rating` (not just the `<StarRating>` child — the div carries its
+// own `display: flex` layout, so guarding only the child would leave an
+// empty flex box behind) and dropping the `?? 0` fallbacks, which were
+// exactly what made the absence silent instead of loud. Byte-identical
+// no-op for all twelve other shipped PDPs, which all have a real `rating`.
 import StarRating from '../plp/StarRating.astro';
 import { isExternalHref } from '../../scripts/links.js';
 
@@ -488,9 +505,11 @@ function selectAccessibleName(control, blockLabel) {
       <div class="course-details__buybox">
         <div class="course-details__heading">
           <h1 class="course-details__title">{item.pdp?.heroTitle ?? item.title}</h1>
-          <div class="course-details__rating">
-            <StarRating rating={item.rating ?? 0} count={item.reviewCount ?? 0} />
-          </div>
+          {item.rating && (
+            <div class="course-details__rating">
+              <StarRating rating={item.rating} count={item.reviewCount} />
+            </div>
+          )}
         </div>
 
         <p class="course-details__price">

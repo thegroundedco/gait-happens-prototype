@@ -4076,7 +4076,7 @@ export const items = [
     cta: 'View Course',
     variants: null,
     sizeChart: null,
-    // ---- COMPONENT GAP — FOUND, NOT FIXED (Task 7, Course PDP Chunk B2) ----
+    // ---- COMPONENT GAP — RESOLVED (review fix wave, Chunk B2) -------------
     // No top-level `rating`/`reviewCount` is added here (unlike every other
     // course on this branch, which all had a real 5-star + review-count
     // instance in their own Course Details hero node to source these from).
@@ -4084,23 +4084,18 @@ export const items = [
     // rating row at all — confirmed via get_design_context on both
     // breakpoints (neither pulled tree contains a "Rating"/StarRating
     // instance, and neither screenshot shows one) — genuinely absent, not an
-    // oversight. CourseDetails.astro's own `.course-details__rating` block,
-    // however, is UNCONDITIONAL: `<StarRating rating={item.rating ?? 0}
-    // count={item.reviewCount ?? 0} />` always renders, with no `item.rating
-    // &&` guard the way PlpCard.astro's own rating row already has
-    // (`{item.rating && <StarRating .../>}`). Leaving `rating`/`reviewCount`
-    // unset therefore does NOT make this hero's rating row disappear the way
-    // omitting `heroCaption`/`buybox`/etc. does elsewhere on this same
-    // component — it will instead render a 5-outline-star, "(0)" row that
-    // doesn't exist in Figma at all. This is a genuine, previously
-    // undiscovered component gap (this is the first course whose Figma hero
-    // has no rating row), reported per this task's brief rather than fixed
-    // (fixing it means editing CourseDetails.astro, out of scope for a
-    // pure-data task) or worked around (inventing a fake rating/review count
-    // would violate the Figma-verbatim rule this task is bound by). The PLP
-    // grid card is unaffected (PlpCard.astro's own guard correctly renders no
-    // rating chip for this item, same as any other item with no `rating`
-    // set) — only this PDP's own Course Details hero shows the artifact.
+    // oversight. Task 7 correctly found that CourseDetails.astro's own
+    // `.course-details__rating` block was UNCONDITIONAL (`<StarRating
+    // rating={item.rating ?? 0} count={item.reviewCount ?? 0} />`, no
+    // `item.rating &&` guard the way PlpCard.astro's own rating row already
+    // has) and left `rating`/`reviewCount` unset rather than invent numbers —
+    // correctly reported, not fixed, since fixing it meant editing the
+    // component, out of scope for that pure-data task. The review fix wave
+    // fixed CourseDetails.astro directly (see that file's own header comment,
+    // "Rating row guard"): the whole wrapper is now guarded on `item.rating`,
+    // so this course's hero correctly renders no rating row at all, matching
+    // Figma. The PLP grid card was never affected (PlpCard.astro's own guard
+    // already correctly rendered no rating chip for this item).
     //
     // Task 7 (Course PDP Chunk B2) — Gait Guru Membership course PDP, the
     // LAST course PDP on this branch. Figma desktop frame 682:9759 (file
@@ -4215,67 +4210,55 @@ export const items = [
       // 4 Column feature band — Figma-verbatim heading from node 687:6575
       // (desktop) / 1129:16047 (mobile). Both frames agree on the heading
       // and all 4 card TITLES — no desktop/mobile disagreement on those (see
-      // the COMPONENT GAP flag below for the one thing that DOES differ).
+      // the CLIENT-CONTENT FLAG on card 4 below for the one thing that DOES
+      // differ).
       featuresHeading: 'What’s Included:',
-      // ---- COMPONENT GAP — FOUND, NOT FIXED (Task 7, Course PDP Chunk B2) --
+      // ---- COMPONENT GAP — RESOLVED (review fix wave, Chunk B2) -----------
       // Every card in both frames shows TWO distinct pieces of copy: a bold
       // 16px TITLE ("Video Library") and a separate, regular-weight 14px
       // BODY sentence below it ("Unlock over 165 videos of assessments &
-      // treatments for the lower body."). No course before this one has
-      // needed that shape — every prior course's own `features` card is ONE
-      // bold sentence (FourColumn.astro's `columns[].text`), optionally
-      // preceded by a small uppercase CAPTION (`columns[].label`) ABOVE it —
-      // never a bold title followed by a separate regular-weight paragraph
-      // BELOW it. `columns[].text` renders at exactly `font: 700 16px` — an
-      // exact style match to THIS course's own bold titles below — but
-      // `columns[].label` renders as a 12px uppercase caption, which does
-      // NOT match either the title's style (bold 16px, sentence case) or
-      // the body's style (regular 14px) Figma actually shows. There is no
-      // field/slot in FourColumn.astro for a second, regular-weight
-      // paragraph under the bold text at all.
-      // Per this task's brief ("stop and report, don't work around it, don't
-      // edit the component"): each card's own bold TITLE is authored into
-      // `text` below (the one value that genuinely matches that field's own
-      // rendered style) and `label` is left unset; each card's own BODY
-      // sentence — genuinely present in Figma, listed here for the record so
-      // it isn't silently lost — has NO fitting field and is THEREFORE NOT
-      // AUTHORED:
-      //   - Video Library: "Unlock over 165 videos of assessments &
-      //     treatments for the lower body."
-      //   - Member's Only Case Study Calls: "Access monthly live video
-      //     discussions via Zoom with case study presentations and Q&A
-      //     sessions."
-      //   - Expert Interviews: "Learn directly from various experts in the
-      //     functional foot health field."
-      //   - The Gait Guru Community: "Where you can interact and learn from
-      //     people who are leading the way in functional treatment of foot
-      //     and gait related conditions."
-      // Reported as a genuine component gap requiring FourColumn.astro to
-      // grow a second, optional per-card body field (the same kind of
-      // generalization CourseDetails.astro's own buybox/hero-image fields
-      // already went through) — not fixed here.
+      // treatments for the lower body."). No course before this one needed
+      // that shape — every prior course's own `features` card is ONE bold
+      // sentence (FourColumn.astro's `columns[].text`), optionally preceded
+      // by a small uppercase CAPTION (`columns[].label`) ABOVE it — never a
+      // bold title followed by a separate regular-weight paragraph BELOW it.
+      // Task 7 correctly found FourColumn.astro had no field/slot for that
+      // second paragraph at all and authored only each card's bold TITLE
+      // into `text` (the one value matching that field's own rendered
+      // style), leaving `label` unset and disclosing the four body sentences
+      // in a comment rather than inventing a slot for them or mis-authoring
+      // them into `label` (a 12px uppercase caption — matching neither the
+      // title's style nor the body's actual regular-14px style). The review
+      // fix wave grew FourColumn.astro a new optional `body` field per card
+      // (see that file's own header comment, "Optional per-card body
+      // paragraph") and the four sentences below — Figma-verbatim, pulled
+      // independently via get_design_context on both breakpoints — are now
+      // authored into it instead of only living in a comment.
       features: [
         {
           image: '/images/plp/gait-guru-membership.jpg',
           label: null,
           text: 'Video Library',
+          body: 'Unlock over 165 videos of assessments & treatments for the lower body.',
         },
         {
           image: '/images/plp/gait-guru-membership.jpg',
           label: null,
           text: 'Member’s Only Case Study Calls',
+          body: 'Access monthly live video discussions via Zoom with case study presentations and Q&A sessions.',
         },
         {
           image: '/images/plp/gait-guru-membership.jpg',
           label: null,
           text: 'Expert Interviews',
+          body: 'Learn directly from various experts in the functional foot health field.',
         },
         {
           image: '/images/plp/gait-guru-membership.jpg',
           label: null,
+          text: 'The Gait Guru Community',
           // CLIENT-CONTENT FLAG: this card's TITLE agrees on both
-          // breakpoints ("The Gait Guru Community"), but if a future fix
-          // adds the dropped body field above, note that mobile's own body
+          // breakpoints ("The Gait Guru Community"), but mobile's own body
           // sentence (1129:16047;181:2406) reads "When the toes can properly
           // splay, our foot and ankle muscles engage, creating a stronger,
           // more stable platform from which to propel ourselves forward." —
@@ -4283,9 +4266,8 @@ export const items = [
           // not written for this course — the SAME systemic mobile-4th-card
           // copy-paste artifact every other course's own `features` comment
           // on this branch already flags. Desktop's own on-topic body
-          // sentence (listed in the COMPONENT GAP comment above) should be
-          // kept canonical whenever that field exists to hold it.
-          text: 'The Gait Guru Community',
+          // sentence (below) is kept canonical, not mobile's copy-pasted one.
+          body: 'Where you can interact and learn from people who are leading the way in functional treatment of foot and gait related conditions.',
         },
       ],
       // Three Column Info — Figma-verbatim from node 1057:31197 (desktop) /
