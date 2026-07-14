@@ -1,0 +1,465 @@
+---
+// Image With Text section (Task 4, Course PDP Chunk B2; review fix wave —
+// Chunk B2 follow-up — below) — Figma file FX7PDNvhZwyozODaq8Q8i7. Prop is
+// `{ item }` (same shape as every other PDP section), reading
+// `item.pdp.imageWithText`. This is the 15th and FINAL registry type for the
+// PDP composer (see Pdp.astro's own header comment for the running count) —
+// a plain media/text split: an image beside a heading + bullet list, with
+// FIVE OPTIONAL pieces (an intro line, a list "lead-in" sentence, a
+// post-list note paragraph, a data-driven media-column width, and a trailing
+// CTA button with an optional trailing icon).
+//
+// ---- BUILT AGAINST ALL FOUR KNOWN INSTANCES, NOT JUST THE FIRST ONE --------
+// This section has FOUR instances in Figma TODAY, not one. A first review
+// pass (Task 4 itself) skimmed only ONE of Foot Fest's three instances
+// (674:7750) plus a metadata-only glance at the other two, and wrongly
+// generalized "Foot Fest is image-RIGHT" from that single sample — WRONG:
+// two of Foot Fest's own three instances are image-LEFT. A second review
+// re-pulled all four instances individually; this is that corrected,
+// per-instance record (desktop nodes; ✓ = present, – = absent):
+//
+//   | Node      | Course            | Image | Media col          | intro | listLead | items | note | CTA            | icon |
+//   |-----------|-------------------|-------|---------------------|-------|----------|-------|------|----------------|------|
+//   | 686:6540  | Trainer Cert      | LEFT  | w-374 / min-h-250   | –     | –        | 7     | –    | –              | –    |
+//   | 674:7748  | Foot Fest onsite  | LEFT  | w-374 / min-h-250   | –     | –        | 3     | –    | "Grab your room"| no  |
+//   | 674:7750  | Foot Fest VIP     | RIGHT | flex-1 / min-h-500  | ✓     | ✓        | 6     | –    | "Become A VIP" | YES  |
+//   | 674:7752  | Foot Fest walk    | LEFT  | flex-1 / min-h-500  | –     | ✓        | 3     | YES  | "Register Now" | YES  |
+//
+// (Mobile: Trainer Cert's own mobile frame is 1116:17403; Foot Fest's is
+// 1098:13857 for the VIP instance — see the mobile-stacking note below.)
+//
+// Only Trainer Certification's data ships in this task/branch — the other
+// three rows exist purely to shape this component's contract so a later
+// chunk (Foot Fest) can ship as pure data, no component edit. Two real
+// per-field takeaways from re-pulling all four, not assumed:
+//
+//   - The media column is NOT one fixed size. 686:6540/674:7748 both measure
+//     a literal 374px-wide, 250px-min-height column; 674:7750/674:7752 are
+//     instead an even ~50/50 `flex-[1_0_0]`/`min-h-[500px]` split — a
+//     genuinely different shape, not a rounding difference. Hardcoding
+//     374/250 (Task 4's original code) would have shipped a ~30%-wide,
+//     half-height, `object-fit:cover`-cropped image column on two of the
+//     four instances. See `imageWidth` below.
+//   - 674:7752 has REAL copy after its `<ul>` ("* Can't join us in person?
+//     You can still donate and join the walk virtually!") that neither
+//     `intro` nor `listLead` can express (both render ABOVE the list). See
+//     `note` below.
+//
+// This precedent already produced THIRTEEN separate "component hardcoded to
+// whichever page happened to be built first" defects on this branch (see
+// ThreeColumnInfo.astro's own header comment for the fullest account) — so
+// every field below, and the CSS approach for `imageSide`/`imageWidth`, is
+// shaped by ALL FOUR instances even though only Trainer Certification's data
+// ships today.
+//
+// ---- Data shape --------------------------------------------------------
+// `item.pdp.imageWithText` = `{ image, imageSide?, imageWidth?, heading,
+// intro?, listLead?, items: [string], note?, cta?: { label, href, icon? } }`.
+// `imageSide` is `'left'` (default) | `'right'`. `imageWidth` is a literal
+// px number (`374` for 686:6540/674:7748's shape); ABSENT means the ~50/50
+// `flex-[1_0_0]`/500px-min-height split (674:7750/674:7752's shape) — see
+// the CSS section below for why this is the default, not the opt-in. `cta`
+// is `{ label, href, icon? }` — `icon` is an optional boolean (674:7750/
+// 674:7752's CTAs both have a trailing arrow; 674:7748's does not, so this
+// is genuinely per-instance, not a fixed CTA style).
+//
+// Trainer Certification's own entry sets `image`/`heading`/`items` ONLY —
+// every other field is OMITTED entirely in catalog.js (its own Figma frame
+// has none of them), which is what proves they're genuinely optional rather
+// than merely unused — see catalog.js's own comment on this item's
+// `imageWithText` block, and this task's report for the `dist/` grep that
+// confirms no empty `<p>`/note/CTA/non-default media column ships.
+//
+// ---- Guards check NON-EMPTINESS, not presence (10+ prior instances) ------
+// `items` is the one required field; every other STRING/OBJECT field is a
+// bare `&&` guard on a plain (possibly absent) value — `''`/`undefined` are
+// both falsy in JS, so no extra `.length` check is needed for `intro`/
+// `listLead`/`note`/`heading` the way ThreeColumnInfo.astro's `columns`/`cta`
+// (arrays/objects, where `[]`/`{}` are truthy) require one. `cta` IS guarded
+// on `label && href` both present (not just the object's presence), matching
+// ThreeColumnInfo.astro's own `hasCta` idiom — a `cta: {}` or `cta: {
+// label }` value must not render an empty/href-less button; `cta.icon` is
+// additionally gated on `hasCta` itself (an icon with no button to sit in
+// makes no sense). Absent/empty -> renders NOTHING: no empty `<p>`, no empty
+// lead-in/note, no empty button, no icon on a CTA-less section — the exact
+// bug class this file exists to not repeat.
+//
+// ---- `imageSide` — CSS-only flip, not a duplicated markup branch --------
+// The component ALWAYS renders markup in one fixed order — media, then
+// body (heading/intro/lead/list/cta) — matching Trainer Certification's own
+// DOM order on both its frames. `imageSide: 'right'` (Foot Fest's future
+// case) flips the VISUAL order at desktop only, via `flex-direction:
+// row-reverse` keyed off a `data-image-side` attribute — never a second,
+// parallel "image after text" markup branch, per this task's explicit
+// brief. This keeps a single source of truth for the list/CTA markup
+// regardless of which side the image renders on.
+//
+// Mobile does NOT follow `imageSide` at all: Foot Fest's own VIP mobile pull
+// (1098:13857, one of its 3 mobile Image With Text instances) shows the
+// image FIRST (above the text), the IDENTICAL stacking order Trainer
+// Certification's own mobile frame (1116:17403) uses — even though that same
+// VIP instance's DESKTOP frame (674:7750) is image-RIGHT. I.e. mobile always
+// stacks image-above-text regardless of the desktop side, confirmed by
+// pulling BOTH mobile instances rather than assumed from `imageSide` —
+// exactly the check this task's brief warned not to skip. So the
+// `row-reverse` override below is scoped inside the `@media (min-width:
+// 1024px)` block only; the mobile base layout is a plain column with no
+// reordering.
+//
+// ---- Image `alt` ---------------------------------------------------------
+// Both known instances' images are decorative lifestyle/lifestyle-adjacent
+// shots (a hands-on workshop demo for Trainer Cert, a flat VIP-ticket
+// graphic for Foot Fest) sitting beside a heading that already carries the
+// section's full meaning — same reasoning InstructorCard.astro's own
+// placeholder-photo precedent already established (`alt=""`, cited there
+// for the identical reason: a generic/stand-in image with no informational
+// content of its own beyond what the adjacent text already states). `alt=""`
+// is used here for the same reason, not because these images are
+// unimportant, but because a screen-reader user loses nothing skipping past
+// them when the heading + list already say everything the section
+// communicates.
+//
+// ---- CTA -------------------------------------------------------------
+// `isExternalHref` (`src/scripts/links.js`) is this repo's one shared
+// internal/external link predicate (already used by ComparisonChart.astro's
+// CTA, CourseDetails.astro's enroll CTA, and ThreeColumnInfo.astro's own
+// CTA) — reused here rather than a fourth copy of the same `/^https?:/`
+// regex. Trainer Certification sets no `cta` at all, so this is inert for
+// this task's own shipped page; Foot Fest's future "Become A VIP"/"Register
+// Now" buttons (an on-page anchor/route, not yet confirmed internal or
+// external) are the first real exerciser of this branch.
+//
+// `cta.icon` (review fix wave) — a trailing arrow, gated on `hasCta &&
+// Boolean(cta.icon)`. 674:7750 (VIP) and 674:7752 (Fundraiser Walk) both
+// show a 24px white arrow with a 12px (`--space-3`) gap from the label;
+// 674:7748 (Stay Onsite) shows the SAME filled teal button with NO icon — a
+// genuinely per-instance difference, not a fixed CTA style, hence a field on
+// `cta` rather than something the component always renders whenever `cta`
+// is set. The icon is NOT `/images/nav/arrow.svg` (checked, not reused): that
+// asset is a solid filled chevron-arrow shape built for a different UI (nav
+// mega-menu cards / PLP CTA rows — see `NavCard.astro`/`CrossSell.astro`);
+// Figma's own button icon is a thin open-stroke line arrow, the exact
+// mismatch Testimonial.astro's own header comment already documents for its
+// carousel arrows ("neither existing repo icon in `/images/nav/` matches its
+// thin open-stroke chevron shape ... a small inline stroke-arrow SVG is
+// built here instead of reusing either"). This file reuses that exact same
+// precedent: `ARROW_PATH` below is Testimonial.astro's own path constant
+// (`M4 12H20M20 12L14 6M20 12L14 18`), rendered inline with
+// `stroke="currentColor"` so it inherits the CTA's own white text colour
+// automatically (no separate colour token/prop needed) — not a third copy
+// of the same inline SVG.
+//
+// ---- Tokens / literals -----------------------------------------------
+// Heading = --type-h3 (600/32px) — Figma's own desktop pull binds it to
+// `var(--text-h3,32px)`; mobile's pull shows the SAME token with a 24px
+// fallback instead. This repo's tokens.css has one non-responsive --type-h3
+// (32px), and every sibling course section (CourseDetails, CourseOverview,
+// FourColumn, ThreeColumnInfo's own column sub-heading) already keeps a
+// single type token consistent across both breakpoints rather than
+// introducing a one-off mobile override — same choice here.
+//
+// List item text is a genuine breakpoint-specific case, not a token
+// mismatch to paper over: desktop's own pull binds the list to
+// `var(--text-body-sm,14px)`; mobile's own pull (BOTH Trainer Cert's
+// 1116:17403 and Foot Fest's 1098:13857) instead binds it to
+// `var(--text-body,16px)`. This repo's tokens.css already carries a
+// dedicated `--type-body-16` (400/16px/1.4) token for exactly this
+// fallback value (used by Testimonial.astro/YoullStopAndInstead.astro/
+// CartDrawer.astro/PlpCard.astro/PromoCard.astro/QuickAddModal.astro for
+// the identical Figma `--text-body,16px` binding — see those files' own
+// header comments), distinct from `--type-body` (20px), which does NOT
+// match Figma's 16px fallback here. So: `--type-body-sm` at desktop,
+// `--type-body-16` at the mobile-first base — a real, Figma-confirmed
+// responsive font-size difference, not an invented one.
+//
+// List item spacing is also breakpoint-specific and literal-free: desktop's
+// own pull shows `mb-[8px]` per `<li>` (an exact `--space-2` match); mobile's
+// shows `mb-[24px]` (an exact `--space-5` match) — both real DS-token hits,
+// no literals needed for the vertical rhythm. Bullet indent (`ms-*`) is the
+// one literal pair: mobile's `ms-[24px]` is again an exact `--space-5`
+// match, but desktop's own `ms-[21px]` lands nowhere on this repo's --space
+// scale (16/24 bracket it) — same "literal OK, flagged" allowance
+// ThreeColumnInfo.astro's own 20px list-item gap already takes.
+//
+// Section-level rhythm: desktop's own outer wrapper shows `gap-64
+// px-48 py-64` — all three land exactly on this repo's scale (--space-8,
+// --space-7, --space-8), so no literals there either. Mobile's image is a
+// plain `aspect-[430/410]` box, reproduced as a literal aspect-ratio.
+//
+// ---- `imageWidth` — data-driven media column, not a hardcoded 374px -----
+// (Review fix wave.) Task 4's original CSS hardcoded the desktop media
+// column to `flex: 0 0 374px; width: 374px; min-height: 250px` — 686:6540
+// (Trainer Cert) and 674:7748 (Stay Onsite)'s own shape, measured off the
+// 1200-wide desktop frame (same "literal measured column width" idiom
+// CourseDetails' 484px buybox/ThreeColumnInfo's 761px heading already use),
+// but NOT 674:7750 (VIP)/674:7752 (Fundraiser Walk)'s — both of those
+// instead measure `flex-[1_0_0]`/`min-h-[500px]`, an even ~50/50 split. Two
+// of the four known instances would have shipped a ~30%-wide, half-height,
+// `object-fit:cover`-cropped image column under the old hardcode.
+//
+// `imageWidth` (optional px number) now drives this: ABSENT is the DEFAULT
+// (`flex: 1 1 0; min-height: 500px` — the ~50/50 split), not the opt-in,
+// because the ~50/50 shape is what an as-yet-unauthored instance is more
+// likely to need if a future course's own Image With Text frame doesn't
+// happen to match Trainer Cert's specific 374/250 measurement — Trainer
+// Certification sets `imageWidth: 374` explicitly. `min-height: 250px` is
+// NOT a separate field: it's a fixed pairing with the fixed-width branch
+// (both Figma instances that use a fixed width use exactly this
+// min-height), same "component-intrinsic literal, not requiring its own
+// data hook" treatment `.image-with-text__cta`'s 20px padding already takes.
+// Implemented via a `--image-with-text-media-width` CSS custom property (set
+// as an inline `style` on the section only when `imageWidth` is present) and
+// a `[data-media-fixed='true']` attribute selector — not a duplicated markup
+// branch, matching this file's own `imageSide` CSS-only-flip precedent.
+//
+// Mobile's OUTER wrapper carries no horizontal padding at all (the image
+// bleeds full-width edge to edge, `py-64` only) while its BODY block alone
+// carries `px-24` (an exact `--space-5` match) — the same "full-bleed media,
+// inset text" idiom FourColumn.astro's own mobile card already documents.
+//
+// ---- Desktop/mobile CONTENT divergence (disclosed here + this task's own
+// report; canonical value per this task's "pull desktop first" rule) -------
+// Trainer Certification's own heading DISAGREES between breakpoints, not
+// just in size: desktop (686:6540) reads "Additional Benefits of the Gait
+// Happens Trainer Certification"; mobile (1116:17403) reads "Additional
+// Benefits of the GH Trainer Certification" (the brand name abbreviated to
+// initials). The 7 bullet items agree byte-for-byte on both frames — only
+// the heading shortens. Desktop's full-name wording is kept canonical below
+// (same "pull desktop first, flag mobile's divergence" precedent every
+// other course section on this branch already follows), per this task's own
+// report.
+//
+// ---- `note` — a post-list paragraph, not a duplicated intro/lead --------
+// (Review fix wave.) 674:7752 (Fundraiser Walk) renders one more paragraph
+// AFTER its `<ul>`: "* Can't join us in person? You can still donate and
+// join the walk virtually!" — neither `intro` nor `listLead` can express
+// this (both render ABOVE the list, matching Trainer Certification's own
+// DOM order, which has no post-list content at all). `note` is a plain
+// OPTIONAL string, bare `&&`-guarded, rendered immediately after the `<ul>`;
+// absent (every instance except 674:7752's future data) renders nothing.
+// Same typography as `intro`/`listLead` (Figma's own text block runs all of
+// intro/lead/list/note through one font binding), so it's added to that
+// existing selector group rather than a new type rule.
+import { isExternalHref } from '../../scripts/links.js';
+
+// Testimonial.astro's own arrow-icon path (see that file's header comment
+// for why: neither `/images/nav/arrow.svg` nor `arrow-lg.svg` match Figma's
+// thin open-stroke arrow glyph, both being solid filled shapes for a
+// different UI). Reused verbatim here for the CTA's optional trailing icon
+// rather than a third copy of the same inline SVG — see this file's own
+// "CTA" section above.
+const ARROW_PATH = 'M4 12H20M20 12L14 6M20 12L14 18';
+
+const { item } = Astro.props;
+const data = item.pdp?.imageWithText;
+const items = data?.items ?? [];
+const imageSide = data?.imageSide === 'right' ? 'right' : 'left';
+const imageWidth = data?.imageWidth;
+const cta = data?.cta;
+const hasCta = Boolean(cta?.label && cta?.href);
+const hasCtaIcon = hasCta && Boolean(cta.icon);
+const isExternal = hasCta ? isExternalHref(cta.href) : false;
+---
+{items.length > 0 && (
+  <section
+    class="image-with-text"
+    data-pdp-id={item.id}
+    data-image-side={imageSide}
+    data-media-fixed={imageWidth ? 'true' : undefined}
+    style={imageWidth ? `--image-with-text-media-width: ${imageWidth}px` : undefined}
+  >
+    <div class="image-with-text__inner">
+      <div class="image-with-text__media">
+        <img src={data.image} alt="" loading="lazy" />
+      </div>
+      <div class="image-with-text__body">
+        {data.heading && <h2 class="image-with-text__heading">{data.heading}</h2>}
+        {data.intro && <p class="image-with-text__intro">{data.intro}</p>}
+        {data.listLead && <p class="image-with-text__lead">{data.listLead}</p>}
+        <ul class="image-with-text__list">
+          {items.map((text) => <li>{text}</li>)}
+        </ul>
+        {data.note && <p class="image-with-text__note">{data.note}</p>}
+        {hasCta && (
+          <a
+            class="image-with-text__cta"
+            href={cta.href}
+            {...(isExternal ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+          >
+            {cta.label}
+            {hasCtaIcon && (
+              <svg
+                class="image-with-text__cta-icon"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                aria-hidden="true"
+              >
+                <path d={ARROW_PATH} stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+            )}
+          </a>
+        )}
+      </div>
+    </div>
+  </section>
+)}
+<style>
+  .image-with-text__inner {
+    max-width: var(--container-max);
+    margin-inline: auto;
+    padding-block: var(--space-8);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-8);
+  }
+
+  .image-with-text__media {
+    width: 100%;
+    aspect-ratio: 430 / 410;
+    overflow: hidden;
+    background: var(--color-border);
+    flex-shrink: 0;
+  }
+  .image-with-text__media img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .image-with-text__body {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-6);
+    padding-inline: var(--space-5);
+    width: 100%;
+    min-width: 0;
+  }
+
+  .image-with-text__heading {
+    font: var(--type-h3);
+    color: var(--color-ink);
+  }
+
+  .image-with-text__intro,
+  .image-with-text__lead,
+  .image-with-text__note {
+    font: var(--type-body-16);
+    color: var(--color-ink);
+  }
+
+  .image-with-text__list {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    /* --space-5 (24px) — exact match to mobile's own `ms-[24px]` bullet
+       indent (see header comment). */
+    padding-inline-start: var(--space-5);
+    margin: 0;
+  }
+  .image-with-text__list li {
+    font: var(--type-body-16);
+    color: var(--color-ink);
+    /* --space-5 (24px) — exact match to mobile's own `mb-[24px]` per-item
+       gap (see header comment). */
+    margin-bottom: var(--space-5);
+  }
+  .image-with-text__list li:last-child {
+    margin-bottom: 0;
+  }
+
+  .image-with-text__cta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    /* --space-3 (12px) — exact match to Figma's own `gap-[var(--space-12,
+       12px)]` between the CTA label and its optional trailing icon (see
+       header comment). No-op whenever `cta.icon` is unset (a single-child
+       flex row ignores `gap`). */
+    gap: var(--space-3);
+    background: var(--color-teal);
+    color: var(--color-paper);
+    font: var(--type-button);
+    /* 20px literal — same figure CourseDetails' enroll CTA /
+       ComparisonChart's CTA / ThreeColumnInfo's CTA already flag; this
+       repo's --space scale has 16/24 on either side of it, no exact step. */
+    padding: var(--space-4) 20px;
+    text-decoration: none;
+    text-align: center;
+    transition: transform var(--motion-fast) var(--ease-standard);
+  }
+  .image-with-text__cta:hover {
+    transform: translateY(-2px);
+  }
+  /* Optional trailing icon (674:7750/674:7752 — see header comment).
+     `stroke="currentColor"` on the inline `<path>` already inherits
+     `.image-with-text__cta`'s own `color: var(--color-paper)`; this rule
+     only needs to stop the icon from flex-shrinking against a long label. */
+  .image-with-text__cta-icon {
+    flex-shrink: 0;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .image-with-text__cta:hover {
+      transform: none;
+    }
+  }
+
+  /* ---- Desktop (Figma 686:6540, ≥1024) --------------------------------- */
+  @media (min-width: 1024px) {
+    .image-with-text__inner {
+      flex-direction: row;
+      align-items: stretch;
+      padding-inline: var(--space-7);
+    }
+    /* Default media column shape: the ~50/50 split 674:7750 (VIP)/674:7752
+       (Fundraiser Walk) both use — see header comment on why this, not a
+       fixed width, is the default. Overridden below when `imageWidth` is
+       set (686:6540/674:7748's shape). */
+    .image-with-text__media {
+      flex: 1 1 0;
+      aspect-ratio: auto;
+      min-height: 500px;
+    }
+    /* `imageWidth` (review fix wave) — Trainer Cert's own 374px/250px shape.
+       `--image-with-text-media-width` is set as an inline style on the
+       `<section>` only when `item.pdp.imageWithText.imageWidth` is present
+       (see the frontmatter/markup above); `min-height: 250px` is a fixed
+       pairing with this branch, not itself data-driven (see header
+       comment). Absent (674:7750/674:7752's future data) never matches this
+       selector, leaving the default ~50/50 split above untouched. */
+    .image-with-text[data-media-fixed='true'] .image-with-text__media {
+      flex: 0 0 var(--image-with-text-media-width);
+      width: var(--image-with-text-media-width);
+      min-height: 250px;
+    }
+    .image-with-text__body {
+      flex: 1 1 0;
+      min-width: 0;
+      padding-inline: 0;
+    }
+    /* `imageSide: 'right'` (Foot Fest's future case) — a CSS-only flip, not
+       a duplicated markup branch. Desktop only; mobile always stacks
+       image-above-text regardless of this attribute (see header comment). */
+    .image-with-text[data-image-side='right'] .image-with-text__inner {
+      flex-direction: row-reverse;
+    }
+    .image-with-text__intro,
+    .image-with-text__lead,
+    .image-with-text__note {
+      font: var(--type-body-sm);
+    }
+    .image-with-text__list li {
+      font: var(--type-body-sm);
+      margin-bottom: var(--space-2);
+    }
+    .image-with-text__list {
+      /* 21px literal — desktop's own `ms-[21px]` bullet indent lands
+         nowhere on this repo's --space scale (16/24 bracket it); see
+         header comment. */
+      padding-inline-start: 21px;
+    }
+  }
+</style>

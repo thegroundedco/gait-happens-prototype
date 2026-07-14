@@ -26,4 +26,10 @@ export default defineConfig({
   site: 'https://gaithappens.com',
   // Astro View Transitions are enabled per-page via the <ClientRouter /> in BaseLayout.
   integrations: [internalStatusRoute()],
+  // Pinned deliberately. Astro's default `'auto'` inlines a stylesheet only
+  // while it is under 4096 bytes, so an unrelated CSS edit can silently flip
+  // 17 pages between <style> and <link>. `'never'` makes the build output
+  // deterministic — the right trade for a reference build the client's dev
+  // team reads and ports.
+  build: { inlineStylesheets: 'never' },
 });

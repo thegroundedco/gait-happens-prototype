@@ -87,10 +87,29 @@ export const routes = [
   // placeholder to built (page + catalog `pdp` block now exist; see
   // src/pages/courses/sole-switch-pro.astro and catalog.js).
   r('/courses/sole-switch-pro', 'Sole Switch Pro', 'course', ['Home', 'Courses', 'Sole Switch Pro'], { status: 'built' }),
-  r('/courses/gait-guru-membership', 'Gait Guru Membership', 'course', ['Home', 'Courses', 'Gait Guru Membership']),
-  r('/courses/trainer-certification', 'Trainer Certification', 'course', ['Home', 'Courses', 'Trainer Certification']),
-  r('/courses/gait-foundations', 'Gait Foundations', 'course', ['Home', 'Courses', 'Gait Foundations']),
-  r('/courses/functional-gait-assessment-l1', 'Functional Gait Assessment L1', 'course', ['Home', 'Courses', 'Functional Gait Assessment L1']),
+  // Task 7 (Course PDP Chunk B2): flipped from placeholder to built (page +
+  // catalog `pdp` block now exist; see src/pages/courses/gait-guru-membership.astro
+  // and catalog.js). This is the LAST course PDP on this branch — its own
+  // section list is the shortest (no `course-overview`, no `pdp-reviews`).
+  r('/courses/gait-guru-membership', 'Gait Guru Membership', 'course', ['Home', 'Courses', 'Gait Guru Membership'], { status: 'built' }),
+  // Task 4 (Course PDP Chunk B2): flipped from placeholder to built (page +
+  // catalog `pdp` block now exist; see src/pages/courses/trainer-certification.astro
+  // and catalog.js).
+  r('/courses/trainer-certification', 'Trainer Certification', 'course', ['Home', 'Courses', 'Trainer Certification'], { status: 'built' }),
+  // Course PDP Chunk B2 Task 3: flipped from placeholder to built (page +
+  // catalog `pdp` block now exist; see src/pages/courses/gait-foundations.astro
+  // and catalog.js).
+  r('/courses/gait-foundations', 'Gait Foundations', 'course', ['Home', 'Courses', 'Gait Foundations'], { status: 'built' }),
+  // Task 5 (Course PDP Chunk B2): flipped from placeholder to built (page +
+  // catalog `pdp` block now exist; see
+  // src/pages/courses/functional-gait-assessment-l1.astro and catalog.js).
+  r('/courses/functional-gait-assessment-l1', 'Functional Gait Assessment L1', 'course', ['Home', 'Courses', 'Functional Gait Assessment L1'], { status: 'built' }),
+  // Task 2 (Course PDP Chunk B2) adopted a fully-designed Figma page
+  // (1041:10410) that previously had no catalog entry, route, or PLP
+  // presence, as a placeholder. Task 6 flips it to 'built' (page +
+  // catalog `pdp` block now exist; see
+  // src/pages/courses/functional-gait-assessment-l2.astro and catalog.js).
+  r('/courses/functional-gait-assessment-l2', 'Functional Gait Assessment L2', 'course', ['Home', 'Courses', 'Functional Gait Assessment L2'], { status: 'built' }),
 
   // Resources
   r('/resources/locally-trained-practitioners', 'Locally Trained Practitioners', 'page', ['Home', 'Resources', 'Locally Trained Practitioners']),

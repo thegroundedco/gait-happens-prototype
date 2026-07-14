@@ -79,31 +79,101 @@
 // desktop's 32px. This repo's tokens.css has one non-responsive --type-h3
 // (32px) and every sibling course section (CourseDetails, FourColumn) uses
 // it unmodified at both breakpoints — same here, no mobile override added.
+//
+// ---- `body` as list OR paragraph (Chunk B2 review fix wave) --------------
+// Trainer Certification's own "Course Concepts" block (683:10089 node
+// `I683:10089;174:1437` desktop / 1116:17400 node `I1116:17400;181:2228`
+// mobile) is a REAL 4-item bulleted `<ul>`, not free-running prose — unlike
+// Sole Switch Pro's own paragraph, which is what this field was originally
+// modeled on (see this file's own comment above). A prior task correctly
+// refused to flatten Figma's actual list structure into a run-on sentence
+// and left `body` unset (rendering nothing) rather than misrepresent it.
+//
+// Fixed here by letting `body` express EITHER shape, not by adding a new,
+// parallel field name (e.g. a sibling `concepts` array): `Array.isArray
+// (overview.body)` renders a `<ul>`; a plain (non-array) truthy value
+// renders exactly the same lone `<p>` as before. This reuses the "array of
+// plain strings = bullet list" shape already established elsewhere on this
+// same PDP composer (`ImageWithText.astro`'s own `items`, `ThreeColumnInfo
+// .astro`'s per-column `items`) rather than inventing a bespoke tuple, and
+// deliberately does NOT reach for `set:html` the way PdpAccordion.astro's
+// generic `content` field does — this branch already reverted a `set:html`
+// sink once (ComparisonChart.astro's own intro paragraph) specifically
+// because plain structured data was cleaner and safer than raw HTML for a
+// field with no genuine embedded markup need; a 4-item array of strings has
+// exactly the same "no real markup, just multiple lines" shape that fix
+// argued for, so the same structured-data-over-HTML choice is made again
+// here rather than re-introducing that pattern.
+//
+// Every course before Trainer Certification passes a plain string for
+// `body` (or omits it) — `Array.isArray` is `false` for both, so `hasBody`/
+// the render branch below are byte-identical to the pre-fix behaviour for
+// all of them; this is a no-op except for Trainer Certification's own new
+// array value.
+//
+// Ordered-list fix (Chunk B2 review wave): FGA Level 2's "Course Concepts"
+// list is a decimal ordered list in Figma, NOT bullets like every other
+// course. Polymorphic `body` already handles array vs. string; now
+// `overview.ordered: true` renders `<ol>` instead of `<ul>` for that
+// course's array. Absent `ordered` defaults to `<ul>` — unchanged for all
+// pre-existing courses (no `ordered` set).
+//
+// Guard fix (final review fix wave): `details`/`image` used to render
+// unconditionally — `<img src={overview.image}>` with no guard gave a
+// broken-image box for a course whose `overview` omits `image`, and a bare
+// `overview.details?.map(...)` still emitted an empty
+// `.course-overview__details` grid `<div>` for one that omits `details`.
+// Both are now wrapped the same way `hasBody`'s block already was: a real
+// element only when there's real content (`details.length > 0` /
+// `Boolean(image)`). Every shipped course sets both fields, so this is a
+// byte-identical no-op today — the Pdp.astro registry entry for this
+// section was ALSO fixed in the same pass so `overview: {}` (or one with
+// only empty fields) can no longer reach this component at all; this
+// guard is the second layer, not the only one.
 const { item } = Astro.props;
 const overview = item.pdp?.overview;
+const bodyIsList = Array.isArray(overview?.body);
+const bodyIsOrdered = bodyIsList && overview?.ordered === true;
+const hasBody = bodyIsList ? overview.body.length > 0 : Boolean(overview?.body);
 ---
 {overview && (
   <section class="course-overview" data-pdp-id={item.id}>
     <div class="course-overview__inner">
       <h2 class="course-overview__heading">Course Overview</h2>
 
-      <div class="course-overview__details">
-        {overview.details?.map((detail) => (
-          <div class="course-overview__detail">
-            <p class="course-overview__detail-label">{detail.label}</p>
-            <p class="course-overview__detail-value">{detail.value}</p>
-          </div>
-        ))}
-      </div>
+      {overview.details?.length > 0 && (
+        <div class="course-overview__details">
+          {overview.details.map((detail) => (
+            <div class="course-overview__detail">
+              <p class="course-overview__detail-label">{detail.label}</p>
+              <p class="course-overview__detail-value">{detail.value}</p>
+            </div>
+          ))}
+        </div>
+      )}
 
-      <div class="course-overview__media">
-        <img src={overview.image} alt="" loading="lazy" />
-      </div>
+      {overview.image && (
+        <div class="course-overview__media">
+          <img src={overview.image} alt="" loading="lazy" />
+        </div>
+      )}
 
-      {overview.body && (
+      {hasBody && (
         <div class="course-overview__concepts">
           <p class="course-overview__detail-label">Course Concepts</p>
-          <p class="course-overview__body">{overview.body}</p>
+          {bodyIsList ? (
+            bodyIsOrdered ? (
+              <ol class="course-overview__list course-overview__list--ordered">
+                {overview.body.map((text) => <li>{text}</li>)}
+              </ol>
+            ) : (
+              <ul class="course-overview__list">
+                {overview.body.map((text) => <li>{text}</li>)}
+              </ul>
+            )
+          ) : (
+            <p class="course-overview__body">{overview.body}</p>
+          )}
         </div>
       )}
     </div>
@@ -173,6 +243,38 @@ const overview = item.pdp?.overview;
   .course-overview__body {
     font: var(--type-body-sm);
     color: var(--color-ink);
+  }
+  /* List variant of `body` (review fix wave — Trainer Certification's own
+     "Course Concepts" 4-item `<ul>`, 683:10089;174:1439 / 1116:17400's
+     equivalent node). Same font/colour as the paragraph variant above
+     (Figma's own list uses the identical --text-body-sm/ink binding); 8px
+     per-item gap (`mb-[8px]`, an exact --space-2 match on both frames) and
+     21px bullet indent (`ms-[21px]`, the same literal-with-no-exact-token
+     ImageWithText.astro's own desktop list already flags — 16/24 bracket it
+     on this repo's --space scale) are both real Figma measurements, not
+     invented. */
+  .course-overview__list {
+    display: flex;
+    flex-direction: column;
+    padding-inline-start: 21px;
+    margin: 0;
+    list-style: disc;
+  }
+  .course-overview__list li {
+    font: var(--type-body-sm);
+    color: var(--color-ink);
+    margin-bottom: var(--space-2);
+  }
+  .course-overview__list li:last-child {
+    margin-bottom: 0;
+  }
+  /* Ordered variant of `body` (review fix wave — FGA Level 2's decimal
+     "Course Concepts" `<ol>`, 1041:10413;174:1439 / 1116:16468's
+     equivalent node). Rendering decimal list markers instead of bullets,
+     while reusing every other `.course-overview__list` style (spacing,
+     type, colour, indent). */
+  .course-overview__list--ordered {
+    list-style: decimal;
   }
 
   /* ---- Desktop (Figma 675:4354, ≥1024) -------------------------------- */

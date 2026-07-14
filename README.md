@@ -134,6 +134,37 @@ section/snippet:
 `BaseLayout.astro` (global `<head>`, font/token loading, header/footer
 mount, motion script) maps to Shopify's `theme.liquid`.
 
+### PDP sections
+
+Product/course detail pages are composed, not hand-assembled per page:
+[`Pdp.astro`](src/components/pdp/Pdp.astro) reads an ordered `item.pdp.sections`
+list off the catalog item and renders each entry through a `type ->
+{ Component, props }` registry — the 15 rows below are that registry, one row
+per section type. A type with no data for the current item renders nothing
+(sections are opt-in per item, not a fixed template). See
+[`docs/pdp-data-model.md`](docs/pdp-data-model.md) for the full `pdp` data
+contract, the guard rules that keep absent/empty data from rendering broken
+markup, and — the part this table can't capture — which pieces of that data
+become Shopify product-record fields vs. metafields/metaobjects.
+
+| Astro component | Shopify equivalent |
+| :-- | :-- |
+| `ProductDetails.astro` (+ `PdpAccordion.astro`) | Main product section: buy box (price/variants/qty/Add to Cart) + gallery + accordion (Size chart/Instructions/Research). Product PDPs only. |
+| `CourseDetails.astro` | Course PDPs' equivalent main section: buy box (price/buy-box controls/Enroll CTA) + branded card or hero image. Course PDPs only. |
+| `CourseOverview.astro` | A PDP section: details grid + image + "Course Concepts" copy. Course PDPs only. |
+| `FourColumn.astro` | A PDP section: yellow 4-card feature band. Shared (product + course). |
+| `YoullStopAndInstead.astro` | A PDP section: two-panel "stop / instead" callout. Course PDPs only today. |
+| `ComparisonChart.astro` | A PDP section: comparison table band with an optional upsell CTA. Course PDPs only today. |
+| `Testimonial.astro` | A PDP section: testimonial band, becomes a real carousel once an item has more than one entry. |
+| `YourInstructors.astro` + `InstructorCard.astro` | A PDP section: instructor/author bio cards with a real read-more toggle. |
+| `Faqs.astro` (reuses `PdpAccordion.astro`) | A PDP section: FAQ accordion band on a teal background. |
+| `ThreeColumnInfo.astro` | A PDP section: 3-column checklist band with an optional CTA. Course PDPs only today. |
+| `ImageWithText.astro` | A PDP section: media/text split band with an optional CTA. Course PDPs only today. |
+| `BrandSection.astro` | A PDP section: brand band (logo + tagline). No per-item data; desktop-only. |
+| `CrossSell.astro` (`src/components/plp/CrossSell.astro`) | Reused PLP cross-sell band — same component the PLP grid uses; `pdp.crossSell` supplies its data on a PDP. |
+| `PdpReviews.astro` | A PDP section — **static placeholder** for the real Shopify reviews app (e.g. Judge.me/Loox); replace the whole section, don't port its markup as final. |
+| `LogoWall.astro` (`src/components/plp/LogoWall.astro`) | Reused PLP "As Seen In" press-logo band. No per-item data. |
+
 ## URL conventions
 
 Routes use **Shopify-style paths** so the eventual Shopify site's URL

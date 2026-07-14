@@ -79,7 +79,7 @@ test('every built course route has a pdp block with sections and a resolving cro
   const courseItems = items.filter(it => it.kind === 'course' && builtCoursePaths.has(it.href));
 
   // Sanity-check the filter — an empty set would make everything below pass vacuously.
-  assert.ok(courseItems.length >= 4, `expected >=4 built course items, found ${courseItems.length}`);
+  assert.ok(courseItems.length >= 9, `expected >=9 built course items, found ${courseItems.length}`);
 
   for (const it of courseItems) {
     assert.ok(it.pdp, `built course missing pdp block: ${it.id}`);
