@@ -28,10 +28,11 @@
 // (CourseOverview.astro); Task 4 added `youll-stop-and-instead`
 // (YoullStopAndInstead.astro); Task 5 added `comparison-chart`
 // (ComparisonChart.astro); Task 6 added `testimonial` (Testimonial.astro);
-// Task 7 added `your-instructors` (YourInstructors.astro); Task 8 adds
-// `faqs` (Faqs.astro) below — the last course-only type, so every entry in
-// Sole Switch Pro's `pdp.sections` list now has a registry entry and the
-// full course PDP assembles end to end.
+// Task 7 added `your-instructors` (YourInstructors.astro); Task 8 added
+// `faqs` (Faqs.astro) — the last course-only type for Chunk A, so every
+// entry in Sole Switch Pro's `pdp.sections` list assembled end to end.
+// Course PDP Chunk B2 Task 3 adds `three-column-info` (ThreeColumnInfo.astro)
+// below, the 14th registry type and Gait Foundations' own new section.
 import ProductDetails from './ProductDetails.astro';
 import CourseDetails from './CourseDetails.astro';
 import CourseOverview from './CourseOverview.astro';
@@ -40,6 +41,7 @@ import ComparisonChart from './ComparisonChart.astro';
 import Testimonial from './Testimonial.astro';
 import YourInstructors from './YourInstructors.astro';
 import Faqs from './Faqs.astro';
+import ThreeColumnInfo from './ThreeColumnInfo.astro';
 import FourColumn from './FourColumn.astro';
 import BrandSection from './BrandSection.astro';
 import PdpReviews from './PdpReviews.astro';
@@ -108,6 +110,17 @@ const REGISTRY = {
     // real `item.pdp.faqs` data render this section.
     Component: Faqs,
     props: (item) => (item.pdp?.faqs?.length > 0 ? { item } : null),
+  },
+  'three-column-info': {
+    // Task 3 (Course PDP Chunk B2). Guarded like `testimonial` above —
+    // `item.pdp.threeColumn.columns` must be a NON-EMPTY array (`?.length >
+    // 0`, not just `?.columns`), or a `threeColumn: { columns: [] }` value
+    // would slip past a presence-only check and render an empty section
+    // wrapper around nothing — the exact bug class ThreeColumnInfo.astro's
+    // own header comment documents at length (10 prior instances of this
+    // mistake on this branch).
+    Component: ThreeColumnInfo,
+    props: (item) => (item.pdp?.threeColumn?.columns?.length > 0 ? { item } : null),
   },
   'brand-section': {
     // Desktop-only per BrandSection.astro's own `@media (max-width: 1023px)

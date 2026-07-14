@@ -89,7 +89,10 @@ export const routes = [
   r('/courses/sole-switch-pro', 'Sole Switch Pro', 'course', ['Home', 'Courses', 'Sole Switch Pro'], { status: 'built' }),
   r('/courses/gait-guru-membership', 'Gait Guru Membership', 'course', ['Home', 'Courses', 'Gait Guru Membership']),
   r('/courses/trainer-certification', 'Trainer Certification', 'course', ['Home', 'Courses', 'Trainer Certification']),
-  r('/courses/gait-foundations', 'Gait Foundations', 'course', ['Home', 'Courses', 'Gait Foundations']),
+  // Course PDP Chunk B2 Task 3: flipped from placeholder to built (page +
+  // catalog `pdp` block now exist; see src/pages/courses/gait-foundations.astro
+  // and catalog.js).
+  r('/courses/gait-foundations', 'Gait Foundations', 'course', ['Home', 'Courses', 'Gait Foundations'], { status: 'built' }),
   r('/courses/functional-gait-assessment-l1', 'Functional Gait Assessment L1', 'course', ['Home', 'Courses', 'Functional Gait Assessment L1']),
   // Task 2 (Course PDP Chunk B2): adopts a fully-designed Figma page
   // (1041:10410) that previously had no catalog entry, route, or PLP

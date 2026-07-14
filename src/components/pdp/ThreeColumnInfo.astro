@@ -1,0 +1,296 @@
+---
+// Three Column Info section (Task 3, Course PDP Chunk B2) — Figma desktop
+// 675:9040 (file FX7PDNvhZwyozODaq8Q8i7, "Gait Foundations Course" frame
+// 675:9036) / mobile 1116:14704 (the "Gait Foundations Course" instance
+// under the professional-courses mobile section 1109:14374). Prop is
+// `{ item }` (same shape as every other course section — CourseOverview,
+// YoullStopAndInstead, ComparisonChart, YourInstructors, etc.), reading
+// `item.pdp.threeColumn`.
+//
+// ---- Why this file is written the way it is (10th-finding prevention) ----
+// Rolling this section library out across courses has already produced TEN
+// separate cases of a shared component with per-course content baked into
+// it (a hardcoded heading, a hardcoded CTA label, a hardcoded intro
+// paragraph, a hardcoded course name in an <h2>, an unconditionally-
+// rendered caption with nothing under it — see ComparisonChart.astro's own
+// header comment for the CTA/heading history, and CourseDetails.astro's
+// "Review fix wave" for the tier-caption case). FOUR more courses render
+// THIS section in later tasks (Tasks 5-7 + one more), each expected to
+// differ from Gait Foundations in every way the data allows — different
+// column COUNT, different item count per column, maybe no CTA at all. So:
+//   - Every string below (section heading, each column's own heading, every
+//     list item, the CTA label/href) comes from `item.pdp.threeColumn` —
+//     nothing course-specific is hardcoded here.
+//   - Every guard below checks NON-EMPTINESS, not just presence. `[]` and
+//     `{}` are both truthy in JS, so a naive `column.heading &&` or
+//     `threeColumn.cta &&` would still let an empty array/object through
+//     and render a wrapper/heading/button with nothing under it — the exact
+//     bug class this file exists to not repeat. See Pdp.astro's own
+//     registry-guard comment for the composer-level half of this same
+//     discipline (`columns?.length > 0`, not just `columns`).
+//
+// `item.pdp.threeColumn` = `{ heading, columns: [{ heading, items:
+// [string] }], cta?: { label, href } }` (this task's brief-mandated shape).
+// Gait Foundations' own 3 columns hold 3/3/5 items respectively — item
+// COUNT differs per column, so `columns` is a list of lists, never a fixed
+// triple destructured by position.
+//
+// ---- Check icon (new asset) ----------------------------------------------
+// Each list item is a check-icon + text row. The icon is a REAL Figma
+// vector asset (node `I675:9040;202:908;202:897`, a 24x24 teal
+// (`#047791`) stroked checkmark) — downloaded via `get_design_context`'s own
+// asset URL and committed as `public/images/pdp/check.svg`, following this
+// repo's existing nav/PLP icon convention (stroke-path SVG,
+// `stroke="var(--stroke-0, <hex>)"`, no width/height baked in — see
+// `public/images/nav/icon-cart.svg`/`icon-search.svg`). This is NOT a reuse
+// of ComparisonChart.astro's `✓` text glyph: that glyph lives in a boolean-
+// `values` branch neither of that component's two shipped comparison tables
+// actually exercises (both render literal "Yes"/"No" TEXT instead, per that
+// file's own header comment), so it appears nowhere in this codebase's
+// built HTML — it's a dead branch, not an icon asset, and reusing a
+// never-rendered text character for a REAL, always-rendered icon here would
+// just be swapping one unverified assumption for another. The official
+// brand icon library (`01_Assets\00_Icons\`) also has no check icon (just
+// `QuickCart.svg`) — so this is a genuinely new asset, not a missed reuse.
+//
+// The icons are decorative: the list text sitting next to each one already
+// carries the full meaning ("Pre-Recorded videos to ensure easy access
+// anytime."), so each icon is `alt=""` + `aria-hidden="true"` with no
+// visually-hidden "included"/"check" string — unlike ComparisonChart's own
+// boolean-cell mark, where the bare ✓/✕ glyph in a table cell IS the cell's
+// entire content (hence that component's paired sr-only "Included"/"Not
+// included" span). Nothing here is a table cell standing in for a value;
+// every icon has a plain-text sibling doing the actual communicating.
+//
+// ---- CTA -------------------------------------------------------------
+// `cta` is OPTIONAL (guarded below on `label && href` both present, not just
+// the object's presence) — the 3 other professional courses that render
+// this section later may have no CTA button at all (Figma frame heights
+// already vary a lot across the professional-courses mobile section, e.g.
+// 1116:16472/1116:17402 vs Gait Foundations' own 1116:14704, consistent
+// with a genuinely optional trailing element, not a fixed 3-part template).
+// `isExternalHref` (`src/scripts/links.js`) is this repo's one shared
+// internal/external link predicate (already used by ComparisonChart.astro's
+// own CTA and CourseDetails.astro's enroll CTA) — reused here rather than a
+// third copy of the same `/^https?:/` regex, so an internal `/courses/...`
+// href (a future course upselling a sibling page, same shape as
+// ComparisonChart's Sole-Switch-to-Sole-Switch-Pro precedent) won't wrongly
+// get `target="_blank"`.
+//
+// ---- Tokens / literals -----------------------------------------------
+// Section heading = --type-display (700/40px), an exact match to Figma's
+// desktop binding (`var(--text-display)`); mobile's own pulled code shows
+// the same token resolving to 32px, but this repo's tokens.css has one
+// non-responsive --type-display — same "one token, no per-breakpoint
+// override" precedent CourseOverview.astro's --type-h3 case and
+// YourInstructors.astro's name/credential tokens already set. List item
+// text = --type-body-sm (400/14px), an exact match at both breakpoints.
+// CTA label = --type-button (500/20px), an exact match (Figma binds it to
+// `var(--text-button)` on both frames), teal background = --color-teal, CTA
+// text = --color-paper — same button recipe as CourseDetails.astro's enroll
+// CTA / ComparisonChart.astro's CTA (`padding: var(--space-4) 20px` — the
+// 20px horizontal figure is a repeat of the same literal those two already
+// flag, this repo's --space scale has 16/24 on either side of it, no exact
+// 20px step).
+//
+// Column sub-heading (e.g. "What to expect") is bold/20px in Figma's pulled
+// code with NO token binding at all (raw `text-[20px]`, not
+// `text-[length:var(--text-...)]`) — unlike FourColumn.astro's 700/16px
+// blurb text (also untokenized in Figma), no DS token pairs 700 weight with
+// exactly 20px either (`--type-nav-label` coincidentally matches 700/20px
+// but is a nav-specific token; reusing it here for an unrelated PDP section
+// would be a confusing name/purpose mismatch for the same reason
+// FourColumn.astro declined to stretch onto a wrong-but-numerically-close
+// token) — so this is a component-intrinsic literal, same allowance
+// FourColumn's own header comment already takes.
+//
+// Root section gap: Figma's own frame shows a 96px gap between its 3 rows
+// (heading / column row / CTA) at desktop, 48px at mobile — 96px exceeds
+// this repo's largest --space step (--space-8, 64px), so it's a literal at
+// desktop, same "literal OK if bigger than the scale" allowance
+// Testimonial.astro's own 96px section padding already takes; mobile's 48px
+// is an exact --space-7 match. The gap BETWEEN list items (20px) is also a
+// literal — no --space step lands on 20 (the scale runs 16/24) — flagged
+// here rather than rounded either direction. Neither pulled frame carries
+// its own top/bottom section padding (both show only horizontal px- values)
+// — Figma's page-level frame absorbs inter-section spacing there instead —
+// so `padding-block: var(--space-7)` is added here as this component's own
+// choice for consistent page rhythm, the same "component supplies its own
+// vertical rhythm even where Figma's own frame doesn't" precedent
+// CourseOverview.astro's header comment already documents for its own
+// section (also `px-` only in Figma's pulled code).
+//
+// Desktop column row is `flex` (row) with `items-start`, each column
+// `flex: 1 1 0` + `min-width: 0` (matches FourColumn.astro's card sizing
+// idiom, needed so long unbroken item text can wrap instead of overflowing
+// its column); mobile stacks the same column blocks in a plain column, full
+// width. Desktop's centered heading gets a 761px literal max-width
+// (measured off the frame, centers the display heading without letting it
+// stretch edge-to-edge on wide viewports) — same "literal measured column
+// width" idiom YoullStopAndInstead's 424px panels / Testimonial's 916px
+// card already use.
+import { isExternalHref } from '../../scripts/links.js';
+
+const { item } = Astro.props;
+const threeColumn = item.pdp?.threeColumn;
+// Non-emptiness, not presence — see header comment. A `threeColumn` object
+// with an empty `columns` array must render nothing, matching Pdp.astro's
+// own registry guard for this type.
+const columns = (threeColumn?.columns ?? []).filter((col) => col.items?.length > 0);
+const cta = threeColumn?.cta;
+const hasCta = Boolean(cta?.label && cta?.href);
+const isExternal = hasCta ? isExternalHref(cta.href) : false;
+---
+{columns.length > 0 && (
+  <section class="three-column-info" data-pdp-id={item.id}>
+    <div class="three-column-info__inner">
+      {threeColumn.heading && <h2 class="three-column-info__heading">{threeColumn.heading}</h2>}
+
+      <div class="three-column-info__row">
+        {columns.map((column) => (
+          <div class="three-column-info__column">
+            {column.heading && <p class="three-column-info__column-heading">{column.heading}</p>}
+            <ul class="three-column-info__list">
+              {column.items.map((text) => (
+                <li class="three-column-info__item">
+                  <img src="/images/pdp/check.svg" alt="" aria-hidden="true" width="24" height="24" loading="lazy" />
+                  <span>{text}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </div>
+
+      {hasCta && (
+        <a
+          class="three-column-info__cta"
+          href={cta.href}
+          {...(isExternal ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+        >
+          {cta.label}
+        </a>
+      )}
+    </div>
+  </section>
+)}
+<style>
+  .three-column-info__inner {
+    max-width: var(--container-max);
+    margin-inline: auto;
+    padding-inline: var(--space-5);
+    padding-block: var(--space-7);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-7);
+  }
+
+  .three-column-info__heading {
+    font: var(--type-display);
+    color: var(--color-ink);
+    text-align: center;
+    width: 100%;
+  }
+
+  .three-column-info__row {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-7);
+    width: 100%;
+  }
+
+  .three-column-info__column {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-5);
+    width: 100%;
+  }
+
+  /* 20px literal — see header comment (no --space step lands on 20; Figma's
+     own pulled code shows this sub-heading unbound to any type token
+     either). */
+  .three-column-info__column-heading {
+    font: 700 20px/1.3 var(--font-sans);
+    color: var(--color-teal);
+    width: 100%;
+  }
+
+  .three-column-info__list {
+    display: flex;
+    flex-direction: column;
+    /* 20px literal — see header comment. */
+    gap: 20px;
+    width: 100%;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .three-column-info__item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    width: 100%;
+  }
+  .three-column-info__item img {
+    flex-shrink: 0;
+  }
+  .three-column-info__item span {
+    font: var(--type-body-sm);
+    color: var(--color-ink);
+    flex: 1 1 0;
+    min-width: 0;
+  }
+
+  .three-column-info__cta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--color-teal);
+    color: var(--color-paper);
+    font: var(--type-button);
+    /* 20px literal — see header comment (same figure CourseDetails' enroll
+       CTA / ComparisonChart's CTA already flag). */
+    padding: var(--space-4) 20px;
+    text-decoration: none;
+    text-align: center;
+    transition: transform var(--motion-fast) var(--ease-standard);
+  }
+  .three-column-info__cta:hover {
+    transform: translateY(-2px);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .three-column-info__cta:hover {
+      transform: none;
+    }
+  }
+
+  /* ---- Desktop (Figma 675:9040, ≥1024) --------------------------------- */
+  @media (min-width: 1024px) {
+    .three-column-info__inner {
+      padding-inline: var(--space-7);
+      /* 96px literal — see header comment (bigger than --space-8, the
+         largest step in this repo's scale); matches Testimonial.astro's own
+         96px precedent. */
+      gap: 96px;
+    }
+    .three-column-info__heading {
+      /* 761px literal — see header comment (measured off the 1200-wide
+         desktop frame, centers the heading without full-bleed stretching). */
+      max-width: 761px;
+      margin-inline: auto;
+    }
+    .three-column-info__row {
+      flex-direction: row;
+      align-items: flex-start;
+      gap: var(--space-7);
+    }
+    .three-column-info__column {
+      flex: 1 1 0;
+      min-width: 0;
+    }
+  }
+</style>

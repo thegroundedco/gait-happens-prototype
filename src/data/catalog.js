@@ -2663,6 +2663,379 @@ export const items = [
     cta: 'View Course',
     variants: null,
     sizeChart: null,
+    // Course PDP Chunk B2 Task 3 — Course Details hero (675:9037 desktop /
+    // 1116:14701 mobile, both under file FX7PDNvhZwyozODaq8Q8i7): 5-star
+    // rating, "(12)" reviews shown identically on both frames — sourced
+    // top-level exactly like every other course's own hero rating (see
+    // fit-feet's/sole-switch-pro's own `rating`/`reviewCount` comments
+    // above), not duplicated under `pdp`.
+    rating: 5,
+    reviewCount: 12,
+    // Task 3 (Course PDP Chunk B2) — Gait Foundations course PDP. Figma
+    // desktop frame 675:9036 ("Gait Foundations Course", file
+    // FX7PDNvhZwyozODaq8Q8i7) / mobile "Gait Foundations Course" frame
+    // 1116:14699 (under the professional-courses mobile section
+    // 1109:14374). This is a NEW section order relative to the Chunk A/B1
+    // courses — it swaps `youll-stop-and-instead`/`comparison-chart` for the
+    // new `three-column-info` type this task adds (this course's own Figma
+    // page has no "You'll Stop and Instead" or "Comparison Chart" section at
+    // all — confirmed via this frame's own child list, not omitted by
+    // oversight).
+    pdp: {
+      sections: [
+        'course-details',
+        'course-overview',
+        'four-column',
+        'three-column-info',
+        'testimonial',
+        'your-instructors',
+        'cross-sell',
+        'faqs',
+        'pdp-reviews',
+        'logo-wall',
+      ],
+      // Course Details hero — Figma-verbatim from node 675:9037 (desktop) /
+      // 1116:14701 (mobile). Both frames read "Gait Foundations Course".
+      heroTitle: 'Gait Foundations Course',
+      // CLIENT-CONTENT FLAG: both frames' own hero price reads "$275.00 USD"
+      // — disagreeing with this item's top-level `price` ("$29 USD"), which
+      // predates this task. Same "PDP hero shows the Figma-verbatim exact
+      // price, top-level `price` is a separate figure" split Sole Switch
+      // Pro's own `priceExact` comment already documents — flagged here, not
+      // silently reconciled (not this task's call to make; the top-level
+      // catalog field is out of this task's scope, see this task's brief).
+      priceExact: '$275.00 USD',
+      // Hero intro paragraph — identical wording on both frames (no
+      // desktop/mobile disagreement here, unlike most other fields on this
+      // item — see the flags below).
+      description:
+        'Improve your patient outcomes with even the most complex cases! This four hour online course is designed to give you the foundation to start treating lower extremity complaints from a functional perspective.',
+      //
+      // ---- COMPONENT GAP (found, not fixed, per this task's brief) --------
+      // Both frames ALSO show a short caption line, "*900+ Professionals
+      // Certified", directly above this intro paragraph (its own `<p>`, not
+      // part of the paragraph text) — CourseDetails.astro has no field or
+      // render path for a stat/certification caption like this (its
+      // `description` slot renders exactly one paragraph). Per this task's
+      // brief ("STOP and REPORT a genuine component gap; don't work around
+      // it inside this data task, don't edit the component here"), this
+      // line is captured nowhere in this data block and is reported as a
+      // finding for a follow-up task to add an explicit field for, the same
+      // "reported, not silently dropped or bolted on" precedent Fit Feet's
+      // Language-pills gap set (see CourseDetails.astro's own header
+      // comment, "Pill-group generalization").
+      //
+      // Primary CTA — both frames' own buybox is a literal cart/quantity-
+      // stepper "Add to Cart" flow (Figma has not remapped this course to a
+      // Kajabi enroll button the way every other course's OWN frame already
+      // does) — remapped here the same way CourseDetails.astro's header
+      // comment documents for every other course (Kajabi-fulfilled, not a
+      // Shopify cart purchase): the filled "Add to Cart" button becomes this
+      // hero's primary "Enroll Now" CTA. Realistic Kajabi placeholder URL;
+      // swap for the real offer/checkout URL once the course is live on
+      // Kajabi.
+      enrollHref: 'https://gaithappens.mykajabi.com/offers/gait-foundations-course',
+      enrollLabel: 'Enroll Now',
+      //
+      // No `pills` — neither frame shows a tier/language selector like Fit
+      // Feet's (confirmed via get_design_context on both breakpoints).
+      //
+      // No `courseCard` — like Fit Feet/Combating Bunions, this course's
+      // Figma hero right column (675:9037 node `I675:9037;173:147` desktop /
+      // 1116:14701 node `I1116:14701;181:674` mobile) is a plain close-up
+      // clinical PHOTO, no overlaid text/colored background — `heroImage` is
+      // used instead (mutually exclusive with `courseCard`, see
+      // CourseDetails.astro's header comment). No dedicated hero photography
+      // exists for this course yet — reuses the same PLP course shot every
+      // other image slot on this item already reuses.
+      heroImage: '/images/plp/gait-foundations.jpg',
+      instructorsByline: 'Course By: Dr. Conley and Dr. Perez',
+      // CLIENT-CONTENT FLAG: mobile's own instructors byline (1116:14701)
+      // reads "Course By: Dr. Conley and Dr. Riley" instead — Dr. Riley
+      // doesn't teach this course (this page's own instructor section, both
+      // breakpoints, lists Conley + Perez, not Riley — see `instructors`
+      // below) — the same mobile-only copy-paste error Fit Feet's/Combating
+      // Bunions' own bylines already hit (a recurring, systemic artifact on
+      // this branch, not a one-off). Desktop's "Dr. Conley and Dr. Perez" is
+      // kept canonical (matches the real instructor roster below).
+      //
+      // Course Overview — Figma 675:9038 (desktop) / 1116:14702 (mobile).
+      // Desktop kept canonical for `details`/`body` per this task's "pull
+      // desktop first" directive — mobile disagrees on MORE than wording
+      // (see the CLIENT-CONTENT FLAG below).
+      overview: {
+        image: '/images/plp/gait-foundations.jpg',
+        details: [
+          { label: 'Course Length', value: '4 Hours' },
+          { label: 'Evidence Based', value: 'Yes' },
+          { label: 'Course Structure', value: 'Online On Demand' },
+          { label: 'Course Style', value: 'Lecture' },
+          {
+            label: 'Audience',
+            value:
+              'To participate, we strongly recommend possessing a certification or advanced degree in a related field.',
+          },
+        ],
+        // CLIENT-CONTENT FLAG: mobile's Audience value (1116:14702) instead
+        // reads "Anyone looking to understand how to choose healthy shoes
+        // for themselves" — that's Sole Switch's own consumer-facing
+        // Audience sentence (byte-for-byte, see that item's own
+        // `overview.details` above), not this (professional-audience)
+        // course's, and has nothing to do with Gait Foundations — the same
+        // Sole-Switch-template copy-paste error Fit Feet's own Audience
+        // value already hit. Mobile's 3rd label also renames to "Course
+        // Format" (same value, "Online On Demand") and Course Style becomes
+        // "Video lecture" instead of "Lecture" — minor wording drift, not
+        // flagged as its own item since it doesn't change the underlying
+        // fact. Desktop's 5-fact set above is kept canonical throughout.
+        body: 'Build a practical understanding of how the feet influence movement throughout the entire kinetic chain. Learn to assess common lower extremity presentations through a functional lens, connect foot mechanics to movement patterns, and apply evidence-informed strategies that translate directly into clinical practice.',
+      },
+      // 4 Column feature band — Figma-verbatim heading + 4 blurbs from node
+      // 675:9039 (desktop) / 1116:14703 (mobile). No dedicated feature
+      // photography exists for this course — `image` reuses this item's own
+      // PLP course shot for all 4 cards, same placeholder approach every
+      // other course's `features` array takes.
+      featuresHeading: 'The Gait Foundations Course includes:',
+      features: [
+        {
+          image: '/images/plp/gait-foundations.jpg',
+          label: null,
+          text: '4 hours of content with forever access.',
+        },
+        {
+          image: '/images/plp/gait-foundations.jpg',
+          label: null,
+          text: 'Tools you can implement in practice immediately.',
+        },
+        {
+          image: '/images/plp/gait-foundations.jpg',
+          label: null,
+          text: 'Specific assessments and treatment strategies.',
+        },
+        {
+          image: '/images/plp/gait-foundations.jpg',
+          label: null,
+          // CLIENT-CONTENT FLAG: mobile's 4th blurb (1116:14703) reads "When
+          // the toes can properly splay, our foot and ankle muscles engage,
+          // creating a stronger, more stable platform from which to propel
+          // ourselves forward." — that's Sole Switch/Sole Switch Pro's own
+          // 4th blurb verbatim (see those items' own `features` comments),
+          // not written for this course; this is the THIRD course on this
+          // branch whose mobile 4th-blurb slot carries that exact
+          // copy-pasted text (Fit Feet's own `features` comment already
+          // flagged the first recurrence). Desktop's Gait-Foundations-
+          // specific text is kept canonical.
+          text: 'Foundational understanding of lower extremity biomechanics.',
+        },
+      ],
+      // Three Column Info — Task 3's own new section type. Figma-verbatim
+      // from node 675:9040 (desktop) / 1116:14704 (mobile). Both frames
+      // agree word-for-word on every heading/item/CTA here — no
+      // desktop/mobile disagreement to flag on this section, unlike most
+      // others on this item. Column item COUNTS genuinely differ (3/3/5) —
+      // see ThreeColumnInfo.astro's own header comment for why `columns` is
+      // a list of lists, not a fixed triple.
+      threeColumn: {
+        heading: 'About The Gait Foundations Course',
+        columns: [
+          {
+            heading: 'What to expect',
+            items: [
+              'Pre-Recorded videos to ensure easy access anytime.',
+              'Helpful lectures led by Gait Happens foot and gait specialists.',
+              'Rewatch anytime to refresh your knowledge.',
+            ],
+          },
+          {
+            heading: 'Skills you will learn',
+            items: [
+              'A detailed outline of six common foot presentations that will walk through your doors.',
+              'An in-depth understanding of the musculoskeletal and fascial anatomy of the foot.',
+              'Specific assessments and treatment strategies to use with patients right away.',
+            ],
+          },
+          {
+            heading: 'Is this course right for you',
+            items: [
+              'Doctor of Physical Therapy',
+              'Doctor of Chiropractic',
+              'Doctor of Podiatric Medicine',
+              'Certified Athletic Trainer',
+              'Applicants with comparable qualifications',
+            ],
+          },
+        ],
+        // CTA label is Figma-verbatim on both frames ("Take The Foundations
+        // Course"). Neither frame's pulled design context exposes a
+        // prototype link target for this button (it's a plain "Button" node,
+        // no reaction data returned) — since the label names THIS SAME
+        // course's own page, `href` points at this item's own `enrollHref`
+        // above (byte-for-byte the same Kajabi link), the same "CTA names
+        // the course it sits on -> point at that course's own enroll link"
+        // precedent Sole Switch Pro's own Comparison Chart CTA already set
+        // (see that item's `comparison.cta` comment).
+        cta: {
+          label: 'Take The Foundations Course',
+          href: 'https://gaithappens.mykajabi.com/offers/gait-foundations-course',
+        },
+      },
+      // Testimonial — Figma-verbatim from node 675:9041 (desktop) /
+      // 1116:14705 (mobile). Identical quote/author/rating on both frames —
+      // no desktop/mobile disagreement here. No `role` line on either frame
+      // (name-only attribution, same as Fit Feet's Michele/Sole Switch
+      // Pro's Phyllis). See tests/testimonial.test.mjs — array shape
+      // required.
+      testimonial: [
+        {
+          quote: [
+            "This course was amazing! I can't wait to get back to work because there is so much that's easy to understand and implement immediately. It makes me honestly excited!",
+          ],
+          author: 'TJ Knowles',
+          role: null,
+          rating: 5,
+        },
+      ],
+      //
+      // ---- COMPONENT GAP — FOUND, NOT FIXED (per this task's brief) -------
+      // Your Instructors — Figma-verbatim bios from the bare frame
+      // `1027:12431` ("Frame 4331", desktop) / the real "Your Instructors"
+      // component instance `1116:15474` (mobile). Both instructors and both
+      // bios are byte-for-byte the SAME ones Fit Feet/Sole Switch Pro
+      // already carry (same 2 clinicians teach every course) — reused
+      // verbatim from Fit Feet's own entry above. `photo` reuses this item's
+      // own PLP course shot for both cards (no dedicated instructor
+      // photography exists yet, same placeholder convention every other
+      // course takes).
+      //
+      // THE FLAG: desktop's own frame (`1027:12431`) is confirmed via
+      // get_design_context to be a BARE frame containing exactly 2
+      // "Instructor Card" instances and NOTHING else — no heading text node
+      // anywhere in its pulled code or screenshot. Mobile's own frame
+      // (`1116:15474`) is a real "Your Instructors" component instance that
+      // DOES include a "Your Instructors" heading (node
+      // `I1116:15474;183:393`). YourInstructors.astro always renders an
+      // `<h2>` (optional per-item TEXT override via `instructorsHeading`,
+      // defaulting to "Your Instructors" — but the default is ALWAYS ON;
+      // there is no way to suppress the heading entirely). Setting
+      // `instructorsHeading: ''` would not help — `??` only replaces
+      // null/undefined, so an empty string would render a literal empty
+      // `<h2></h2>`, the exact "wrapper/heading with nothing meaningful
+      // under it" bug class this whole task is trying not to repeat.
+      // Per this task's explicit brief ("if the frame genuinely has no
+      // heading, STOP and REPORT it — the component needs an explicit
+      // no-heading case; do not work around it and do not edit the
+      // component in this data task"), `instructorsHeading` is left UNSET
+      // below — the section renders its normal default "Your Instructors"
+      // heading, which is byte-identical to what mobile's OWN frame already
+      // shows, and is not an invented value (it's the component's own
+      // existing, already-shipped default). This does not perfectly match
+      // desktop's headingless bare frame, but ships a working, non-broken
+      // section rather than an authored hack; a follow-up task should add
+      // an explicit "no heading" case to YourInstructors.astro (e.g. a
+      // sentinel like `instructorsHeading: false`) and this course is the
+      // one that should then flip to it. Reported in this task's own report
+      // as a component gap, per the brief.
+      instructors: [
+        {
+          photo: '/images/plp/gait-foundations.jpg',
+          name: 'Dr. Courtney Conley',
+          credential: 'Lakewood, Colorado',
+          bio: [
+            "Dr. Courtney Conley is a national bestselling author, international educator, and one of the world's foremost authorities on foot and gait health. Her book, Walk, hit both the USA Today and Amazon bestseller lists, resonating with readers eager to understand the profound connection between foot function and whole-body health. The book's success has brought Dr. Conley to some of the most respected platforms in health and wellness media, including appearances on The Peter Attia Drive Podcast, Diary of a CEO, Feel Better, Live More with Dr. Rangan Chatterjee, as well as national television features on CBS Mornings and Fox & Friends.",
+            "Dr. Conley holds a Doctorate in Chiropractic Medicine and two Bachelor's degrees in Kinesiology and Human Biology. With nearly 25 years of clinical practice, she has worked with professional athletes from organizations including the Phoenix Suns, New York Yankees, Cleveland Browns, New York Giants, and San Francisco 49ers. She has also collaborated with medical experts across the country, addressing complex foot and gait challenges at the highest level of performance. She currently serves as Head of Patient Care at Total Health Solutions and Total Health Performance in Lakewood, Colorado—premier clinics known for comprehensive, rehabilitation-focused patient care where she is committed to helping people improve their lives one step at a time.",
+            'That same commitment led her to found and lead Gait Happens, an education enterprise leading a paradigm shift in foot health by empowering people worldwide to reclaim optimal foot function through science-backed training and protocols. Gait Happens offers a comprehensive ecosystem of resources — from professional education for practitioners to consumer training programs and personalized consultations with top-of-field specialists — all grounded in research and designed to deliver real, measurable results. With a focus on natural, preventative approaches to foot and gait health, Gait Happens has built a global community of individuals committed to moving better and living pain-free, offering a proven alternative to unnecessary surgical intervention through education and evidence-based care.',
+            'An internationally recognized speaker, Dr. Conley shares her expertise to clinicians and consumers alike through in-person and online lectures on foot mechanics and gait dynamics. Her work spans authorship, mentorship, patent and curriculum development, and the creation of pioneering foot and gait methodologies. Yet at the heart of every lecture, protocol, and patient interaction is the same driving belief: real strength starts from the ground up, and healthy feet are the foundation every body needs to move through life with confidence and ease.',
+          ],
+        },
+        {
+          photo: '/images/plp/gait-foundations.jpg',
+          name: 'Dr. Jenifer Perez, DC',
+          credential: 'Lafayette, Colorado',
+          bio: [
+            'Dr. Jen Perez is the co-owner and Vice President of Gait Happens. As both an educator and a clinician, her mission is to empower as many people as possible to take charge of their lower body health so they can get back to what they love.',
+          ],
+        },
+      ],
+      // Cross-sell band — Figma-verbatim heading from the "Product Cards"
+      // frame, node 1027:12459 (desktop) / 1116:14713 (mobile). Identical
+      // content on both breakpoints — no desktop/mobile disagreement here.
+      // Unlike Fit Feet's/Combating Bunions' own crossSell (each
+      // self-referenced its own course from its "Product Cards" frame),
+      // this course's own 3 cards read "Sole Switch Pro" / "Functional Gait
+      // Assessment 1" / "Gait Happens Trainer Cert." — none of which is
+      // Gait Foundations itself, so no self-reference here. `shopAllHref`
+      // points at the Professionals course PLP, matching this section's own
+      // "for Professionals" framing (same target Sole Switch Pro's own
+      // crossSell already uses).
+      crossSell: {
+        heading: 'More Courses for Professionals',
+        itemIds: ['sole-switch-pro', 'functional-gait-assessment-l1', 'trainer-certification'],
+        shopAllHref: '/collections/courses-professionals',
+      },
+      // FAQs — Figma node 675:9043 (desktop) / 1116:14714 (mobile).
+      // Identical 5 questions on both breakpoints — no desktop/mobile
+      // disagreement here, unlike most other sections on this item.
+      //
+      // Neither frame contains any ANSWER copy for its own questions (both
+      // are static mockups of the collapsed accordion state only) — the
+      // same situation every other course's FAQ section has hit so far. Per
+      // this task's explicit instruction not to author plausible-sounding
+      // invented answers (and never to invent factual/medical claims), each
+      // row below is handled per its own actual grounding — this disclosure
+      // lives only here and in this task's report, never in the rendered
+      // HTML:
+      //   - Row 5 (teaching methods): grounded in this SAME entry's already
+      //     Figma-verbatim `threeColumn.columns[0]` items ("Pre-Recorded
+      //     videos...", "Helpful lectures led by Gait Happens foot and gait
+      //     specialists...", "Rewatch anytime...") and `overview.details`
+      //     Course Style fact ("Lecture") — restated in plain customer-
+      //     facing prose, same technique Fit Feet's own Row 1 FAQ answer
+      //     uses.
+      //   - Rows 1-4 (watch-count/access; companion app; course slides;
+      //     CEUs): NO grounding data exists anywhere in this file for any of
+      //     these (this course has no comparison-chart section to draw a
+      //     Yes/No CEU fact from, unlike Fit Feet's own CEU-adjacent FAQ) —
+      //     each `content` value is a short, neutral "copy pending"
+      //     placeholder, no invented claim.
+      faqs: [
+        {
+          label: 'How many times can I watch the course?',
+          content: '<p>Details on program access are coming soon.</p>',
+        },
+        {
+          label: 'Is there an app I can use on my phone?',
+          content: '<p>Details on a companion app are coming soon.</p>',
+        },
+        {
+          label: 'Can I get a copy of the slides from the course?',
+          content: '<p>Details on course materials are coming soon.</p>',
+        },
+        {
+          label: 'Can I get CEUs for this course?',
+          content: '<p>Details on continuing education credit are coming soon.</p>',
+        },
+        {
+          label: 'What teaching methods are used in this course?',
+          content:
+            '<p>The course is delivered through pre-recorded video lectures led by Gait Happens foot and gait specialists, which you can rewatch anytime to refresh your knowledge.</p>',
+        },
+      ],
+      // Reviews placeholder — same static reviews-app-screenshot values
+      // every product/course PDP reuses (see Toe Spacers' `reviews` comment
+      // / PdpReviews.astro's note); this course has no real review data any
+      // more than the others do.
+      reviews: {
+        rating: 4.75,
+        count: 12,
+        distribution: [
+          { stars: 5, count: 11 },
+          { stars: 4, count: 0 },
+          { stars: 3, count: 0 },
+          { stars: 2, count: 1 },
+          { stars: 1, count: 0 },
+        ],
+      },
+    },
   },
   {
     id: 'functional-gait-assessment-l1',
