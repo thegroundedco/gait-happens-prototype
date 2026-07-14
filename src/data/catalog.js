@@ -3632,6 +3632,425 @@ export const items = [
     cta: 'View Course',
     variants: null,
     sizeChart: null,
+    // Task 6 (Course PDP Chunk B2) — Course Details hero (1041:10412 desktop /
+    // 1116:16467 mobile, both under file FX7PDNvhZwyozODaq8Q8i7): 5-star
+    // rating, "(9)" reviews shown identically on both frames — sourced
+    // top-level exactly like every other course's own hero rating (see
+    // gait-foundations'/fit-feet's/trainer-certification's own
+    // `rating`/`reviewCount` comments above), not duplicated under `pdp`.
+    // This item had no top-level `rating`/`reviewCount` before this task —
+    // ADDING them (not changing an existing value) per that same precedent.
+    rating: 5,
+    reviewCount: 9,
+    // Task 6 (Course PDP Chunk B2) — Functional Gait Assessment Level 2
+    // course PDP. Figma desktop frame 1041:10410 ("Functional Gait
+    // Assessment: Level 2", file FX7PDNvhZwyozODaq8Q8i7) / mobile
+    // "Functional Gait Assessment: Level 2" frame 1116:16465 (under the
+    // professional-courses mobile section 1109:14374). Every value below was
+    // pulled from THIS course's own nodes independently of sibling L1's
+    // already-shipped `pdp` block — see the `comparison` block's own comment
+    // for the one section where L2's own Figma content turned out to be
+    // suspiciously identical to L1's anyway (flagged there, not silently
+    // reconciled).
+    pdp: {
+      sections: [
+        'course-details',
+        'course-overview',
+        'four-column',
+        'comparison-chart',
+        'three-column-info',
+        'testimonial',
+        'your-instructors',
+        'cross-sell',
+        'faqs',
+        'pdp-reviews',
+        'logo-wall',
+      ],
+      // Course Details hero — Figma-verbatim from node 1041:10412 (desktop) /
+      // 1116:16467 (mobile). Both frames read "Functional Gait Assessment:
+      // Level 2" WITH a colon before "Level" — like L1's own hero, unlike
+      // this item's own top-level `title` (no colon, matched to L1's stored
+      // title per this item's own top-level comment above).
+      heroTitle: 'Functional Gait Assessment: Level 2',
+      // Both frames' own hero price reads "$897.00 USD" — matches this
+      // item's own top-level `price` (unlike L1, whose hero price disagrees
+      // with its own top-level `price`) — no divergence to flag here.
+      priceExact: '$897.00 USD',
+      // Hero intro paragraph — identical wording on both frames (no
+      // desktop/mobile disagreement).
+      description:
+        "FGA Level 2 is everything you need to take your work with clients to the next level. In this two-day, 16 hour certification course, you'll learn to hit ALL the buckets when it comes to treatment.",
+      // No `heroCaption` — unlike L1's own hero (675:9358/1116:15572), THIS
+      // course's own intro text-block node (1041:10412;173:130 desktop /
+      // 1116:16467;181:664 mobile) is a SINGLE paragraph on both breakpoints
+      // — no second "*N+ Professionals Certified" caption line above it.
+      // Confirmed via get_design_context on both — genuinely absent, not an
+      // oversight.
+      //
+      // Buy box — Figma-verbatim from both frames' own "Course Type" block
+      // (1041:10412;181:1352 desktop / 1116:16467;181:1388 mobile): the SAME
+      // 2-option pill row ("Online On-Demand" outline / "In-Person"
+      // filled-selected) + "Location…" select combination L1's own buybox
+      // already established (see CourseDetails.astro's own "Buy box
+      // controls generalization" header comment). `select.options` stays
+      // EMPTY per that same precedent — neither frame exposes a real
+      // location list behind the control, only its closed/placeholder state.
+      buybox: {
+        label: 'Course Type',
+        controls: [
+          {
+            type: 'pills',
+            options: [{ label: 'Online On-Demand' }, { label: 'In-Person', selected: true }],
+          },
+          { type: 'select', placeholder: 'Location…', ariaLabel: 'Location', options: [] },
+        ],
+      },
+      // Byline — desktop's own byline (1041:10412;173:137) reads "Courses
+      // By: Dr. Conley" (this course's ONE real instructor — see this
+      // item's own `instructors` below; "Courses" stays plural, matching
+      // L1's own "Courses By:" wording, even though only one name follows).
+      instructorsByline: 'Courses By: Dr. Conley',
+      // CLIENT-CONTENT FLAG: mobile's own byline (1116:16467;181:673) instead
+      // reads "Course By: Dr. Conley and Dr. Riley" — Dr. Riley doesn't teach
+      // this course at all (not in the real instructor roster below) — the
+      // SAME systemic mobile-byline copy-paste artifact L1's own
+      // `instructorsByline` comment already flags (now recurring on its
+      // sibling too). Desktop's own text is kept canonical above.
+      //
+      // No `courseCard` — like L1, this course's Figma hero right column
+      // (1041:10412;173:147 desktop / 1116:16467;181:674 mobile) is a plain
+      // clinical photo, no overlaid text/colored background — `heroImage` is
+      // used instead. No dedicated L2 photography exists yet (this item's
+      // own top-level `image` is already a flat placeholder — see that
+      // field's own comment above), so `heroImage` reuses the same
+      // placeholder every other image-shaped field on this item reuses,
+      // matching Mobility Ball's own "no photography yet" precedent.
+      heroImage: '/images/plp/placeholder.svg',
+      //
+      // Primary CTA — same Kajabi/"Add to Cart"→"Enroll Now" remap as every
+      // other course on this branch (see CourseDetails.astro's own header
+      // comment). Realistic placeholder Kajabi offer URL; swap for the real
+      // offer/checkout URL once this course is live on Kajabi.
+      enrollHref: 'https://gaithappens.mykajabi.com/offers/functional-gait-assessment-l2-course',
+      enrollLabel: 'Enroll Now',
+      //
+      // Course Overview — Figma 1041:10413 (desktop) / 1116:16468 (mobile).
+      // Desktop kept canonical for `details`/`body` per this task's "pull
+      // desktop first" directive — mobile disagrees on MORE than wording,
+      // the SAME divergence shape L1's own overview already hit (see
+      // CourseOverview.astro's own header comment).
+      overview: {
+        image: '/images/plp/placeholder.svg',
+        details: [
+          { label: 'Course Length', value: '10 Hours or 2 Days' },
+          { label: 'Evidence Based', value: 'Yes' },
+          { label: 'Course Structure', value: 'Online on demand or In-Person' },
+          { label: 'Continuing Education Credit', value: 'Yes' },
+          {
+            label: 'Audience',
+            value: 'To participate, individuals must have completed the FGA Level 1 Certification.',
+          },
+        ],
+        // CLIENT-CONTENT FLAG: mobile's own details (1116:16468) rename the
+        // 3rd label to "Course Format" (same value) and swap the 4th fact to
+        // "Course Style: Video lecture" instead of desktop's "Continuing
+        // Education Credit: Yes" — the SAME "details set disagrees, not just
+        // wording" pattern L1's own overview comment documents. Mobile's
+        // Audience value ALSO differs — "Anyone looking to understand how to
+        // choose healthy shoes for themselves" — that's the SAME Sole-Switch
+        // consumer-facing Audience sentence L1's own mobile frame wrongly
+        // copy-pasted too (now confirmed on both FGA levels' mobile frames).
+        // Desktop's 5-fact set above is kept canonical throughout.
+        //
+        // `body` — Figma-verbatim 7-item "Course Concepts" list, byte-
+        // identical on both frames (no desktop/mobile disagreement here).
+        // Kept as an ARRAY (CourseOverview.astro's polymorphic `body`) since
+        // both frames show a real list. Unlike L1's own `body` array, THIS
+        // course's own list items carry NO leading "1."/"2." numerals in
+        // their own Figma text (confirmed via get_design_context — each
+        // `<li>` node is plain sentence text; the numbering comes only from
+        // Figma's own `<ol>` styling) — so none are added here; the rendered
+        // `<ul>` bullets are the correct, Figma-verbatim presentation.
+        body: [
+          'Learn the importance of foot strength and its relationship to our longevity.',
+          'Discuss the impact minimalist footwear can have on improving foot mechanics.',
+          'Learn a framework to treat patients with lower extremity pain and dysfunction.',
+          'Understand the importance of building strength and incorporating plyometrics into a lower extremity treatment plan.',
+          'Outline the specifics of treating forefoot diagnoses.',
+          'Outline the specifics of treating midfoot/rearfoot diagnoses.',
+          'Understand the pathomechanics behind tendinopathies and how to treat them.',
+        ],
+      },
+      // 4 Column feature band — Figma-verbatim heading + 4 blurbs from node
+      // 1041:10414 (desktop) / 1116:16470 (mobile). THIS course's own
+      // heading ("What To Look Forward To") is genuinely different from
+      // L1's own ("Ready to make a real difference in your patients'
+      // lives?..."), pulled from L2's own node, not inherited. No dedicated
+      // L2 feature photography exists — `image` reuses this item's own flat
+      // placeholder for all 4 cards, same placeholder approach every other
+      // no-photography item on this branch takes.
+      featuresHeading: 'What To Look Forward To',
+      features: [
+        {
+          image: '/images/plp/placeholder.svg',
+          label: null,
+          text: '2 full days with a Gait Happens Instructor',
+        },
+        {
+          image: '/images/plp/placeholder.svg',
+          label: null,
+          text: "A combination of lecture and labs packed with content you'll love",
+        },
+        {
+          image: '/images/plp/placeholder.svg',
+          label: null,
+          text: 'A video library of exercises covered in the course',
+        },
+        {
+          image: '/images/plp/placeholder.svg',
+          label: null,
+          // CLIENT-CONTENT FLAG: mobile's 4th blurb (1116:16470) instead
+          // reads "When the toes can properly splay, our foot and ankle
+          // muscles engage, creating a stronger, more stable platform from
+          // which to propel ourselves forward." — that's Sole Switch/Sole
+          // Switch Pro's own 4th blurb verbatim, not written for this
+          // course — the SAME systemic mobile-4th-blurb copy-paste artifact
+          // every prior course's own `features` comment already flags (now
+          // recurring on FGA Level 2 too). Desktop's own genuine text is
+          // kept canonical.
+          text: 'Networking with fellow gait nerds',
+        },
+      ],
+      // ---- Comparison Chart — CLIENT-CONTENT FLAG (major) ------------------
+      // Figma node 1075:15698 (desktop) / 1116:16471 (mobile) — confirmed via
+      // get_metadata that BOTH are genuinely children of THIS course's own
+      // frame (1041:10410 desktop / 1116:16465 mobile), not a shared/reused
+      // node id read by mistake. Read independently of L1's own already-
+      // shipped `comparison` block, per this task's explicit brief. Having
+      // done that independent read: this course's own Comparison Chart is,
+      // content-for-content, BYTE-IDENTICAL to L1's own — same heading-
+      // driving `columns` ("Online On-Demand" / "In-Person"), same intro
+      // sentence, same 5 rows (same labels AND same values, including
+      // "Course Price: $599 / $897" — the exact figures L1's own table
+      // already shows), and mobile's own frame even carries the SAME extra
+      // 6th "Live Interaction with GH Instructor" row and the SAME
+      // Sole-Switch-Pro-intro copy-paste error L1's own mobile frame has.
+      // This is almost certainly a Figma-authoring artifact (L2's frame
+      // appears to have been duplicated from L1's, and this ONE section was
+      // never re-customized for Level 2's own actual delivery-format
+      // comparison) rather than a real coincidence — but it IS what both of
+      // THIS course's own frames currently show, read independently, so it's
+      // transcribed Figma-verbatim rather than silently invented or
+      // silently dropped. FLAGGING PROMINENTLY for the client/porting team
+      // to confirm before this ships: is FGA Level 2's own Online-On-Demand-
+      // vs-In-Person pricing/comparison genuinely identical to Level 1's, or
+      // does Figma need a real update here?
+      comparison: {
+        columns: ['Online On-Demand', 'In-Person'],
+        intro:
+          'Trying to figure out if in-person or online is a better fit for you? This chart provides a brief overview of the differences between the two!',
+        // CLIENT-CONTENT FLAG: mobile's own intro (1116:16471) instead reads
+        // "Trying to figure out which course is right for you? This table
+        // provides a brief overview of the differences between the Sole
+        // Switch and Sole Switch Pro courses." — Sole Switch Pro's own intro
+        // paragraph verbatim (the SAME mobile-intro copy-paste error already
+        // flagged on L1's own `comparison.intro`), unrelated to this
+        // course's actual comparison. Desktop's on-topic text is kept
+        // canonical.
+        rows: [
+          {
+            label: 'Course Structure',
+            values: ['Pre-recorded lecture and lab videos', 'Course with interactive group demos and hands on lab practice.'],
+          },
+          { label: 'Course Length', values: ['10 hours', '2 days'] },
+          { label: 'Forever Access', values: ['Full Online Course Content', 'Specific Assessment Demo Videos'] },
+          { label: 'Extra Lab Practice with Instructor', values: ['No', 'Yes'] },
+          { label: 'Course Price', values: ['$599', '$897'] },
+        ],
+        // CLIENT-CONTENT FLAG (row-set, not just wording): mobile's own table
+        // (1116:16471) has a SIXTH row desktop lacks — "Live Interaction with
+        // GH Instructor: No / Yes" — inserted between "Extra Lab Practice
+        // with Instructor" and "Course Price", the SAME extra mobile-only
+        // row L1's own table has in the exact same position. Desktop's 5-row
+        // set above is kept canonical; the extra mobile-only row is dropped,
+        // not silently merged in.
+        //
+        // No `cta` — like L1, neither breakpoint's own comparison node has a
+        // CTA button (confirmed via get_design_context + the pulled
+        // screenshots for both 1075:15698 and 1116:16471 — the table is the
+        // last element in both frames' own child list).
+      },
+      // Three Column Info — Figma-verbatim from node 1041:10415 (desktop) /
+      // 1116:16472 (mobile). Both frames agree word-for-word on every
+      // heading/item/CTA — no desktop/mobile disagreement here. The "What to
+      // expect" and "Is this course right for you" columns are byte-
+      // identical to L1's own (plausibly shared, evergreen FGA-program
+      // boilerplate — both are generic statements about the Gait Happens
+      // program/audience, not course-specific facts, unlike the Comparison
+      // Chart flag above) — read independently off L2's own node, confirmed
+      // matching, not assumed. The middle "Topics covered" column IS this
+      // course's own genuinely distinct content (L1's equivalent column is
+      // "Skills you will learn", a different heading AND different items).
+      threeColumn: {
+        heading: 'About Functional Gait Assessment Level 2',
+        columns: [
+          {
+            heading: 'What to expect',
+            items: [
+              'Pre-Recorded videos to ensure easy access anytime',
+              'Helpful lectures led by Gait Happens foot and gait specialists',
+              'Lab demonstrations for better knowledge retention',
+              'Rewatch anytime to refresh your knowledge',
+              'Our Most Affordable Gait Certification',
+            ],
+          },
+          {
+            heading: 'Topics covered',
+            items: [
+              'Plyometrics',
+              'Proximal stability',
+              'Range of motion',
+              'Strength capacity',
+              'Motor control and compound movements',
+            ],
+          },
+          {
+            heading: 'Is this course right for you',
+            items: [
+              'Doctor of Physical Therapy',
+              'Doctor of Chiropractic',
+              'Doctor of Podiatric Medicine',
+              'Certified Athletic Trainer',
+              'Applicants with comparable qualifications',
+            ],
+          },
+        ],
+        // CTA label is Figma-verbatim on both frames ("Step Up My Assessment
+        // Skills" — identical to L1's own CTA label; both courses share the
+        // same assessment-skills framing). Neither frame's pulled design
+        // context exposes a prototype link target, so `href` points at this
+        // item's own `enrollHref`, the same "CTA names the course it sits
+        // on -> point at that course's own enroll link" precedent L1's own
+        // Three Column Info CTA already sets.
+        cta: {
+          label: 'Step Up My Assessment Skills',
+          href: 'https://gaithappens.mykajabi.com/offers/functional-gait-assessment-l2-course',
+        },
+      },
+      // Testimonial — Figma-verbatim from node 1041:10418 (desktop) /
+      // 1116:16473 (mobile). Identical quote/author/rating on both frames —
+      // no desktop/mobile disagreement here. Unlike L1's own testimonial
+      // (which names a real instructor + role), THIS course's own attribution
+      // reads "Anonymous" with no role line at all — genuinely different
+      // per-course data, not an omission. `role` is left unset (optional
+      // field — see Testimonial.astro's own header comment for the same
+      // role-less-testimonial precedent).
+      testimonial: [
+        {
+          quote: [
+            'I just completed FGA 2 On Demand. This course was fabulous with in depth case studies, demonstration of exercises and the research behind the exercises to help better understand intervention selections. I have already helped several clients with bunion pain, tendinopathies and ankle sprain. Highly recommend this course!',
+          ],
+          author: 'Anonymous',
+          rating: 5,
+        },
+      ],
+      // Your Instructors — Figma-verbatim from node 1041:10416 (desktop) /
+      // 1116:16474 (mobile). Both frames show the SAME single instructor,
+      // byte-identical name/credential-line/bio — no desktop/mobile
+      // disagreement here. Only ONE instructor (Dr. Conley), matching this
+      // item's own hero byline above exactly (unlike L1, whose byline
+      // under-lists its own 4-instructor roster, this course's byline and
+      // instructor roster genuinely agree). Conley's bio is byte-for-byte
+      // the same 4-paragraph bio already reused on Gait Foundations/Sole
+      // Switch Pro/Functional Gait Assessment Level 1 above.
+      instructors: [
+        {
+          photo: '/images/plp/placeholder.svg',
+          name: 'Dr. Courtney Conley, DC',
+          credential: 'Lakewood, Colorado',
+          bio: [
+            "Dr. Courtney Conley is a national bestselling author, international educator, and one of the world's foremost authorities on foot and gait health. Her book, Walk, hit both the USA Today and Amazon bestseller lists, resonating with readers eager to understand the profound connection between foot function and whole-body health. The book's success has brought Dr. Conley to some of the most respected platforms in health and wellness media, including appearances on The Peter Attia Drive Podcast, Diary of a CEO, Feel Better, Live More with Dr. Rangan Chatterjee, as well as national television features on CBS Mornings and Fox & Friends.",
+            "Dr. Conley holds a Doctorate in Chiropractic Medicine and two Bachelor's degrees in Kinesiology and Human Biology. With nearly 25 years of clinical practice, she has worked with professional athletes from organizations including the Phoenix Suns, New York Yankees, Cleveland Browns, New York Giants, and San Francisco 49ers. She has also collaborated with medical experts across the country, addressing complex foot and gait challenges at the highest level of performance. She currently serves as Head of Patient Care at Total Health Solutions and Total Health Performance in Lakewood, Colorado—premier clinics known for comprehensive, rehabilitation-focused patient care where she is committed to helping people improve their lives one step at a time.",
+            'That same commitment led her to found and lead Gait Happens, an education enterprise leading a paradigm shift in foot health by empowering people worldwide to reclaim optimal foot function through science-backed training and protocols. Gait Happens offers a comprehensive ecosystem of resources — from professional education for practitioners to consumer training programs and personalized consultations with top-of-field specialists — all grounded in research and designed to deliver real, measurable results. With a focus on natural, preventative approaches to foot and gait health, Gait Happens has built a global community of individuals committed to moving better and living pain-free, offering a proven alternative to unnecessary surgical intervention through education and evidence-based care.',
+            'An internationally recognized speaker, Dr. Conley shares her expertise to clinicians and consumers alike through in-person and online lectures on foot mechanics and gait dynamics. Her work spans authorship, mentorship, patent and curriculum development, and the creation of pioneering foot and gait methodologies. Yet at the heart of every lecture, protocol, and patient interaction is the same driving belief: real strength starts from the ground up, and healthy feet are the foundation every body needs to move through life with confidence and ease.',
+          ],
+        },
+      ],
+      // Cross-sell band — Figma-verbatim heading from the "Product Cards"
+      // frame, node 1080:25784 (desktop) / 1116:17292 (mobile). Identical
+      // content on both breakpoints — no desktop/mobile disagreement here.
+      // Byte-identical to L1's own crossSell (same 3 sibling courses, same
+      // shopAllHref) — read independently off L2's own node, confirmed
+      // matching: both are professional courses cross-selling the SAME
+      // evergreen "More Courses for Professionals" trio, none of which is
+      // FGA Level 2 (or Level 1) itself.
+      crossSell: {
+        heading: 'More Courses for Professionals',
+        itemIds: ['sole-switch-pro', 'gait-foundations', 'trainer-certification'],
+        shopAllHref: '/collections/courses-professionals',
+      },
+      // FAQs — Figma node 1041:10422 (desktop) / 1116:16477 (mobile).
+      // Desktop's own 4 rows are all genuine, on-topic questions for this
+      // course (unlike L1's own generic-label-heavy set) — kept canonical.
+      //
+      // Desktop's own heading (1041:10422;180:344) reads "More Information
+      // and Frequently Asked Questions" — note "Information", the full word,
+      // NOT L1's own "More Info" abbreviation (1116:15582;183:474) — a real,
+      // per-course wording difference, not a transcription slip; both
+      // override the component's default "Frequently Asked Questions" via
+      // `faqsHeading` (see Faqs.astro's own header comment).
+      faqsHeading: 'More Information and Frequently Asked Questions',
+      //
+      // CLIENT-CONTENT FLAG: mobile's own FAQ node (1116:16477) has TWO
+      // extra rows desktop lacks — both literally titled "Gait Happens
+      // Products", back to back, duplicate text — unmistakably unfilled
+      // generic category chips (the same "unfilled category chip" situation
+      // Trainer Certification's/L1's own FAQ rows hit), not real content.
+      // Desktop's coherent 4-question set above is kept canonical; the two
+      // mobile-only placeholder rows are dropped, not transcribed.
+      //
+      // Neither frame contains any ANSWER copy for its own rows (both are
+      // static mockups of the collapsed accordion state only) — disclosed
+      // per-row, per this repo's "flag, don't silently invent" convention.
+      // Rows 1-2 are grounded in THIS same entry's already-Figma-verbatim
+      // `overview.details` facts (Continuing Education Credit / Audience),
+      // restated in plain customer-facing prose; rows 3-4 have no grounding
+      // data anywhere in this file, so each gets a short, neutral "coming
+      // soon"-style placeholder — no invented claim, no medical claim.
+      faqs: [
+        {
+          label: 'Continuing Education',
+          content: '<p>Yes — this course offers Continuing Education Credit. Specific reporting details are coming soon.</p>',
+        },
+        {
+          label: 'Can anyone enroll in this certification?',
+          content: '<p>Not quite — FGA Level 2 requires completion of the FGA Level 1 Certification first.</p>',
+        },
+        {
+          label: 'Are meals included in the ticket price?',
+          content: '<p>Details on what is included with your ticket are coming soon.</p>',
+        },
+        {
+          label: 'Will I get a certificate of completion?',
+          content: '<p>Details on certification for this course are coming soon.</p>',
+        },
+      ],
+      // Reviews placeholder — same static reviews-app-screenshot values every
+      // product/course PDP reuses (see Toe Spacers' `reviews` comment /
+      // PdpReviews.astro's note); this course has no real review data any
+      // more than the others do.
+      reviews: {
+        rating: 4.75,
+        count: 12,
+        distribution: [
+          { stars: 5, count: 11 },
+          { stars: 4, count: 0 },
+          { stars: 3, count: 0 },
+          { stars: 2, count: 1 },
+          { stars: 1, count: 0 },
+        ],
+      },
+    },
   },
   {
     id: 'gait-guru-membership',

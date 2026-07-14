@@ -1,0 +1,10 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Pdp from '../../components/pdp/Pdp.astro';
+import { getItem } from '../../data/catalog.js';
+
+const item = getItem('functional-gait-assessment-l2');
+---
+<BaseLayout title={item.title} description={item.description} wide>
+  <Pdp item={item} />
+</BaseLayout>
