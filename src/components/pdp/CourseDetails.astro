@@ -307,6 +307,40 @@
 // paragraph, just tightly spaced above the first. `.course-details__caption`
 // therefore reuses `.course-details__intro`'s exact font/colour
 // declarations rather than inventing a new type style.
+//
+// ---- Select control (Chunk B2 review fix wave: component gap fix) -------
+// Trainer Certification's own buybox (683:10088 desktop / 1116:17399 mobile,
+// both node `...;181:1352`/`;181:1388`, "Course Type") shows "SELECT YOUR
+// COURSE" over a real bordered dropdown — placeholder "Location…" + a
+// chevron — not a pill/button. The task that first authored this course's
+// catalog data correctly found `pills` had no render path for this (only
+// button-styled options, real `<a>` links or inert `<span>`s) and left the
+// field unset rather than force-fitting a select into a pill. This is fixed
+// here by EXTENDING `pills` rather than adding a parallel field — the same
+// generalization move as the pill-group section above (`pills` itself was
+// once a single-purpose tier field, generalized in place instead of
+// growing a second, parallel one) — via a new `control: 'pills' | 'select'`
+// key, defaulting to `'pills'` so all ten already-shipped courses (which
+// never set `control` at all) take the exact same branch and render the
+// exact same markup as before this fix.
+//
+// Guard: NOT the same emptiness check for both control types. `'pills'`
+// keeps the pre-existing `options.length > 0` guard verbatim. `'select'` is
+// guarded on `label` alone — Trainer Certification's own `options` array is
+// DELIBERATELY empty (Figma exposes only the closed/placeholder state of
+// this control, with no option list behind it to pull), so gating on
+// `options.length` here would hide a real, Figma-verbatim control behind the
+// same guard that (correctly) hides an accidentally-empty pill list. This is
+// a documented stub for the porting team, not a false affordance: the
+// select renders with its own real Figma-verbatim placeholder text, an
+// empty option list beneath it (see catalog.js's own comment on this field
+// — the client must supply the real location list; none is invented here).
+//
+// Markup: a real native `<select>`, not a fake bordered `<div>` — see
+// `.course-details__select`'s own CSS comment for why it reuses
+// FilterSortBar.astro's exact select styling/precedent (including that
+// file's choice not to add a custom chevron overlay) rather than a new
+// styling approach.
 import StarRating from '../plp/StarRating.astro';
 import { isExternalHref } from '../../scripts/links.js';
 
@@ -320,6 +354,27 @@ const { item } = Astro.props;
 // instead of the previous hardcoded pair.
 const enrollHref = item.pdp?.enrollHref ?? '#';
 const isExternal = isExternalHref(enrollHref);
+
+// `pills.control` (review fix wave: extends the pill-group generalization
+// above rather than adding a parallel field — see this file's own
+// "Pill-group generalization" header comment). Defaults to `'pills'`, so
+// every course before Trainer Certification (which never sets `control` at
+// all) computes the exact same value and takes the exact same render branch
+// as before this fix. `'select'` is Trainer Certification's own case (see
+// the "Select control" header comment below) — a real native dropdown/
+// select control, not a button-styled pill.
+const pills = item.pdp?.pills;
+const pillsControl = pills?.control === 'select' ? 'select' : 'pills';
+// Non-emptiness guard, per control type — NOT the same check for both.
+// `'pills'` keeps the exact pre-existing guard (`options.length > 0`): an
+// empty/absent pill list still renders nothing. `'select'` is guarded on
+// `label` alone: this course's own `options` array is INTENTIONALLY empty
+// (Figma exposes only the closed/placeholder state — see catalog.js's own
+// comment on this field), so gating on `options.length` would hide a real,
+// Figma-verbatim control that's supposed to render with just its
+// placeholder visible.
+const showTierBlock =
+  pillsControl === 'select' ? Boolean(pills?.label) : (pills?.options?.length ?? 0) > 0;
 ---
 <section class="course-details" data-pdp-id={item.id}>
   <div class="course-details__inner">
@@ -354,29 +409,38 @@ const isExternal = isExternalHref(enrollHref);
           item.pdp?.description && <p class="course-details__intro">{item.pdp.description}</p>
         )}
 
-        {item.pdp?.pills?.options?.length > 0 && (
+        {showTierBlock && (
           <div class="course-details__tier">
-            <span class="course-details__tier-label">{item.pdp.pills.label}</span>
-            <div class="course-details__pills">
-              {item.pdp.pills.options.map((option) =>
-                option.href ? (
-                  <a
-                    class={`course-details__pill${option.selected ? ' course-details__pill--selected' : ''}`}
-                    href={option.href}
-                    aria-current={option.selected ? 'true' : undefined}
-                  >
-                    {option.label}
-                  </a>
-                ) : (
-                  <span
-                    class={`course-details__pill course-details__pill--static${option.selected ? ' course-details__pill--selected' : ''}`}
-                  >
-                    {option.label}
-                    {option.selected && <span class="course-details__sr-only"> (selected)</span>}
-                  </span>
-                )
-              )}
-            </div>
+            <span class="course-details__tier-label">{pills.label}</span>
+            {pillsControl === 'select' ? (
+              <select class="course-details__select" aria-label={pills.label}>
+                <option value="" selected disabled hidden>{pills.placeholder}</option>
+                {(pills.options ?? []).map((option) => (
+                  <option value={option.href ?? option.label}>{option.label}</option>
+                ))}
+              </select>
+            ) : (
+              <div class="course-details__pills">
+                {pills.options.map((option) =>
+                  option.href ? (
+                    <a
+                      class={`course-details__pill${option.selected ? ' course-details__pill--selected' : ''}`}
+                      href={option.href}
+                      aria-current={option.selected ? 'true' : undefined}
+                    >
+                      {option.label}
+                    </a>
+                  ) : (
+                    <span
+                      class={`course-details__pill course-details__pill--static${option.selected ? ' course-details__pill--selected' : ''}`}
+                    >
+                      {option.label}
+                      {option.selected && <span class="course-details__sr-only"> (selected)</span>}
+                    </span>
+                  )
+                )}
+              </div>
+            )}
           </div>
         )}
 
@@ -532,6 +596,37 @@ const isExternal = isExternalHref(enrollHref);
     display: flex;
     flex-wrap: wrap;
     gap: var(--space-2);
+  }
+
+  /* ---- Select control (review fix wave: `pills.control === 'select'`) ----
+     Trainer Certification's own "Course Type" node (683:10088;181:1352 /
+     1116:17399;181:1388) is a bordered field with a "Location…" placeholder
+     + chevron, not a pill row (see this file's header comment). A REAL
+     native <select> — same "real, focusable, labeled control" precedent
+     FilterSortBar.astro's own PLP filter/sort selects already establish for
+     this repo, reusing that file's exact border/background/padding idiom
+     rather than inventing a second styling approach — not a fake bordered
+     `<div>`. No custom chevron overlay: FilterSortBar's own selects rely on
+     the browser's native affordance with zero extra icon markup, and this
+     follows that same precedent rather than adding `appearance: none` +
+     a masked icon with no other precedent in this codebase. `239px` is a
+     literal, measured off BOTH breakpoints' own "Input / Select" node
+     (683:10088;181:1352;181:1320 desktop / 1116:17399;181:1388;181:1320
+     mobile — identical on both, unlike most of this file's other
+     desktop/mobile splits). */
+  .course-details__select {
+    width: 239px;
+    max-width: 100%;
+    border: 1px solid var(--color-border);
+    background: var(--color-paper);
+    /* Figma's own placeholder text colour (`--text-muted,#837e7f`) is an
+       exact hex match to this repo's `--color-border` token — reused here
+       for the same value despite the "border" name, same "token regardless
+       of its own name" allowance PdpAccordion.astro's `--type-nav-label`
+       reuse already takes. */
+    color: var(--color-border);
+    font: var(--type-body-16);
+    padding: var(--space-3) var(--space-4);
   }
 
   /* Pill (secondary-CTA link OR inert language option) — outline style,

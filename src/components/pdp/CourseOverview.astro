@@ -79,8 +79,41 @@
 // desktop's 32px. This repo's tokens.css has one non-responsive --type-h3
 // (32px) and every sibling course section (CourseDetails, FourColumn) uses
 // it unmodified at both breakpoints — same here, no mobile override added.
+//
+// ---- `body` as list OR paragraph (Chunk B2 review fix wave) --------------
+// Trainer Certification's own "Course Concepts" block (683:10089 node
+// `I683:10089;174:1437` desktop / 1116:17400 node `I1116:17400;181:2228`
+// mobile) is a REAL 4-item bulleted `<ul>`, not free-running prose — unlike
+// Sole Switch Pro's own paragraph, which is what this field was originally
+// modeled on (see this file's own comment above). A prior task correctly
+// refused to flatten Figma's actual list structure into a run-on sentence
+// and left `body` unset (rendering nothing) rather than misrepresent it.
+//
+// Fixed here by letting `body` express EITHER shape, not by adding a new,
+// parallel field name (e.g. a sibling `concepts` array): `Array.isArray
+// (overview.body)` renders a `<ul>`; a plain (non-array) truthy value
+// renders exactly the same lone `<p>` as before. This reuses the "array of
+// plain strings = bullet list" shape already established elsewhere on this
+// same PDP composer (`ImageWithText.astro`'s own `items`, `ThreeColumnInfo
+// .astro`'s per-column `items`) rather than inventing a bespoke tuple, and
+// deliberately does NOT reach for `set:html` the way PdpAccordion.astro's
+// generic `content` field does — this branch already reverted a `set:html`
+// sink once (ComparisonChart.astro's own intro paragraph) specifically
+// because plain structured data was cleaner and safer than raw HTML for a
+// field with no genuine embedded markup need; a 4-item array of strings has
+// exactly the same "no real markup, just multiple lines" shape that fix
+// argued for, so the same structured-data-over-HTML choice is made again
+// here rather than re-introducing that pattern.
+//
+// Every course before Trainer Certification passes a plain string for
+// `body` (or omits it) — `Array.isArray` is `false` for both, so `hasBody`/
+// the render branch below are byte-identical to the pre-fix behaviour for
+// all of them; this is a no-op except for Trainer Certification's own new
+// array value.
 const { item } = Astro.props;
 const overview = item.pdp?.overview;
+const bodyIsList = Array.isArray(overview?.body);
+const hasBody = bodyIsList ? overview.body.length > 0 : Boolean(overview?.body);
 ---
 {overview && (
   <section class="course-overview" data-pdp-id={item.id}>
@@ -100,10 +133,16 @@ const overview = item.pdp?.overview;
         <img src={overview.image} alt="" loading="lazy" />
       </div>
 
-      {overview.body && (
+      {hasBody && (
         <div class="course-overview__concepts">
           <p class="course-overview__detail-label">Course Concepts</p>
-          <p class="course-overview__body">{overview.body}</p>
+          {bodyIsList ? (
+            <ul class="course-overview__list">
+              {overview.body.map((text) => <li>{text}</li>)}
+            </ul>
+          ) : (
+            <p class="course-overview__body">{overview.body}</p>
+          )}
         </div>
       )}
     </div>
@@ -173,6 +212,29 @@ const overview = item.pdp?.overview;
   .course-overview__body {
     font: var(--type-body-sm);
     color: var(--color-ink);
+  }
+  /* List variant of `body` (review fix wave — Trainer Certification's own
+     "Course Concepts" 4-item `<ul>`, 683:10089;174:1439 / 1116:17400's
+     equivalent node). Same font/colour as the paragraph variant above
+     (Figma's own list uses the identical --text-body-sm/ink binding); 8px
+     per-item gap (`mb-[8px]`, an exact --space-2 match on both frames) and
+     21px bullet indent (`ms-[21px]`, the same literal-with-no-exact-token
+     ImageWithText.astro's own desktop list already flags — 16/24 bracket it
+     on this repo's --space scale) are both real Figma measurements, not
+     invented. */
+  .course-overview__list {
+    display: flex;
+    flex-direction: column;
+    padding-inline-start: 21px;
+    margin: 0;
+  }
+  .course-overview__list li {
+    font: var(--type-body-sm);
+    color: var(--color-ink);
+    margin-bottom: var(--space-2);
+  }
+  .course-overview__list li:last-child {
+    margin-bottom: 0;
   }
 
   /* ---- Desktop (Figma 675:4354, ≥1024) -------------------------------- */

@@ -3208,29 +3208,35 @@ export const items = [
       // Foundations' hero does (confirmed via get_design_context on both
       // breakpoints: each frame's node holds exactly one `<p>`).
       //
-      // ---- COMPONENT GAP — FOUND, NOT FIXED (per this task's brief) -------
+      // ---- COMPONENT GAP — RESOLVED (review fix wave) ----------------------
       // Both frames' own buybox (683:10088 node `I683:10088;181:1352` /
       // 1116:17399 node `I1116:17399;181:1388`, "Course Type") show a
       // "SELECT YOUR COURSE" label above a real dropdown/select control (a
       // bordered field reading placeholder text "Location…" + a chevron
       // icon) — a functionally different widget from every other course's
-      // own `pills` block (CourseDetails.astro's `item.pdp.pills` shape only
-      // renders BUTTON-styled options, either real links or inert
-      // non-interactive spans; it has no render path for a native-style
-      // select/dropdown control at all). Neither frame exposes any actual
-      // option list behind this field (both are static mockups of the
-      // closed/placeholder state only, the same "collapsed accordion only"
-      // situation this file's FAQ rows hit elsewhere) — so there's also no
-      // real option data to author even if the shape did fit. Per this
-      // task's explicit brief ("if you find a component gap, STOP and
-      // REPORT it — do not work around it and do not edit the component in
-      // this data task"), `pills` is left UNSET below: this "Select your
-      // course" / location-picker block simply doesn't render, rather than
-      // being force-fit into a pill button that would misrepresent a
-      // dropdown as a link/label. Reported in this task's own report as a
-      // (candidate 13th) component gap; a follow-up task should add a real
-      // "select" variant to `pills` (or a sibling field) once real location
-      // option data exists.
+      // own `pills` block (which only ever rendered BUTTON-styled options,
+      // real links or inert spans). A prior task found this gap and left
+      // `pills` UNSET rather than force-fitting a select into a pill button
+      // (correctly, per that task's own brief). CourseDetails.astro now
+      // extends `pills` with a `control: 'select'` variant (see that file's
+      // own header comment) instead of adding a parallel field, so this
+      // renders as a REAL native `<select>` below.
+      //
+      // CLIENT-CONTENT DISCLOSURE: `options: []` is INTENTIONALLY empty, not
+      // an oversight. Neither frame exposes any actual option list behind
+      // this control — both are static mockups of the closed/placeholder
+      // state only (the same "collapsed accordion only" situation this
+      // file's FAQ rows hit elsewhere) — so there is no real location data to
+      // author. The client/porting team must supply the real course-location
+      // list here before this control is functionally complete; no location
+      // is invented. `label`/`placeholder` are both Figma-verbatim on both
+      // frames ("Select your course" / "Location…").
+      pills: {
+        control: 'select',
+        label: 'Select your course',
+        placeholder: 'Location…',
+        options: [],
+      },
       //
       // Primary CTA — both frames' own buybox is a literal cart/quantity-
       // stepper "Add to Cart" flow (same remapping every other course's
@@ -3295,30 +3301,23 @@ export const items = [
         // same drift pattern Gait Foundations' own comment documents.
         // Desktop's 5-fact set above is kept canonical throughout.
         //
-        // ---- COMPONENT GAP — FOUND, NOT FIXED (per this task's brief) -----
+        // ---- COMPONENT GAP — RESOLVED (review fix wave) --------------------
         // Both frames' own closing block (683:10089 node `I683:10089;174:1437`
         // / 1116:17400 node `I1116:17400;181:2228`) show a "Course Concepts"
-        // label over a REAL BULLETED LIST of 4 items ("Fundamentals of
-        // effective and engaging teaching", "Review of relevant anatomy for
-        // explaining the function of our feet", "Outlines for 3 different
-        // Certified Foot Health workshops", "Teaching practice with
-        // real-time feedback from peers and instructors.") — but
-        // CourseOverview.astro's own `overview.body` field renders a SINGLE
-        // plain paragraph (`<p>{overview.body}</p>`), with no field/render
-        // path for a list at all (its own header comment explicitly
-        // documents `body` as "the one piece of free-running descriptive
-        // copy", modeled on Sole Switch Pro's own prose paragraph, which
-        // this course's Figma does NOT have — this course's own "Course
-        // Concepts" block is a list, not prose). Concatenating the 4 items
-        // into one run-on sentence would misrepresent Figma's actual list
-        // structure without inventing any new fact, which this task's brief
-        // still treats as a fabrication of form, not just content — so
-        // `body` is left UNSET below: the whole "Course Concepts" block
-        // renders nothing (guarded, matching this file's own
-        // `{overview.body && (...)}` idiom) rather than a lossy paraphrase.
-        // Reported in this task's own report as a (candidate 14th) component
-        // gap; a follow-up task should add an optional `overview.concepts:
-        // [string]` list field alongside `body`.
+        // label over a REAL BULLETED LIST of 4 items, byte-identical on both
+        // frames. A prior task correctly refused to concatenate them into one
+        // run-on sentence (CourseOverview.astro's `body` only rendered a
+        // single `<p>`) and left `body` unset. CourseOverview.astro's `body`
+        // field now accepts EITHER a plain string (unchanged paragraph
+        // behaviour, every other course) OR an array of strings (renders as
+        // a `<ul>`, see that file's own header comment) — no new field name,
+        // `body` itself is now polymorphic. Figma-verbatim 4 items below.
+        body: [
+          'Fundamentals of effective and engaging teaching',
+          'Review of relevant anatomy for explaining the function of our feet',
+          'Outlines for 3 different Certified Foot Health workshops',
+          'Teaching practice with real-time feedback from peers and instructors.',
+        ],
       },
       // 4 Column feature band — Figma-verbatim heading + 4 blurbs from node
       // 683:10090 (desktop) / 1116:17401 (mobile). No dedicated feature
@@ -3410,15 +3409,26 @@ export const items = [
       },
       // Image With Text — Task 4's own new section type. Figma-verbatim
       // items from node 686:6540 (desktop) / 1116:17403 (mobile). Sets
-      // `image`/`heading`/`items` ONLY — `imageSide`/`intro`/`listLead`/
-      // `cta` are OMITTED entirely (this course's own Figma has none of
-      // them; see ImageWithText.astro's own header comment for the Foot
-      // Fest instance that DOES use those fields, pulled only to shape the
-      // component's contract, not authored here). No dedicated photography
-      // exists for this section — reuses this item's own PLP course shot.
+      // `image`/`heading`/`imageWidth`/`items` ONLY — `imageSide`/`intro`/
+      // `listLead`/`note`/`cta` are OMITTED entirely (this course's own
+      // Figma has none of them; see ImageWithText.astro's own header comment
+      // for the three Foot Fest instances that DO use those fields, pulled
+      // only to shape the component's contract, not authored here). No
+      // dedicated photography exists for this section — reuses this item's
+      // own PLP course shot.
+      //
+      // `imageWidth: 374` (review fix wave) — this frame's own media column
+      // measures a literal 374px wide / 250px min-height (matching Foot
+      // Fest's Stay Onsite instance, 674:7748, NOT its VIP/Fundraiser Walk
+      // instances' ~50/50 split — see ImageWithText.astro's own header
+      // comment table). Without this field the component now defaults to
+      // the ~50/50 split instead, so this is required here to keep this
+      // page's own rendered geometry unchanged from before the review fix
+      // wave.
       imageWithText: {
         image: '/images/plp/trainer-certification.jpg',
         heading: 'Additional Benefits of the Gait Happens Trainer Certification',
+        imageWidth: 374,
         items: [
           'Host and teach Certified GH Workshops (choose from three different workshop options).',
           'You will be provided with a workshop kit which includes 3 Foot Health Kits, 3 GH Mobility Balls, and 5 Toe Strengthener Packs ($490 total value)',
