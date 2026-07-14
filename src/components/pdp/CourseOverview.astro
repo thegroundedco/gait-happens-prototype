@@ -110,9 +110,17 @@
 // the render branch below are byte-identical to the pre-fix behaviour for
 // all of them; this is a no-op except for Trainer Certification's own new
 // array value.
+//
+// Ordered-list fix (Chunk B2 review wave): FGA Level 2's "Course Concepts"
+// list is a decimal ordered list in Figma, NOT bullets like every other
+// course. Polymorphic `body` already handles array vs. string; now
+// `overview.ordered: true` renders `<ol>` instead of `<ul>` for that
+// course's array. Absent `ordered` defaults to `<ul>` — unchanged for all
+// pre-existing courses (no `ordered` set).
 const { item } = Astro.props;
 const overview = item.pdp?.overview;
 const bodyIsList = Array.isArray(overview?.body);
+const bodyIsOrdered = bodyIsList && overview?.ordered === true;
 const hasBody = bodyIsList ? overview.body.length > 0 : Boolean(overview?.body);
 ---
 {overview && (
@@ -137,9 +145,15 @@ const hasBody = bodyIsList ? overview.body.length > 0 : Boolean(overview?.body);
         <div class="course-overview__concepts">
           <p class="course-overview__detail-label">Course Concepts</p>
           {bodyIsList ? (
-            <ul class="course-overview__list">
-              {overview.body.map((text) => <li>{text}</li>)}
-            </ul>
+            bodyIsOrdered ? (
+              <ol class="course-overview__list course-overview__list--ordered">
+                {overview.body.map((text) => <li>{text}</li>)}
+              </ol>
+            ) : (
+              <ul class="course-overview__list">
+                {overview.body.map((text) => <li>{text}</li>)}
+              </ul>
+            )
           ) : (
             <p class="course-overview__body">{overview.body}</p>
           )}
@@ -227,6 +241,7 @@ const hasBody = bodyIsList ? overview.body.length > 0 : Boolean(overview?.body);
     flex-direction: column;
     padding-inline-start: 21px;
     margin: 0;
+    list-style: disc;
   }
   .course-overview__list li {
     font: var(--type-body-sm);
@@ -235,6 +250,14 @@ const hasBody = bodyIsList ? overview.body.length > 0 : Boolean(overview?.body);
   }
   .course-overview__list li:last-child {
     margin-bottom: 0;
+  }
+  /* Ordered variant of `body` (review fix wave — FGA Level 2's decimal
+     "Course Concepts" `<ol>`, 1041:10413;174:1439 / 1116:16468's
+     equivalent node). Rendering decimal list markers instead of bullets,
+     while reusing every other `.course-overview__list` style (spacing,
+     type, colour, indent). */
+  .course-overview__list--ordered {
+    list-style: decimal;
   }
 
   /* ---- Desktop (Figma 675:4354, ≥1024) -------------------------------- */

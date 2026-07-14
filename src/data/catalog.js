@@ -3262,7 +3262,11 @@ export const items = [
         // own paragraph nodes (not a numbered-list style applied on top), so
         // they're preserved verbatim even though the rendered `<ul>` already
         // supplies its own bullet marks — a minor, Figma-authored redundancy,
-        // not a transcription artifact.
+        // not a transcription artifact. (Unlike FGA L2's own decimal list,
+        // where Figma applies `<ol>` styling and this course's items are
+        // plain text — see L2's overview comment. DO NOT "fix" this L1 list
+        // into an ordered list; its numerals are literal from Figma and
+        // changing the render to `<ol>` would duplicate them as "1. 1. …".)
         body: [
           '1. Participants will develop improved competence from taking a patient history.',
           '2. Participants will assess gait mechanics, identifying normal gait parameters as well as aberrant patterns in the human gait cycle.',
@@ -3769,8 +3773,9 @@ export const items = [
         // course's own list items carry NO leading "1."/"2." numerals in
         // their own Figma text (confirmed via get_design_context — each
         // `<li>` node is plain sentence text; the numbering comes only from
-        // Figma's own `<ol>` styling) — so none are added here; the rendered
-        // `<ul>` bullets are the correct, Figma-verbatim presentation.
+        // Figma's own `<ol>` decimal styling, node I1041:10413;174:1439) — so
+        // none are added here. `ordered: true` below renders `<ol>` decimal
+        // instead of `<ul>` bullets, matching Figma's verbatim presentation.
         body: [
           'Learn the importance of foot strength and its relationship to our longevity.',
           'Discuss the impact minimalist footwear can have on improving foot mechanics.',
@@ -3780,6 +3785,11 @@ export const items = [
           'Outline the specifics of treating midfoot/rearfoot diagnoses.',
           'Understand the pathomechanics behind tendinopathies and how to treat them.',
         ],
+        // Ordered list flag (review fix wave) — Figma's own node renders
+        // decimal numerals (`list-decimal` style), so `ordered: true` tells
+        // CourseOverview.astro to render `<ol>` instead of `<ul>`. Every
+        // other course omits this (defaults to `<ul>`), so they're unaffected.
+        ordered: true,
       },
       // 4 Column feature band — Figma-verbatim heading + 4 blurbs from node
       // 1041:10414 (desktop) / 1116:16470 (mobile). THIS course's own
