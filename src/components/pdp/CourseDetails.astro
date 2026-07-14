@@ -265,6 +265,48 @@
 //    `options` key would throw at build (`.map` on `undefined`). Guard is
 //    now `item.pdp?.pills?.options?.length > 0`, which also subsumes the
 //    old presence check.
+//
+// ---- Hero caption (Chunk B2 follow-up: component gap fix) ---------------
+// Gait Foundations' Course Details hero (675:9037 desktop / 1116:14701
+// mobile) shows a short credibility-stat line, "*900+ Professionals
+// Certified", in its OWN <p> directly above the intro paragraph — confirmed
+// via get_design_context on both breakpoints that each frame's own text
+// node (675:9037;173:130 desktop / 1116:14701;181:664 mobile) is a single
+// wrapper containing exactly these two <p> children, not one paragraph with
+// the stat folded into its text. This file had no field or render path for
+// a second caption line at all (`description` renders exactly one
+// paragraph), so the line was reported (not fixed) by the task that first
+// authored gait-foundations' own catalog data — fixed here per that same
+// "report now, generalize later" precedent this file's `pills`/`courseCard`
+// /`heroImage` fields above already followed.
+//
+// `item.pdp.heroCaption` is a new OPTIONAL plain string, read/guarded
+// exactly like `description`/`instructorsByline` already are on this same
+// file — a bare `&&` check. An empty string is already falsy in JS, so no
+// extra `.length`/emptiness check is needed the way `pills.options` and
+// `threeColumn.columns` (both arrays, where `{ options: [] }` would slip
+// past a bare presence check) require one. Absent (every course before
+// Gait Foundations) renders NOTHING — not even a wrapper element — so this
+// is a byte-identical no-op for every other shipped PDP.
+//
+// Markup: when present, `heroCaption` and `description` share a nested
+// `.course-details__intro-block` wrapper, mirroring Figma's own single
+// text-block node that holds both paragraphs, so their own tight 8px gap
+// (`--space-2`, Figma's literal `mb-[8px]` on the caption `<p>`) is
+// independent of the buybox's outer --space-5 (24px) rhythm governing the
+// gap to this block's neighbors — the same "nested wrapper carries its own
+// tighter internal gap" pattern `.course-details__tier`/
+// `.course-details__pills` already established for the pill-group above.
+// When `heroCaption` is unset, `description` renders unwrapped exactly as
+// before (the same lone `<p>`, no extra `<div>`) — required for the ten
+// already-shipped PDPs to stay byte-identical.
+//
+// Typography: Figma's own text-block node uses ONE font/colour for both
+// paragraphs (type/body-sm, `--text-primary`) — the caption isn't bold, a
+// different colour, or a caption/eyebrow style; it's a second body-sm
+// paragraph, just tightly spaced above the first. `.course-details__caption`
+// therefore reuses `.course-details__intro`'s exact font/colour
+// declarations rather than inventing a new type style.
 import StarRating from '../plp/StarRating.astro';
 import { isExternalHref } from '../../scripts/links.js';
 
@@ -303,7 +345,14 @@ const isExternal = isExternalHref(enrollHref);
           )}
         </p>
 
-        {item.pdp?.description && <p class="course-details__intro">{item.pdp.description}</p>}
+        {item.pdp?.heroCaption ? (
+          <div class="course-details__intro-block">
+            <p class="course-details__caption">{item.pdp.heroCaption}</p>
+            {item.pdp?.description && <p class="course-details__intro">{item.pdp.description}</p>}
+          </div>
+        ) : (
+          item.pdp?.description && <p class="course-details__intro">{item.pdp.description}</p>
+        )}
 
         {item.pdp?.pills?.options?.length > 0 && (
           <div class="course-details__tier">
@@ -438,6 +487,25 @@ const isExternal = isExternalHref(enrollHref);
   }
 
   .course-details__intro {
+    font: var(--type-body-sm);
+    color: var(--color-ink);
+  }
+
+  /* Optional hero caption ("*900+ Professionals Certified", Gait
+     Foundations' 675:9037/1116:14701 frames — see header comment). Rendered
+     only inside `.course-details__intro-block`, which exists only when
+     `item.pdp.heroCaption` is set — absent everywhere else, so this rule is
+     inert (matches no elements) on every other shipped PDP. Same font/colour
+     as `.course-details__intro` (Figma uses one type style for both
+     paragraphs); `.course-details__intro-block`'s own --space-2 (8px) column
+     gap supplies the tight spacing Figma's `mb-[8px]` shows between them,
+     independent of the buybox's outer --space-5 rhythm. */
+  .course-details__intro-block {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+  .course-details__caption {
     font: var(--type-body-sm);
     color: var(--color-ink);
   }

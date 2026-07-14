@@ -2710,20 +2710,16 @@ export const items = [
       // item — see the flags below).
       description:
         'Improve your patient outcomes with even the most complex cases! This four hour online course is designed to give you the foundation to start treating lower extremity complaints from a functional perspective.',
-      //
-      // ---- COMPONENT GAP (found, not fixed, per this task's brief) --------
-      // Both frames ALSO show a short caption line, "*900+ Professionals
-      // Certified", directly above this intro paragraph (its own `<p>`, not
-      // part of the paragraph text) — CourseDetails.astro has no field or
-      // render path for a stat/certification caption like this (its
-      // `description` slot renders exactly one paragraph). Per this task's
-      // brief ("STOP and REPORT a genuine component gap; don't work around
-      // it inside this data task, don't edit the component here"), this
-      // line is captured nowhere in this data block and is reported as a
-      // finding for a follow-up task to add an explicit field for, the same
-      // "reported, not silently dropped or bolted on" precedent Fit Feet's
-      // Language-pills gap set (see CourseDetails.astro's own header
-      // comment, "Pill-group generalization").
+      // Hero caption — Figma-verbatim (including the leading "*") from both
+      // frames' own text-block node (675:9037;173:130 desktop /
+      // 1116:14701;181:664 mobile), a short credibility-stat line in its own
+      // `<p>` directly above `description`. Previously a reported-not-fixed
+      // component gap (CourseDetails.astro had no field/render path for a
+      // second caption line) — now a real, OPTIONAL field the component
+      // guards on non-emptiness (see CourseDetails.astro's own header
+      // comment, "Hero caption"). Identical on both breakpoints, no
+      // desktop/mobile disagreement.
+      heroCaption: '*900+ Professionals Certified',
       //
       // Primary CTA — both frames' own buybox is a literal cart/quantity-
       // stepper "Add to Cart" flow (Figma has not remapped this course to a
