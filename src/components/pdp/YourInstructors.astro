@@ -193,6 +193,15 @@ const heading = item.pdp?.instructorsHeading ?? 'Your Instructors';
 
     const label = toggle.querySelector('[data-instructor-toggle-label]');
     if (label) label.textContent = wasExpanded ? 'Read More' : 'Read Less';
+
+    // Collapsing (wasExpanded === true) re-clamps the bio to 4 lines at
+    // whatever width the viewport is NOW, which may not be the width that
+    // was current when this bio was last measured (e.g. expanded at
+    // 390px, widened to 1440px — skipped by syncInstructorToggles while
+    // expanded — then collapsed back). Re-measure so a toggle that no
+    // longer has anything to reveal doesn't stay visible as an inert
+    // control until the next resize.
+    syncInstructorToggles();
   });
 
   // The Read More toggle must only exist when the bio ACTUALLY overflows its
@@ -218,10 +227,42 @@ const heading = item.pdp?.instructorsHeading ?? 'Your Instructors';
   }
 
   document.addEventListener('astro:page-load', syncInstructorToggles);
-  window.addEventListener('resize', () => requestAnimationFrame(syncInstructorToggles));
+
+  // Coalesce a resize burst to at most one measurement per frame: without
+  // the `pending` guard, every `resize` event queues its own rAF callback,
+  // and a drag-resize can fire dozens of `resize` events before the next
+  // paint — each one re-running a write (`setAttribute`) + read
+  // (`scrollHeight`) per bio for no benefit over the last-scheduled one.
+  let pendingResizeMeasurement = false;
+  window.addEventListener('resize', () => {
+    if (pendingResizeMeasurement) return;
+    pendingResizeMeasurement = true;
+    requestAnimationFrame(() => {
+      pendingResizeMeasurement = false;
+      syncInstructorToggles();
+    });
+  });
+
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', syncInstructorToggles);
   } else {
     syncInstructorToggles();
   }
+
+  // The measurement above can run BEFORE the self-hosted Montserrat swap
+  // (`font-display: swap` in global.css, no font preload): on a cold cache
+  // the browser paints with the `system-ui` fallback first. Both short
+  // bios sit exactly on the 4-line boundary (Riley: scrollHeight ===
+  // clientHeight === 84, zero slack; McDowell: 105 vs 84, one line over)
+  // — narrow enough that the fallback font can fit a bio in 4 lines,
+  // `toggle.hidden` gets set true, and then Montserrat swaps in wider and
+  // pushes that same bio to 5 lines. Without this re-measure, the button
+  // that would reveal the newly-clamped line is gone: content made
+  // permanently unreachable, which is worse than the false affordance
+  // this task removed. `document.fonts.ready` resolves once the swap has
+  // happened (or immediately if fonts were already loaded/cached), so
+  // this re-measure is a no-op on a warm cache and a correcting pass on a
+  // cold one. Do not remove this as a "duplicate" of the calls above —
+  // it runs at a different, font-dependent time than any of them.
+  document.fonts?.ready.then(syncInstructorToggles);
 </script>

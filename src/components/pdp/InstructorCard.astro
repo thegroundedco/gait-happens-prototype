@@ -154,15 +154,21 @@ const bioId = `instructor-bio-${instructor.name.toLowerCase().replace(/[^a-z0-9]
     padding: 0;
     cursor: pointer;
   }
-  /* The browser's UA stylesheet hides `[hidden]` elements via `display:
-     none`, but that rule has the SAME specificity as the unconditional
-     `display: inline-flex` above, and author styles win ties over UA
-     styles — so without this, setting `toggle.hidden = true` (the measured
-     overflow check in YourInstructors.astro's script) would have no visual
-     effect: confirmed in a live browser check during this fix, where the
-     toggle stayed rendered with `computedDisplay: 'flex'` despite
-     `hidden === true`. This rule's higher specificity restores the
-     attribute's actual hiding behavior. */
+  /* This repo's established idiom for pairing a `[hidden]`-toggled element
+     with its own unconditional `display` rule — see AccountMenu.astro,
+     CartDrawer.astro (x4), Header.astro, MobileNav.astro, QuickAddModal.astro
+     (x3), SearchOverlay.astro. Needed here for the same reason it's needed
+     there: normal author-origin declarations beat normal UA-origin
+     declarations by ORIGIN, full stop — specificity never enters into it,
+     it only breaks ties *within* one origin. (The real UA rule is
+     `[hidden]:not([hidden=until-found]) { display: none }`, specificity
+     0-2-0, actually HIGHER than `.instructor-card__toggle`'s 0-1-0 — and it
+     still loses, purely on origin.) So without this rule, the unconditional
+     `display: inline-flex` above always wins over the UA's `[hidden]` rule,
+     and setting `toggle.hidden = true` (the measured overflow check in
+     YourInstructors.astro's script) has no visual effect: confirmed in a
+     live browser check during this fix, where the toggle stayed rendered
+     with `computedDisplay: 'flex'` despite `hidden === true`. */
   .instructor-card__toggle[hidden] {
     display: none;
   }
