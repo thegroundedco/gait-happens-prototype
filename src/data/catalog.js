@@ -2704,11 +2704,15 @@ export const items = [
     //     the PLP on divergence).
     //   - `price` is PDP-hero-verbatim: "$897.00 USD". The PLP card shows
     //     "$150 USD" instead, but that exact figure is also stamped
-    //     identically on the Sole Switch Pro, Gait Foundations, and FGA
+    //     identically on the Sole Switch Pro, Gait Guru Membership, and FGA
     //     Level 1 cards in the same grid — a stale/repeated placeholder
     //     value copy-pasted across cards (same class of Figma-authoring
     //     artifact flagged elsewhere in this file, e.g. the 3 identical
-    //     cross-sell blurbs), not this course's real price. Not used.
+    //     cross-sell blurbs). Note: Gait Guru Membership's real price IS
+    //     $150 USD, which is why the value bleeds onto other cards via an
+    //     un-overridden Figma component default, not just a generic
+    //     placeholder. This entry's price ($897.00 USD) is correct — not
+    //     changed.
     //   - `description` is PLP-CARD-verbatim (not PDP-hero-verbatim) per
     //     this task's explicit instruction: this field feeds the PLP card
     //     (see PlpCard.astro), so it follows the PLP where it differs from
@@ -2730,20 +2734,24 @@ export const items = [
     // future PLP-content task, not corrected here.
     id: 'functional-gait-assessment-l2',
     handle: 'functional-gait-assessment-l2',
-    title: 'Functional Gait Assessment: Level 2',
+    // CLIENT-CONTENT FLAG: Figma's PDP heroes for BOTH L1 and L2 read
+    // "Functional Gait Assessment: Level N" WITH colons (L1 node
+    // 675:9358, L2 node 1041:10410), but the L1 catalog entry stored
+    // the title WITHOUT a colon to match consistency. Matching the
+    // sibling L1 title here rather than adding a colon to just L2;
+    // reconciling the colon across both courses is a client/content
+    // decision batched with other Figma-vs-catalog discrepancies.
+    title: 'Functional Gait Assessment Level 2',
     kind: 'course',
     badges: ['Course', 'Professional'],
     price: '$897.00 USD',
     priceRange: null,
     description: 'FGA Level 2 is everything you need to take your work with clients to the next level.',
-    // Placeholder — no dedicated L2 photography exists yet (project-wide
-    // deferred item). Reuses sibling `functional-gait-assessment-l1`'s own
-    // PLP shot (confirmed present on disk at
-    // public/images/plp/functional-gait-assessment-l1.jpg) rather than the
-    // generic flat-placeholder.svg, since L1 and L2 are the same course
-    // family and every other course item's placeholder photo is likewise
-    // a non-dedicated stock/generic shot, not real branded photography.
-    image: '/images/plp/functional-gait-assessment-l1.jpg',
+    // No dedicated L2 photography exists yet — falls back to a flat
+    // placeholder rectangle, matching the Mobility Ball's own fallback
+    // approach when real product photography isn't available (see its
+    // comment above).
+    image: '/images/plp/placeholder.svg',
     href: '/courses/functional-gait-assessment-l2',
     cta: 'View Course',
     variants: null,
