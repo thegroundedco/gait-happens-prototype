@@ -96,7 +96,10 @@ export const routes = [
   // catalog `pdp` block now exist; see src/pages/courses/gait-foundations.astro
   // and catalog.js).
   r('/courses/gait-foundations', 'Gait Foundations', 'course', ['Home', 'Courses', 'Gait Foundations'], { status: 'built' }),
-  r('/courses/functional-gait-assessment-l1', 'Functional Gait Assessment L1', 'course', ['Home', 'Courses', 'Functional Gait Assessment L1']),
+  // Task 5 (Course PDP Chunk B2): flipped from placeholder to built (page +
+  // catalog `pdp` block now exist; see
+  // src/pages/courses/functional-gait-assessment-l1.astro and catalog.js).
+  r('/courses/functional-gait-assessment-l1', 'Functional Gait Assessment L1', 'course', ['Home', 'Courses', 'Functional Gait Assessment L1'], { status: 'built' }),
   // Task 2 (Course PDP Chunk B2): adopts a fully-designed Figma page
   // (1041:10410) that previously had no catalog entry, route, or PLP
   // presence. Placeholder only — its page is Task 6, so status is NOT
