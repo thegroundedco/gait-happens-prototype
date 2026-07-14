@@ -88,7 +88,10 @@ export const routes = [
   // src/pages/courses/sole-switch-pro.astro and catalog.js).
   r('/courses/sole-switch-pro', 'Sole Switch Pro', 'course', ['Home', 'Courses', 'Sole Switch Pro'], { status: 'built' }),
   r('/courses/gait-guru-membership', 'Gait Guru Membership', 'course', ['Home', 'Courses', 'Gait Guru Membership']),
-  r('/courses/trainer-certification', 'Trainer Certification', 'course', ['Home', 'Courses', 'Trainer Certification']),
+  // Task 4 (Course PDP Chunk B2): flipped from placeholder to built (page +
+  // catalog `pdp` block now exist; see src/pages/courses/trainer-certification.astro
+  // and catalog.js).
+  r('/courses/trainer-certification', 'Trainer Certification', 'course', ['Home', 'Courses', 'Trainer Certification'], { status: 'built' }),
   // Course PDP Chunk B2 Task 3: flipped from placeholder to built (page +
   // catalog `pdp` block now exist; see src/pages/courses/gait-foundations.astro
   // and catalog.js).

@@ -3155,6 +3155,386 @@ export const items = [
     cta: 'View Course',
     variants: null,
     sizeChart: null,
+    // Task 4 (Course PDP Chunk B2) — Course Details hero (683:10088 desktop /
+    // 1116:17399 mobile, both under file FX7PDNvhZwyozODaq8Q8i7): 5-star
+    // rating, "(1)" reviews shown identically on both frames — sourced
+    // top-level exactly like every other course's own hero rating (see
+    // gait-foundations'/fit-feet's own `rating`/`reviewCount` comments
+    // above), not duplicated under `pdp`.
+    rating: 5,
+    reviewCount: 1,
+    // Task 4 (Course PDP Chunk B2) — Trainer Certification course PDP.
+    // Figma desktop frame 683:10086 ("Trainer Certification", file
+    // FX7PDNvhZwyozODaq8Q8i7) / mobile "Trainer Certification" frame
+    // 1116:17397 (under the professional-courses mobile section
+    // 1109:14374). No `testimonial` — confirmed via both frames' own child
+    // list (get_metadata on 683:10086/1109:14374): neither has a
+    // Testimonial instance anywhere on this course's page, unlike Gait
+    // Foundations/Sole Switch Pro.
+    pdp: {
+      sections: [
+        'course-details',
+        'course-overview',
+        'four-column',
+        'three-column-info',
+        'image-with-text',
+        'your-instructors',
+        'cross-sell',
+        'faqs',
+        'pdp-reviews',
+        'logo-wall',
+      ],
+      // Course Details hero — Figma-verbatim from node 683:10088 (desktop) /
+      // 1116:17399 (mobile). Both frames read "Gait Happens Trainer
+      // Certification" (the catalog's own shorter `title`, "Trainer
+      // Certification", is left alone — used elsewhere for
+      // nav/breadcrumbs/PLP cards/page <title>, same override pattern every
+      // other course's `heroTitle` already takes).
+      heroTitle: 'Gait Happens Trainer Certification',
+      // CLIENT-CONTENT FLAG: both frames' own hero price reads "$599.00 USD"
+      // — disagreeing with this item's top-level `price` ("$399 USD",
+      // marked "(sample)" and predating this task). Same "PDP hero shows the
+      // Figma-verbatim exact price, top-level `price` is a separate figure"
+      // split Sole Switch Pro's/Gait Foundations' own `priceExact` comments
+      // already document — flagged here, not silently reconciled (the
+      // top-level catalog field is out of this task's scope).
+      priceExact: '$599.00 USD',
+      // Hero intro paragraph — identical wording on both frames (no
+      // desktop/mobile disagreement here).
+      description:
+        'GH Certified Trainers will be able to lead Certified Foot Health Workshops to their clients, customers, and community. The certification will give you the tools to deliver these workshops with confidence, clarity, and the science to back it up.',
+      // No `heroCaption` — neither frame's own intro text-block node carries
+      // a second short caption paragraph above `description` the way Gait
+      // Foundations' hero does (confirmed via get_design_context on both
+      // breakpoints: each frame's node holds exactly one `<p>`).
+      //
+      // ---- COMPONENT GAP — FOUND, NOT FIXED (per this task's brief) -------
+      // Both frames' own buybox (683:10088 node `I683:10088;181:1352` /
+      // 1116:17399 node `I1116:17399;181:1388`, "Course Type") show a
+      // "SELECT YOUR COURSE" label above a real dropdown/select control (a
+      // bordered field reading placeholder text "Location…" + a chevron
+      // icon) — a functionally different widget from every other course's
+      // own `pills` block (CourseDetails.astro's `item.pdp.pills` shape only
+      // renders BUTTON-styled options, either real links or inert
+      // non-interactive spans; it has no render path for a native-style
+      // select/dropdown control at all). Neither frame exposes any actual
+      // option list behind this field (both are static mockups of the
+      // closed/placeholder state only, the same "collapsed accordion only"
+      // situation this file's FAQ rows hit elsewhere) — so there's also no
+      // real option data to author even if the shape did fit. Per this
+      // task's explicit brief ("if you find a component gap, STOP and
+      // REPORT it — do not work around it and do not edit the component in
+      // this data task"), `pills` is left UNSET below: this "Select your
+      // course" / location-picker block simply doesn't render, rather than
+      // being force-fit into a pill button that would misrepresent a
+      // dropdown as a link/label. Reported in this task's own report as a
+      // (candidate 13th) component gap; a follow-up task should add a real
+      // "select" variant to `pills` (or a sibling field) once real location
+      // option data exists.
+      //
+      // Primary CTA — both frames' own buybox is a literal cart/quantity-
+      // stepper "Add to Cart" flow (same remapping every other course's
+      // CourseDetails.astro header comment documents: Kajabi-fulfilled, not
+      // a Shopify cart purchase) — the filled "Add to Cart" button becomes
+      // this hero's primary "Enroll Now" CTA. Realistic Kajabi placeholder
+      // URL; swap for the real offer/checkout URL once the course is live on
+      // Kajabi.
+      enrollHref: 'https://gaithappens.mykajabi.com/offers/trainer-certification-course',
+      enrollLabel: 'Enroll Now',
+      //
+      // No `courseCard` — like Fit Feet/Combating Bunions/Gait Foundations,
+      // this course's Figma hero right column (683:10088 node
+      // `I683:10088;173:147` desktop / 1116:17399 node `I1116:17399;181:674`
+      // mobile) is a plain photo, no overlaid text/colored background —
+      // `heroImage` is used instead (mutually exclusive with `courseCard`).
+      // No dedicated hero photography exists for this course yet — reuses
+      // the same PLP course shot every other image slot on this item
+      // already reuses.
+      heroImage: '/images/plp/trainer-certification.jpg',
+      // Desktop's own byline (683:10088 node `I683:10088;173:137`) reads
+      // "Course By: Dr. Perez" — matching this item's real, single-
+      // instructor roster below (Dr. Jenifer Perez, DC; see `instructors`).
+      instructorsByline: 'Course By: Dr. Perez',
+      // CLIENT-CONTENT FLAG: mobile's own byline (1116:17399 node
+      // `I1116:17399;181:673`) instead reads "Course By: Dr. Conley and Dr.
+      // Riley" — TWO names, neither of which matches this course's actual
+      // (single-instructor) roster below, and Dr. Riley doesn't teach this
+      // course at all. The same recurring mobile-byline copy-paste artifact
+      // Fit Feet's/Combating Bunions'/Gait Foundations' own `instructorsByline`
+      // comments already flag (this is now the FOURTH course hitting it).
+      // Desktop's "Course By: Dr. Perez" is kept canonical (matches the real
+      // instructor roster below).
+      //
+      // Course Overview — Figma 683:10089 (desktop) / 1116:17400 (mobile).
+      // Desktop kept canonical for `details` per this task's "pull desktop
+      // first" directive — mobile disagrees on MORE than wording (see the
+      // CLIENT-CONTENT FLAG and COMPONENT GAP below).
+      overview: {
+        image: '/images/plp/trainer-certification.jpg',
+        details: [
+          { label: 'Course Length', value: '1 Day (8am-4pm)' },
+          { label: 'Evidence Based', value: 'Yes' },
+          { label: 'Course Structure', value: 'In-Person' },
+          { label: 'Course Style', value: 'In-Person Certification Course' },
+          {
+            label: 'Audience',
+            value:
+              'Healthcare professionals looking to improve their footwear recommendations for clients and patients.',
+          },
+        ],
+        // CLIENT-CONTENT FLAG: mobile's Audience value (1116:17400) instead
+        // reads "Anyone looking to understand how to choose healthy shoes
+        // for themselves" — that's Sole Switch's own consumer-facing
+        // Audience sentence (byte-for-byte, see that item's own
+        // `overview.details` comment above), not this (professional-
+        // audience) course's, the same Sole-Switch-template copy-paste error
+        // Fit Feet's/Gait Foundations' own Audience values already hit (now
+        // a THIRD recurrence). Mobile's 3rd label also renames to "Course
+        // Format" (same value, "In-Person") and Course Style becomes "Video
+        // lecture" instead of "In-Person Certification Course" — the exact
+        // same drift pattern Gait Foundations' own comment documents.
+        // Desktop's 5-fact set above is kept canonical throughout.
+        //
+        // ---- COMPONENT GAP — FOUND, NOT FIXED (per this task's brief) -----
+        // Both frames' own closing block (683:10089 node `I683:10089;174:1437`
+        // / 1116:17400 node `I1116:17400;181:2228`) show a "Course Concepts"
+        // label over a REAL BULLETED LIST of 4 items ("Fundamentals of
+        // effective and engaging teaching", "Review of relevant anatomy for
+        // explaining the function of our feet", "Outlines for 3 different
+        // Certified Foot Health workshops", "Teaching practice with
+        // real-time feedback from peers and instructors.") — but
+        // CourseOverview.astro's own `overview.body` field renders a SINGLE
+        // plain paragraph (`<p>{overview.body}</p>`), with no field/render
+        // path for a list at all (its own header comment explicitly
+        // documents `body` as "the one piece of free-running descriptive
+        // copy", modeled on Sole Switch Pro's own prose paragraph, which
+        // this course's Figma does NOT have — this course's own "Course
+        // Concepts" block is a list, not prose). Concatenating the 4 items
+        // into one run-on sentence would misrepresent Figma's actual list
+        // structure without inventing any new fact, which this task's brief
+        // still treats as a fabrication of form, not just content — so
+        // `body` is left UNSET below: the whole "Course Concepts" block
+        // renders nothing (guarded, matching this file's own
+        // `{overview.body && (...)}` idiom) rather than a lossy paraphrase.
+        // Reported in this task's own report as a (candidate 14th) component
+        // gap; a follow-up task should add an optional `overview.concepts:
+        // [string]` list field alongside `body`.
+      },
+      // 4 Column feature band — Figma-verbatim heading + 4 blurbs from node
+      // 683:10090 (desktop) / 1116:17401 (mobile). No dedicated feature
+      // photography exists for this course — `image` reuses this item's own
+      // PLP course shot for all 4 cards, same placeholder approach every
+      // other course's `features` array takes.
+      featuresHeading: 'The Certification Process',
+      features: [
+        {
+          image: '/images/plp/trainer-certification.jpg',
+          label: null,
+          text: 'Join us for a 1 day in-person certification course from 8am-4pm.',
+        },
+        {
+          image: '/images/plp/trainer-certification.jpg',
+          label: null,
+          text: 'After the course you will receive access to the video library of relevant exercises and sample workshops.',
+        },
+        {
+          image: '/images/plp/trainer-certification.jpg',
+          label: null,
+          text: 'After completing the in-person training you will be required to complete a video submission to demonstrate your teaching and physical ability to lead the workshops.',
+        },
+        {
+          image: '/images/plp/trainer-certification.jpg',
+          label: null,
+          // CLIENT-CONTENT FLAG: mobile's 4th blurb (1116:17401) reads "When
+          // the toes can properly splay, our foot and ankle muscles engage,
+          // creating a stronger, more stable platform from which to propel
+          // ourselves forward." — that's Sole Switch/Sole Switch Pro's own
+          // 4th blurb verbatim (see those items' own `features` comments),
+          // not written for this course; this is now the FOURTH course on
+          // this branch whose mobile 4th-blurb slot carries that exact
+          // copy-pasted text. Desktop's Trainer-Certification-specific text
+          // is kept canonical.
+          text: 'Once you pass the online demonstration you will be a Certified Gait Happens Trainer!',
+        },
+      ],
+      // Three Column Info — Figma-verbatim from node 1057:31123 (desktop) /
+      // 1116:17402 (mobile). Both frames agree word-for-word on every
+      // heading/item/CTA here — no desktop/mobile disagreement to flag on
+      // this section, matching Gait Foundations' own experience with this
+      // section type.
+      threeColumn: {
+        heading: 'About Gait Happens Trainer Certification',
+        columns: [
+          {
+            heading: 'What to expect',
+            items: [
+              'Helpful lectures led by Gait Happens foot and gait specialists',
+              'Lab demonstrations for better knowledge retention',
+              'Rewatch anytime to refresh your knowledge',
+              'Our Most Affordable Gait Certification',
+            ],
+          },
+          {
+            heading: 'Skills you will learn',
+            items: [
+              'A systematic approach to gait assessment',
+              'How tissues can become overloaded leading to pain & injury',
+              'How to identify aberrant patterns',
+              'Evidence-based methods',
+              'A system you can apply right away with nothing but your smart phone',
+            ],
+          },
+          {
+            heading: 'Is this course right for you',
+            items: [
+              'Doctor of Physical Therapy',
+              'Doctor of Chiropractic',
+              'Doctor of Podiatric Medicine',
+              'Certified Athletic Trainer',
+              'Applicants with comparable qualifications',
+            ],
+          },
+        ],
+        // CTA label is Figma-verbatim on both frames ("Step Up My Assessment
+        // Skills"). Neither frame's pulled design context exposes a
+        // prototype link target for this button — since the label names
+        // THIS SAME course's own outcome, `href` points at this item's own
+        // `enrollHref` above (byte-for-byte the same Kajabi link), the same
+        // "CTA names the course it sits on -> point at that course's own
+        // enroll link" precedent Gait Foundations'/Sole Switch Pro's own
+        // Three Column Info / Comparison Chart CTAs already set.
+        cta: {
+          label: 'Step Up My Assessment Skills',
+          href: 'https://gaithappens.mykajabi.com/offers/trainer-certification-course',
+        },
+      },
+      // Image With Text — Task 4's own new section type. Figma-verbatim
+      // items from node 686:6540 (desktop) / 1116:17403 (mobile). Sets
+      // `image`/`heading`/`items` ONLY — `imageSide`/`intro`/`listLead`/
+      // `cta` are OMITTED entirely (this course's own Figma has none of
+      // them; see ImageWithText.astro's own header comment for the Foot
+      // Fest instance that DOES use those fields, pulled only to shape the
+      // component's contract, not authored here). No dedicated photography
+      // exists for this section — reuses this item's own PLP course shot.
+      imageWithText: {
+        image: '/images/plp/trainer-certification.jpg',
+        heading: 'Additional Benefits of the Gait Happens Trainer Certification',
+        items: [
+          'Host and teach Certified GH Workshops (choose from three different workshop options).',
+          'You will be provided with a workshop kit which includes 3 Foot Health Kits, 3 GH Mobility Balls, and 5 Toe Strengthener Packs ($490 total value)',
+          'Any GH workshops that you host as a certified trainer are eligible to be added to the Events Calendar on our website',
+          'Add your name/business to the GH Local Practitioners Map',
+          '1 month trial access to the Gait Guru membership (new members only)',
+          'Our partners at Altra Running have agreed to add Gait Happens Certified Trainers to their health hub (normally restricted to qualifying medical professions). This hub provides educational materials and a 40% discount on Altra shoes',
+          'We will help you build a network in your community by connecting you with local Altra sales reps and retail stores that we have relationships with (if applicable in your geographic location).',
+        ],
+      },
+      // CLIENT-CONTENT FLAG: mobile's own heading (1116:17403) instead reads
+      // "Additional Benefits of the GH Trainer Certification" (brand name
+      // abbreviated to initials) — the 7 bullet items agree byte-for-byte on
+      // both frames; only the heading shortens. Desktop's full-name wording
+      // is kept canonical above, same "pull desktop first" precedent every
+      // other section on this item already follows.
+      //
+      // Your Instructors — Figma-verbatim from node 1086:28562 (desktop) /
+      // 1116:17404 (mobile). Both frames show the SAME single instructor
+      // (Dr. Jenifer Perez, DC) with byte-identical name/credential/bio — no
+      // desktop/mobile disagreement here, unlike most other sections on this
+      // item. Bio wording is THIS course's own frame text (note: ends "...so
+      // they can get back to doing what they love", one word longer than
+      // Gait Foundations' own copy of the same bio, "...get back to what
+      // they love" — a genuine, minor per-page wording variance in Figma
+      // itself, not a transcription error; kept verbatim to THIS course's
+      // own pulled node rather than reconciled with the other page's
+      // slightly different copy). `photo` reuses this item's own PLP course
+      // shot (no dedicated instructor photography exists yet, same
+      // placeholder convention every other course takes).
+      instructors: [
+        {
+          photo: '/images/plp/trainer-certification.jpg',
+          name: 'Dr. Jenifer Perez, DC',
+          credential: 'Lafayette, Colorado',
+          bio: [
+            'Dr. Jen Perez is the co-owner and Vice President of Gait Happens. As both an educator and a clinician, her mission is to empower as many people as possible to take charge of their lower body health so they can get back to doing what they love.',
+          ],
+        },
+      ],
+      // Cross-sell band — Figma-verbatim heading from the "Product Cards"
+      // frame, node 1045:20159 (desktop) / 1116:17405 (mobile). Identical
+      // content on both breakpoints — no desktop/mobile disagreement here.
+      // This course's own 3 cards read "Sole Switch Pro" / "Gait Foundations
+      // Course" / "Functional Gait Assessment 1" — none of which is Trainer
+      // Certification itself, so no self-reference here. `shopAllHref`
+      // points at the Professionals course PLP, matching this section's own
+      // "for Professionals" framing (same target Gait Foundations'/Sole
+      // Switch Pro's own crossSell already uses).
+      crossSell: {
+        heading: 'More Courses for Professionals',
+        itemIds: ['sole-switch-pro', 'gait-foundations', 'functional-gait-assessment-l1'],
+        shopAllHref: '/collections/courses-professionals',
+      },
+      // FAQs — Figma node 683:10095 (desktop) / 1116:17406 (mobile).
+      //
+      // CLIENT-CONTENT FLAG (distinct from every other course's FAQ gap):
+      // unlike Gait Foundations/Sole Switch Pro, whose FAQ rows are real,
+      // course-specific QUESTIONS with only the ANSWER copy missing, this
+      // course's own row LABELS themselves are generic, unfilled category
+      // chips — "Virtual Consultations", "Gait Happens Education", "Online
+      // Courses", "Memberships", "Gait Happens Products" — none of which is
+      // phrased as an actual question, and none of which is specific to
+      // Trainer Certification (they read like leftover site-wide FAQ
+      // category names, not this course's own content). Desktop's own frame
+      // additionally repeats the LAST label ("Gait Happens Products") THREE
+      // times back-to-back (nodes `181:465`/`345:770`/`345:775`, byte-
+      // identical) — an obvious duplicated-node authoring artifact, not 3
+      // distinct questions; mobile's own frame (1116:17406) has only ONE
+      // copy of that row, agreeing with desktop's first 5 rows exactly. The
+      // 2 extra duplicate desktop rows are DROPPED here (not shipped 3x)
+      // rather than preserved byte-for-byte, since shipping 3 identical
+      // accordion rows would be a visibly broken page, not a faithful
+      // Figma pull — the 5 rows below are the exact set both breakpoints
+      // agree on. Labels are kept Figma-verbatim (never invented/reworded
+      // into real questions) per this task's explicit brief; each `content`
+      // value is a short, neutral "copy pending" placeholder, no invented
+      // claim, same pattern every other course's un-answered FAQ rows use.
+      faqs: [
+        {
+          label: 'Virtual Consultations',
+          content: '<p>Details on virtual consultations for this certification are coming soon.</p>',
+        },
+        {
+          label: 'Gait Happens Education',
+          content: '<p>Details on Gait Happens education programs are coming soon.</p>',
+        },
+        {
+          label: 'Online Courses',
+          content: '<p>Details on our online course offerings are coming soon.</p>',
+        },
+        {
+          label: 'Memberships',
+          content: '<p>Details on Gait Guru membership access are coming soon.</p>',
+        },
+        {
+          label: 'Gait Happens Products',
+          content: '<p>Details on Gait Happens products included in this certification are coming soon.</p>',
+        },
+      ],
+      // Reviews placeholder — same static reviews-app-screenshot values
+      // every product/course PDP reuses (see Toe Spacers' `reviews` comment
+      // / PdpReviews.astro's note); this course has no real review data any
+      // more than the others do.
+      reviews: {
+        rating: 4.75,
+        count: 12,
+        distribution: [
+          { stars: 5, count: 11 },
+          { stars: 4, count: 0 },
+          { stars: 3, count: 0 },
+          { stars: 2, count: 1 },
+          { stars: 1, count: 0 },
+        ],
+      },
+    },
   },
 ];
 
