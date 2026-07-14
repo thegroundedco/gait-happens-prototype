@@ -1113,19 +1113,28 @@ export const items = [
       enrollLabel: 'Enroll Now',
       // Pill group — Task 4 follow-up (Chunk B1's 9th-finding fix) migrated
       // this off the old single-purpose tier-pill field onto the
-      // generalized `pills` shape CourseDetails.astro now renders (see that
-      // file's header comment). Figma's OUTLINE pill on this page is "Sole
-      // Switch Pro" (the filled/selected pill is "Sole Switch Basic" — this
-      // page's own tier, dropped per CourseDetails.astro's established
+      // generalized `pills` shape CourseDetails.astro used to render (now
+      // itself superseded — see below). Figma's OUTLINE pill on this page is
+      // "Sole Switch Pro" (the filled/selected pill is "Sole Switch Basic" —
+      // this page's own tier, dropped per CourseDetails.astro's established
       // convention: the tier already being viewed isn't repeated as a 3rd
       // CTA). Links to the Pro course's own page (already `built` — see
       // sitemap.js). `label` is this page's own real Figma caption
       // ("Select your course", node 998:14856); `options` is a
       // single-element array — same real link/label pair the old field
-      // carried, just renamed and reshaped to a 1-item list.
-      pills: {
+      // carried.
+      //
+      // MECHANICAL migration (review fix wave: `pills` -> `buybox`, see
+      // CourseDetails.astro's "Buy box controls generalization" header
+      // comment) — `{ label, options }` becomes `{ label, controls: [{
+      // type: 'pills', options }] }`, byte-identical rendered output (this
+      // page's own hero only ever had ONE control, so the new plural shape
+      // has exactly one entry).
+      buybox: {
         label: 'Select your course',
-        options: [{ label: 'Sole Switch Pro', href: '/courses/sole-switch-pro' }],
+        controls: [
+          { type: 'pills', options: [{ label: 'Sole Switch Pro', href: '/courses/sole-switch-pro' }] },
+        ],
       },
       //
       // Figma's branded card (right column) is a flattened screenshot, same
@@ -1476,14 +1485,17 @@ export const items = [
       // offer/checkout URL once the course is live on Kajabi.
       enrollHref: 'https://gaithappens.mykajabi.com/offers/combating-bunions-course',
       enrollLabel: 'Enroll Now',
-      // No `pills` — unlike Sole Switch/Sole Switch Pro's two-tier pill
-      // toggle (now the generalized `pdp.pills` shape — see
-      // CourseDetails.astro's header comment) or Fit Feet's language
-      // selector, neither of this course's Course Details frames shows any
-      // pill-group content next to the CTA (single-tier course, no sibling
-      // tier or language selector to cross-link from the hero). Left unset
-      // — the whole pill-group block guards on this field's presence, same
-      // idiom as `courseCard`/`heroImage`, so nothing renders.
+      // No `buybox` — unlike Sole Switch/Sole Switch Pro's two-tier pill
+      // toggle or Fit Feet's language selector (both now the generalized
+      // `pdp.buybox` shape — see CourseDetails.astro's header comment;
+      // `pills` was this field's name before the review fix wave that added
+      // Functional Gait Assessment Level 1's combined pill+select control),
+      // neither of this course's Course Details frames shows any pill-group
+      // content next to the CTA (single-tier course, no sibling tier or
+      // language selector to cross-link from the hero). Left unset — the
+      // whole buybox block renders iff at least one control survives its
+      // own non-emptiness check (see CourseDetails.astro's header comment),
+      // same idiom as `courseCard`/`heroImage`, so nothing renders here.
       //
       // ---- COMPONENT GAP — RESOLVED (CourseDetails.astro hero image fix) --
       // No `courseCard` is set, and never should be for this course: unlike
@@ -1898,13 +1910,23 @@ export const items = [
       // any entry (unlinked in Figma — see header comment), so
       // CourseDetails.astro renders these as inert spans; `English` alone
       // carries `selected: true` (the one filled pill in both frames).
-      pills: {
+      //
+      // MECHANICAL migration (review fix wave: `pills` -> `buybox`, see
+      // CourseDetails.astro's "Buy box controls generalization" header
+      // comment) — `{ label, options }` becomes `{ label, controls: [{
+      // type: 'pills', options }] }`, byte-identical rendered output.
+      buybox: {
         label: 'Language',
-        options: [
-          { label: 'English', selected: true },
-          { label: 'Spanish' },
-          { label: 'French' },
-          { label: 'Japanese' },
+        controls: [
+          {
+            type: 'pills',
+            options: [
+              { label: 'English', selected: true },
+              { label: 'Spanish' },
+              { label: 'French' },
+              { label: 'Japanese' },
+            ],
+          },
         ],
       },
       //
@@ -2316,17 +2338,25 @@ export const items = [
       enrollLabel: 'Enroll Now',
       // Pill group — Task 4 follow-up (Chunk B1's 9th-finding fix) migrated
       // this off the old single-purpose tier-pill field onto the
-      // generalized `pills` shape CourseDetails.astro now renders (see that
-      // file's header comment). Figma's outline "Sole Switch Basic" pill,
-      // kept as a real link (verbatim label) to the Basic-tier course's own
-      // page (`/courses/sole-switch`, an existing placeholder route — see
-      // sitemap.js). The Figma frame's second, filled "Sole Switch Pro"
-      // pill is NOT reproduced as a 3rd element — see CourseDetails.astro's
-      // header comment for why. `label` is this page's own real Figma
-      // caption ("Select your course", node 675:4353).
-      pills: {
+      // generalized `pills` shape CourseDetails.astro used to render (now
+      // itself superseded — see below). Figma's outline "Sole Switch Basic"
+      // pill, kept as a real link (verbatim label) to the Basic-tier
+      // course's own page (`/courses/sole-switch`, an existing placeholder
+      // route — see sitemap.js). The Figma frame's second, filled "Sole
+      // Switch Pro" pill is NOT reproduced as a 3rd element — see
+      // CourseDetails.astro's header comment for why. `label` is this
+      // page's own real Figma caption ("Select your course", node
+      // 675:4353).
+      //
+      // MECHANICAL migration (review fix wave: `pills` -> `buybox`, see
+      // CourseDetails.astro's "Buy box controls generalization" header
+      // comment) — `{ label, options }` becomes `{ label, controls: [{
+      // type: 'pills', options }] }`, byte-identical rendered output.
+      buybox: {
         label: 'Select your course',
-        options: [{ label: 'Sole Switch Basic', href: '/courses/sole-switch' }],
+        controls: [
+          { type: 'pills', options: [{ label: 'Sole Switch Basic', href: '/courses/sole-switch' }] },
+        ],
       },
       // Branded teal card (right column) — Figma-verbatim text read off the
       // frame's flattened screenshot (see CourseDetails.astro's header
@@ -2733,8 +2763,11 @@ export const items = [
       enrollHref: 'https://gaithappens.mykajabi.com/offers/gait-foundations-course',
       enrollLabel: 'Enroll Now',
       //
-      // No `pills` — neither frame shows a tier/language selector like Fit
-      // Feet's (confirmed via get_design_context on both breakpoints).
+      // No `buybox` (this field was named `pills` before the review fix
+      // wave that generalized it into a shared-label/ordered-controls shape
+      // — see CourseDetails.astro's header comment) — neither frame shows a
+      // tier/language selector like Fit Feet's (confirmed via
+      // get_design_context on both breakpoints).
       //
       // No `courseCard` — like Fit Feet/Combating Bunions, this course's
       // Figma hero right column (675:9037 node `I675:9037;173:147` desktop /
@@ -3042,18 +3075,27 @@ export const items = [
     price: '$249 USD', // (sample)
     priceRange: null,
     rating: 5,
-    // CLIENT-CONTENT correction (Task 5, Course PDP Chunk B2): both the
-    // desktop (675:9358) and mobile (1116:15572) Course Details hero frames
-    // show "(15)" next to their 5-star rating — the pre-existing top-level
-    // reviewCount (28) predates this task's Figma pull and was never
-    // reconciled against the real hero data, the same "sample placeholder,
-    // not yet Figma-verbatim" situation this item's own `price` comment
-    // already flags. Corrected here to match Figma-verbatim (both
-    // breakpoints agree on 15), per the "rating/reviewCount sourced
-    // top-level from the hero, not duplicated under pdp" convention every
-    // other course on this branch already follows (see gait-foundations'/
-    // trainer-certification's own rating/reviewCount comments).
-    reviewCount: 15,
+    // CLIENT-CONTENT FLAG (review fix wave — reverts Task 5's own change):
+    // both the desktop (675:9358) and mobile (1116:15572) Course Details
+    // hero frames show "(15)" next to their 5-star rating, disagreeing with
+    // this pre-existing top-level `reviewCount` (28) — the SAME systemic
+    // catalog-vs-Figma review-count disagreement already flagged on Sole
+    // Switch ("(5)" vs. 15, see that item's own `reviewCount` comment) and
+    // Fit Feet ("(21)" vs. 32, see that item's own `reviewCount` comment).
+    // Task 5 "corrected" this to 15 to match the hero — wrong per this
+    // review: those two siblings' own comments already establish that this
+    // disagreement is a DELIBERATELY BATCHED client-content decision, not a
+    // per-item patch, specifically because changing a pre-existing top-level
+    // field is outside a `pdp`-block-scoped task's reach, AND because
+    // `PlpCard.astro` renders this same top-level `reviewCount` on the PLP —
+    // "fixing" it here would also silently change an already-shipped PLP
+    // page's rendered review count, not just this one PDP hero. (The
+    // gait-foundations/trainer-certification precedent Task 5 cited doesn't
+    // apply: those items had NO top-level `reviewCount` at all before their
+    // own tasks — ADDING a missing value isn't the same edit as CHANGING an
+    // existing one.) NOT changed here, per that same batched-for-the-client
+    // precedent — restored to its pre-Task-5 value.
+    reviewCount: 28,
     description: 'Our Level 1 FGA course is designed to sharpen your gait assessment and clinical reasoning.',
     image: '/images/plp/functional-gait-assessment-l1.jpg',
     href: '/courses/functional-gait-assessment-l1',
@@ -3105,26 +3147,42 @@ export const items = [
       // 1116:15572;181:664 mobile) — identical on both breakpoints.
       heroCaption: '*750+ Professionals Certified',
       //
-      // ---- COMPONENT GAP — FOUND, NOT FIXED (this task) --------------------
+      // ---- COMPONENT GAP — RESOLVED (review fix wave: buybox generalization)
       // Both frames' own "Course Type" block (675:9358 node `I675:9358;
       // 181:1352` / 1116:15572 node `I1116:15572;181:1388`) shows BOTH a
       // 2-option pill row ("Online On-Demand" outline / "In-Person"
       // filled-selected) AND a "Location…" select/dropdown beneath it, in the
       // SAME block, on BOTH breakpoints (confirmed via get_design_context on
-      // both node trees plus their screenshots). CourseDetails.astro's
-      // `pills` field renders EITHER a pill group (`control: 'pills'`, the
-      // pilot's/Fit Feet's/Sole Switch Pro's shape) OR a native select
-      // (`control: 'select'`, Trainer Certification's shape) — never both
-      // together in the one "Course Type" slot this course's Figma actually
-      // shows. Per this task's brief ("if a section needs a component
-      // change, stop and report it — do not work around it, do not edit the
-      // component"), `pills` is left UNSET below rather than guessing which
-      // half of the real control to keep (dropping either the pills or the
-      // select would misrepresent this course's own frame) — reported here
-      // and in this task's own report. A follow-up task should generalize
-      // `pills`/`control` into a shape that can express BOTH controls in one
-      // block (e.g. an array of control blocks) before this course's Course
-      // Type row can render faithfully.
+      // both node trees). Task 5 correctly found that `CourseDetails.astro`'s
+      // OLD `pills` field could express EITHER a pill group OR a select —
+      // never both — and left the field unset rather than guess which half
+      // of the real control to keep. `pills` is now generalized in place
+      // into `buybox` — a shared block `label` governing an ORDERED LIST of
+      // `controls` (see CourseDetails.astro's own "Buy box controls
+      // generalization" header comment) — so this course's hero can finally
+      // render BOTH controls, Figma-verbatim, in the same top-to-bottom
+      // order Figma itself shows (pill row first, select second).
+      // `select`'s own `options` stays EMPTY: neither frame exposes any real
+      // location list behind this control (both are static mockups of the
+      // closed/placeholder state only, the same situation Trainer
+      // Certification's own select already hit) — no location is invented;
+      // the client/porting team must supply the real list. `ariaLabel:
+      // 'Location'` is authored explicitly (unlike Trainer Certification's
+      // select, which needs none) because THIS select shares its block
+      // label ("Course Type") with the adjacent pill group — without its
+      // own accessible name the two controls would both be announced as
+      // "Course Type" (see CourseDetails.astro's "A11Y" header-comment
+      // paragraph).
+      buybox: {
+        label: 'Course Type',
+        controls: [
+          {
+            type: 'pills',
+            options: [{ label: 'Online On-Demand' }, { label: 'In-Person', selected: true }],
+          },
+          { type: 'select', placeholder: 'Location…', ariaLabel: 'Location', options: [] },
+        ],
+      },
       //
       // Byline — desktop's own byline (675:9358 node `I675:9358;173:137`)
       // reads "Courses By: Dr. Perez and Dr. Schilling" (note: "Courses",
@@ -3431,16 +3489,24 @@ export const items = [
       // 4 rows on both breakpoints, same top-to-bottom order — no
       // desktop/mobile disagreement here.
       //
-      // ---- COMPONENT GAP — FOUND, NOT FIXED (this task) --------------------
+      // ---- COMPONENT GAP — RESOLVED (review fix wave) ----------------------
       // Both frames' own section heading (675:9366 node `I675:9366;180:344` /
       // 1116:15582 node `I1116:15582;183:474`) reads "More Info and
-      // Frequently Asked Questions" — Faqs.astro hardcodes a static
-      // "Frequently Asked Questions" `<h2>` with no data field to override it
-      // (see that file's own render: `<h2 class="faqs__heading">Frequently
-      // Asked Questions</h2>`). This course's own page will therefore render
-      // the generic heading, not Figma's actual text — reported here and in
-      // this task's report per the brief's "stop and report a component gap,
-      // don't edit the component" instruction.
+      // Frequently Asked Questions" — Task 5 correctly found `Faqs.astro`
+      // hardcoded a static "Frequently Asked Questions" `<h2>` with no data
+      // field to override it, and reported (not fixed) the gap. `Faqs.astro`
+      // now reads an optional `faqsHeading` field
+      // (`item.pdp?.faqsHeading ?? 'Frequently Asked Questions'`), so this
+      // course's own real heading renders here without changing any other
+      // shipped course's page. Every other course that ships a `faqs`
+      // section (Sole Switch, Sole Switch Pro, Combating Bunions, Fit Feet,
+      // Gait Foundations, Trainer Certification) was re-verified against its
+      // OWN Figma FAQ node as part of this fix (both breakpoints, all 12
+      // pulls, via get_design_context) — every one of them genuinely reads
+      // the generic "Frequently Asked Questions", so the fallback default is
+      // correct for all of them and none needed its own `faqsHeading`
+      // override.
+      faqsHeading: 'More Info and Frequently Asked Questions',
       //
       // Neither frame contains any ANSWER copy for its own rows (both are
       // static mockups of the collapsed accordion state only, same situation
@@ -3658,10 +3724,20 @@ export const items = [
       // own `pills` block (which only ever rendered BUTTON-styled options,
       // real links or inert spans). A prior task found this gap and left
       // `pills` UNSET rather than force-fitting a select into a pill button
-      // (correctly, per that task's own brief). CourseDetails.astro now
-      // extends `pills` with a `control: 'select'` variant (see that file's
-      // own header comment) instead of adding a parallel field, so this
-      // renders as a REAL native `<select>` below.
+      // (correctly, per that task's own brief). `CourseDetails.astro` then
+      // extended `pills` with a `control: 'select'` variant instead of
+      // adding a parallel field, rendering this as a REAL native `<select>`.
+      //
+      // MECHANICAL migration (review fix wave: `pills`/`pills.control` ->
+      // `buybox`, see CourseDetails.astro's "Buy box controls
+      // generalization" header comment — this field had to generalize a
+      // 2nd time once Functional Gait Assessment Level 1's own hero turned
+      // up a combined pill-row + select control under one shared label,
+      // widening the axis from "one control, two possible types" to "one
+      // label, an ORDERED LIST of controls") — `{ control: 'select', label,
+      // placeholder, options }` becomes `{ label, controls: [{
+      // type: 'select', placeholder, options }] }`, byte-identical rendered
+      // output.
       //
       // CLIENT-CONTENT DISCLOSURE: `options: []` is INTENTIONALLY empty, not
       // an oversight. Neither frame exposes any actual option list behind
@@ -3672,11 +3748,9 @@ export const items = [
       // list here before this control is functionally complete; no location
       // is invented. `label`/`placeholder` are both Figma-verbatim on both
       // frames ("Select your course" / "Location…").
-      pills: {
-        control: 'select',
+      buybox: {
         label: 'Select your course',
-        placeholder: 'Location…',
-        options: [],
+        controls: [{ type: 'select', placeholder: 'Location…', options: [] }],
       },
       //
       // Primary CTA — both frames' own buybox is a literal cart/quantity-

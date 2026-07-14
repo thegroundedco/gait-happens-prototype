@@ -66,14 +66,28 @@
 // `__inner` wrappers already use, background+max-width+padding all living on
 // the inner wrapper (not the outer `<section>`), same structural idiom those
 // three components set.
+// ---- Heading override (review fix wave: component gap fix) --------------
+// This section's own `<h2>` used to be a hardcoded literal — correct for
+// every course UNTIL Functional Gait Assessment Level 1, whose own Figma
+// FAQ node (675:9366 desktop / 1116:15582 mobile) reads "More Info and
+// Frequently Asked Questions", not the generic string. `item.pdp.faqsHeading`
+// is a new OPTIONAL string, falling back to the exact literal this file
+// always rendered — byte-identical output for every course that doesn't set
+// it. Before adding the fallback, every OTHER course shipping this section
+// (Sole Switch, Sole Switch Pro, Combating Bunions, Fit Feet, Gait
+// Foundations, Trainer Certification) was re-checked against its OWN Figma
+// FAQ node, both breakpoints — all 6 genuinely read the plain "Frequently
+// Asked Questions", so none needed its own override; see catalog.js's own
+// `faqsHeading` comment on the FGA L1 entry for the full disclosure.
 import PdpAccordion from './PdpAccordion.astro';
 const { item } = Astro.props;
 const faqs = item.pdp?.faqs;
+const heading = item.pdp?.faqsHeading || 'Frequently Asked Questions';
 ---
 {faqs && faqs.length > 0 && (
   <section class="faqs" data-pdp-id={item.id}>
     <div class="faqs__inner">
-      <h2 class="faqs__heading">Frequently Asked Questions</h2>
+      <h2 class="faqs__heading">{heading}</h2>
       <PdpAccordion item={item} rows={faqs} variant="onTeal" />
     </div>
   </section>

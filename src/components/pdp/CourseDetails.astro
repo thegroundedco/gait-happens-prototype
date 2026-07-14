@@ -174,6 +174,10 @@
 //    external Kajabi URLs, so this is a no-op today.
 //
 // ---- Pill-group generalization (Chunk B1 Task 4 follow-up: 9th finding) --
+// (NOTE: the `pills` field this section documents has since been renamed
+// and reshaped again, into `buybox` — see the "Buy box controls
+// generalization" section at the end of this header comment. The history
+// below is preserved as-is, unedited, for the record.)
 // Fit Feet's Course Details hero (675:8156 desktop / 999:7170 mobile) has a
 // real 4-pill "Language" selector (English/Spanish/French/Japanese) this
 // file had no field or render branch for at all — the 9th finding on this
@@ -309,6 +313,9 @@
 // declarations rather than inventing a new type style.
 //
 // ---- Select control (Chunk B2 review fix wave: component gap fix) -------
+// (NOTE: `pills`/`pills.control` are likewise superseded by `buybox` — see
+// the "Buy box controls generalization" section at the end of this header
+// comment. The history below is preserved as-is, unedited, for the record.)
 // Trainer Certification's own buybox (683:10088 desktop / 1116:17399 mobile,
 // both node `...;181:1352`/`;181:1388`, "Course Type") shows "SELECT YOUR
 // COURSE" over a real bordered dropdown — placeholder "Location…" + a
@@ -341,6 +348,89 @@
 // FilterSortBar.astro's exact select styling/precedent (including that
 // file's choice not to add a custom chevron overlay) rather than a new
 // styling approach.
+//
+// ---- Buy box controls generalization (review fix wave: pills -> buybox) --
+// Functional Gait Assessment Level 1's own "Course Type" block (675:9358
+// node `I675:9358;181:1352` desktop / 1116:15572 node `I1116:15572;
+// 181:1388` mobile) shows BOTH a 2-option pill row ("Online On-Demand"
+// outline / "In-Person" filled-selected) AND a "Location…" select beneath
+// it, under ONE shared label — a combination the `pills` field (as of the
+// "Select control" section above) could not express: `pillsControl` picked
+// EXACTLY ONE branch, pills OR select, never both. This is the 15th finding
+// on this branch (Task 5 correctly found it and left `pills` unset rather
+// than guess which control to drop).
+//
+// This field has now been generalized THREE times — `secondaryCta` (a
+// single link) -> `pills` (a label + N button-styled options) -> `pills`
+// + `control: 'select'` (a label + EITHER an option list OR a select) —
+// and every widening changed the control's TYPE, never its CARDINALITY.
+// That was the actual missing axis: a course hero can need MORE THAN ONE
+// control under one shared label. Rather than keep the block-level
+// `control` flag and bolt on a second, parallel block (which would either
+// duplicate the shared label or force an awkward `pills2` field), `pills`
+// is renamed to `buybox` (the name was a lie the moment it grew
+// `control: 'select'` — a select isn't a pill) and reshaped to a label
+// governing an ORDERED LIST of `controls`:
+//
+//   OLD: { label, options }                     -> pills, ONE control
+//   OLD: { label, control: 'select', ... }       -> select, ONE control
+//   NEW: { label, controls: [ { type, ... } ] }  -> N controls, any mix
+//
+// `controls` is NOT an array of `{ label, options }` GROUPS — that would
+// duplicate the one shared label Figma itself shows exactly once per block.
+// Each entry is just the TYPE-SPECIFIC payload (`type: 'pills'` + `options`,
+// or `type: 'select'` + `placeholder`/`options`), rendered in array order —
+// Figma's own top-to-bottom order (pill row, then select) is preserved by
+// authoring the array in that same order, not by any special-casing in this
+// component.
+//
+// MIGRATION: every existing `pills` user is migrated MECHANICALLY, with
+// byte-identical rendered output (see each item's own comment in
+// catalog.js for its specific before/after):
+//   { label, options }                                  ->
+//     { label, controls: [{ type: 'pills', options }] }
+//   { label, control: 'select', placeholder, options }  ->
+//     { label, controls: [{ type: 'select', placeholder, options }] }
+//
+// GUARDS ARE NOW PER-CONTROL, NOT PER-BLOCK — this is where the old code
+// was already fragile (the select's guard keyed on the SHARED `label`,
+// which was fine when a block only ever had one control, but would have
+// been wrong the moment two controls shared that label: an empty select
+// sitting next to a real pill group would have rendered anyway, keyed off
+// the pill group's own label instead of its own emptiness). Each control
+// now survives or dies on its OWN non-emptiness check — `pills`:
+// `options.length > 0`; `select`: `placeholder || options.length > 0`
+// (Trainer Certification's/this course's own select both have
+// `options: []` by design, so `placeholder` alone still lets the
+// documented-stub control render). The whole `.course-details__tier` block
+// renders iff AT LEAST ONE control survives its own check; the shared
+// `<span>` label itself is separately guarded on its own non-emptiness (an
+// empty/absent `buybox.label` renders no label, even if a control still
+// renders) — no empty wrapper, label, `<select>`, or pill row ever leaks
+// through either guard.
+//
+// A11Y: the select used to take `aria-label={pills.label}` — safe when a
+// select was the ONLY control under that label, but under a label SHARED
+// with a pill group (this course's own case) that would give the select
+// the exact same accessible name as the adjacent pill group ("Course Type"
+// naming both), the exact ambiguity `aria-label` exists to prevent.
+// `selectAccessibleName()` below defaults to the shared block `label` —
+// BYTE-IDENTICAL to Trainer Certification's already-shipped select, which
+// authors no override — but a control-level `ariaLabel` can opt out of that
+// default. This course's own select is the one control that needs to: it
+// authors `ariaLabel: 'Location'` (see catalog.js), distinct from its
+// block's shared "Course Type" label, so the two adjacent controls under
+// one caption are never given the same accessible name.
+//
+// Markup/CSS: UNCHANGED. `.course-details__tier`'s existing column layout
+// (`flex-direction: column`, `gap: var(--space-3)`) already gives a uniform
+// 12px gap between the label and EVERY child after it — Figma's own
+// "Course Type" node (I675:9358;181:1352) is itself a single gap-12 column
+// containing the label, then the pill row, then the select, so rendering
+// multiple controls as additional siblings in that same column reproduces
+// Figma exactly with no new CSS needed. `.course-details__pills`/
+// `.course-details__select`/`.course-details__pill*` are reused verbatim,
+// unchanged, per control.
 import StarRating from '../plp/StarRating.astro';
 import { isExternalHref } from '../../scripts/links.js';
 
@@ -355,26 +445,40 @@ const { item } = Astro.props;
 const enrollHref = item.pdp?.enrollHref ?? '#';
 const isExternal = isExternalHref(enrollHref);
 
-// `pills.control` (review fix wave: extends the pill-group generalization
-// above rather than adding a parallel field — see this file's own
-// "Pill-group generalization" header comment). Defaults to `'pills'`, so
-// every course before Trainer Certification (which never sets `control` at
-// all) computes the exact same value and takes the exact same render branch
-// as before this fix. `'select'` is Trainer Certification's own case (see
-// the "Select control" header comment below) — a real native dropdown/
-// select control, not a button-styled pill.
-const pills = item.pdp?.pills;
-const pillsControl = pills?.control === 'select' ? 'select' : 'pills';
-// Non-emptiness guard, per control type — NOT the same check for both.
-// `'pills'` keeps the exact pre-existing guard (`options.length > 0`): an
-// empty/absent pill list still renders nothing. `'select'` is guarded on
-// `label` alone: this course's own `options` array is INTENTIONALLY empty
-// (Figma exposes only the closed/placeholder state — see catalog.js's own
-// comment on this field), so gating on `options.length` would hide a real,
-// Figma-verbatim control that's supposed to render with just its
-// placeholder visible.
-const showTierBlock =
-  pillsControl === 'select' ? Boolean(pills?.label) : (pills?.options?.length ?? 0) > 0;
+// Buy box — see this file's own "Buy box controls generalization" header
+// comment for the full history/reasoning. `buybox.controls` is normalized
+// (default `type: 'pills'`, per-control non-emptiness `show` flag computed)
+// then filtered down to only the controls that survive their OWN guard —
+// NOT one guard for the whole block.
+const buybox = item.pdp?.buybox;
+const buyboxControls = (buybox?.controls ?? [])
+  .map((control) => {
+    const type = control.type === 'select' ? 'select' : 'pills';
+    const show =
+      type === 'select'
+        ? Boolean(control.placeholder) || (control.options?.length ?? 0) > 0
+        : (control.options?.length ?? 0) > 0;
+    return { ...control, type, show };
+  })
+  .filter((control) => control.show);
+// The whole `.course-details__tier` block renders iff at least one control
+// survived its own guard above — an authored `buybox` whose only control is
+// e.g. an empty pill list correctly renders nothing, same as the old
+// per-block guard did for a single control.
+const showBuybox = buyboxControls.length > 0;
+// Each select's accessible name defaults to the shared block `label` —
+// BYTE-IDENTICAL to every already-shipped select-only buybox (Trainer
+// Certification never authors `ariaLabel`, so this computes the exact same
+// `aria-label` it always has). `control.ariaLabel` is an explicit, OPTIONAL
+// override for the one case where that default is no longer safe: a select
+// sharing its block label with an adjacent pill group (see the "A11Y"
+// paragraph in this file's "Buy box controls generalization" header
+// comment) — Functional Gait Assessment Level 1's own select is the only
+// control that authors it today (`ariaLabel: 'Location'`, distinct from its
+// block's shared "Course Type" label).
+function selectAccessibleName(control, blockLabel) {
+  return control.ariaLabel ?? blockLabel;
+}
 ---
 <section class="course-details" data-pdp-id={item.id}>
   <div class="course-details__inner">
@@ -409,37 +513,42 @@ const showTierBlock =
           item.pdp?.description && <p class="course-details__intro">{item.pdp.description}</p>
         )}
 
-        {showTierBlock && (
+        {showBuybox && (
           <div class="course-details__tier">
-            <span class="course-details__tier-label">{pills.label}</span>
-            {pillsControl === 'select' ? (
-              <select class="course-details__select" aria-label={pills.label}>
-                <option value="" selected disabled hidden>{pills.placeholder}</option>
-                {(pills.options ?? []).map((option) => (
-                  <option value={option.href ?? option.label}>{option.label}</option>
-                ))}
-              </select>
-            ) : (
-              <div class="course-details__pills">
-                {pills.options.map((option) =>
-                  option.href ? (
-                    <a
-                      class={`course-details__pill${option.selected ? ' course-details__pill--selected' : ''}`}
-                      href={option.href}
-                      aria-current={option.selected ? 'true' : undefined}
-                    >
-                      {option.label}
-                    </a>
-                  ) : (
-                    <span
-                      class={`course-details__pill course-details__pill--static${option.selected ? ' course-details__pill--selected' : ''}`}
-                    >
-                      {option.label}
-                      {option.selected && <span class="course-details__sr-only"> (selected)</span>}
-                    </span>
-                  )
-                )}
-              </div>
+            {buybox.label && <span class="course-details__tier-label">{buybox.label}</span>}
+            {buyboxControls.map((control) =>
+              control.type === 'select' ? (
+                <select
+                  class="course-details__select"
+                  aria-label={selectAccessibleName(control, buybox.label)}
+                >
+                  <option value="" selected disabled hidden>{control.placeholder}</option>
+                  {(control.options ?? []).map((option) => (
+                    <option value={option.href ?? option.label}>{option.label}</option>
+                  ))}
+                </select>
+              ) : (
+                <div class="course-details__pills">
+                  {control.options.map((option) =>
+                    option.href ? (
+                      <a
+                        class={`course-details__pill${option.selected ? ' course-details__pill--selected' : ''}`}
+                        href={option.href}
+                        aria-current={option.selected ? 'true' : undefined}
+                      >
+                        {option.label}
+                      </a>
+                    ) : (
+                      <span
+                        class={`course-details__pill course-details__pill--static${option.selected ? ' course-details__pill--selected' : ''}`}
+                      >
+                        {option.label}
+                        {option.selected && <span class="course-details__sr-only"> (selected)</span>}
+                      </span>
+                    )
+                  )}
+                </div>
+              )
             )}
           </div>
         )}
