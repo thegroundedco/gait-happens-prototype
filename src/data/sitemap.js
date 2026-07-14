@@ -91,6 +91,11 @@ export const routes = [
   r('/courses/trainer-certification', 'Trainer Certification', 'course', ['Home', 'Courses', 'Trainer Certification']),
   r('/courses/gait-foundations', 'Gait Foundations', 'course', ['Home', 'Courses', 'Gait Foundations']),
   r('/courses/functional-gait-assessment-l1', 'Functional Gait Assessment L1', 'course', ['Home', 'Courses', 'Functional Gait Assessment L1']),
+  // Task 2 (Course PDP Chunk B2): adopts a fully-designed Figma page
+  // (1041:10410) that previously had no catalog entry, route, or PLP
+  // presence. Placeholder only — its page is Task 6, so status is NOT
+  // 'built' yet (no page file exists for this route).
+  r('/courses/functional-gait-assessment-l2', 'Functional Gait Assessment L2', 'course', ['Home', 'Courses', 'Functional Gait Assessment L2']),
 
   // Resources
   r('/resources/locally-trained-practitioners', 'Locally Trained Practitioners', 'page', ['Home', 'Resources', 'Locally Trained Practitioners']),

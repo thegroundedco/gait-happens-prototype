@@ -2682,6 +2682,74 @@ export const items = [
     sizeChart: null,
   },
   {
+    // Task 2 (Course PDP Chunk B2): adopts Functional Gait Assessment
+    // Level 2 — a fully-designed Figma page (`1041:10410`, file
+    // FX7PDNvhZwyozODaq8Q8i7) that previously had no catalog entry, route,
+    // or PLP presence. This entry is item + PLP-card fields ONLY (mirrors
+    // sibling `functional-gait-assessment-l1`'s shape); the full `pdp`
+    // block is Task 6 — do not add `pdp`/sections here.
+    //
+    // `title`/`price`/`description` pulled via get_metadata → get_design_
+    // context on 1041:10410's "Course Details" node (1041:10412, the PDP
+    // hero) AND the Professionals PLP card instance for this course
+    // (854:8660, inside "Professionals Courses PLP" frame 813:7471, itself
+    // under the PLPs section node `764:10786` documented in the Chunk-1
+    // PLP spec):
+    //   - `title` is PDP-hero-verbatim: "Functional Gait Assessment: Level
+    //     2" (colon before "Level"). The PLP card's own title text drops
+    //     the colon ("Functional Gait Assessment Level 2", matching L1's
+    //     stored no-colon title) — a real, disclosed divergence. Kept
+    //     PDP-hero-verbatim per this task's brief (hero is the primary
+    //     source; only the card-level `description` field below follows
+    //     the PLP on divergence).
+    //   - `price` is PDP-hero-verbatim: "$897.00 USD". The PLP card shows
+    //     "$150 USD" instead, but that exact figure is also stamped
+    //     identically on the Sole Switch Pro, Gait Foundations, and FGA
+    //     Level 1 cards in the same grid — a stale/repeated placeholder
+    //     value copy-pasted across cards (same class of Figma-authoring
+    //     artifact flagged elsewhere in this file, e.g. the 3 identical
+    //     cross-sell blurbs), not this course's real price. Not used.
+    //   - `description` is PLP-CARD-verbatim (not PDP-hero-verbatim) per
+    //     this task's explicit instruction: this field feeds the PLP card
+    //     (see PlpCard.astro), so it follows the PLP where it differs from
+    //     the hero. The PLP card's line is the hero paragraph's first
+    //     sentence only, not a conflicting statement.
+    //   - No `rating`/`reviewCount`: the PLP card's rating row is the
+    //     grid's shared default `Rating` sub-component (stars="5", a
+    //     generic "(128)" placeholder), rendered identically and without
+    //     override on every professional-course card except Trainer
+    //     Certification's (which alone shows a distinct "(1)") — i.e. not
+    //     real per-card data, so left off (also outside this task's
+    //     explicit field list).
+    //
+    // FLAG (out of scope for this task, not acted on): the grid cell
+    // immediately right of the intro card (node `830:7878`) renders
+    // "Foot Fest" / "Event" / "$147-897 USD" content — an Individuals-
+    // course card stray inside the Professionals PLP frame, unrelated to
+    // FGA Level 2. Pre-existing Figma-authoring artifact; flagged for a
+    // future PLP-content task, not corrected here.
+    id: 'functional-gait-assessment-l2',
+    handle: 'functional-gait-assessment-l2',
+    title: 'Functional Gait Assessment: Level 2',
+    kind: 'course',
+    badges: ['Course', 'Professional'],
+    price: '$897.00 USD',
+    priceRange: null,
+    description: 'FGA Level 2 is everything you need to take your work with clients to the next level.',
+    // Placeholder — no dedicated L2 photography exists yet (project-wide
+    // deferred item). Reuses sibling `functional-gait-assessment-l1`'s own
+    // PLP shot (confirmed present on disk at
+    // public/images/plp/functional-gait-assessment-l1.jpg) rather than the
+    // generic flat-placeholder.svg, since L1 and L2 are the same course
+    // family and every other course item's placeholder photo is likewise
+    // a non-dedicated stock/generic shot, not real branded photography.
+    image: '/images/plp/functional-gait-assessment-l1.jpg',
+    href: '/courses/functional-gait-assessment-l2',
+    cta: 'View Course',
+    variants: null,
+    sizeChart: null,
+  },
+  {
     id: 'gait-guru-membership',
     handle: 'gait-guru-membership',
     title: 'Gait Guru Membership',
@@ -2762,7 +2830,21 @@ export const collections = {
   '/collections/courses-professionals': {
     title: 'Gait Happens Professionals Courses',
     intro: professionalsIntro,
-    itemIds: ['sole-switch-pro', 'gait-foundations', 'functional-gait-assessment-l1', 'gait-guru-membership', 'trainer-certification'],
+    // 'functional-gait-assessment-l2' inserted immediately after Level 1
+    // (Task 2, Course PDP Chunk B2) — matches its reading-order position in
+    // the Figma Professionals PLP grid (frame 813:7471): intro, Sole Switch
+    // Pro, Gait Foundations, FGA Level 1, [Wholesaler promo], FGA Level 2,
+    // Gait Guru Membership, [Ambassador promo], Trainer Certification —
+    // i.e. immediately after Level 1 once the two promo cells are excluded
+    // (promos are a separate array, not part of `itemIds`).
+    itemIds: [
+      'sole-switch-pro',
+      'gait-foundations',
+      'functional-gait-assessment-l1',
+      'functional-gait-assessment-l2',
+      'gait-guru-membership',
+      'trainer-certification',
+    ],
     // Teal CTA cells interspersed in the grid (Figma Professionals PLP).
     // `at` is the index in the final cell sequence (intro is cell 0).
     // href is a placeholder until the real wholesale/affiliate URLs exist.
@@ -2797,7 +2879,16 @@ export const collections = {
       {
         persona: 'Professionals',
         intro: professionalsIntro,
-        itemIds: ['sole-switch-pro', 'gait-foundations', 'functional-gait-assessment-l1', 'gait-guru-membership', 'trainer-certification'],
+        // Same order/rationale as the `/collections/courses-professionals'
+        // itemIds above (Task 2, Course PDP Chunk B2).
+        itemIds: [
+          'sole-switch-pro',
+          'gait-foundations',
+          'functional-gait-assessment-l1',
+          'functional-gait-assessment-l2',
+          'gait-guru-membership',
+          'trainer-certification',
+        ],
       },
     ],
     crossSell: {
