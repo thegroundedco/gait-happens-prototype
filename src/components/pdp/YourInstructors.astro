@@ -194,4 +194,34 @@ const heading = item.pdp?.instructorsHeading ?? 'Your Instructors';
     const label = toggle.querySelector('[data-instructor-toggle-label]');
     if (label) label.textContent = wasExpanded ? 'Read More' : 'Read Less';
   });
+
+  // The Read More toggle must only exist when the bio ACTUALLY overflows its
+  // 4-line clamp — otherwise it is a control that reveals nothing (a false
+  // affordance; same reasoning that keeps Testimonial's arrows inert when
+  // there is only one quote). Overflow is WIDTH-dependent, so this cannot be
+  // an authored data flag: it must be measured, and re-measured on resize.
+  //
+  // The listeners below are registered ONCE at module scope (Astro's
+  // ClientRouter never re-executes an identical inline module), but the
+  // measurement itself must re-run against each new page's DOM — hence
+  // `astro:page-load`. Nodes are resolved fresh on every run; nothing is cached.
+  function syncInstructorToggles() {
+    document.querySelectorAll('[data-instructor-bio]').forEach((bio) => {
+      const toggle = document.querySelector(`[aria-controls="${bio.id}"]`);
+      if (!toggle) return;
+      if (toggle.getAttribute('aria-expanded') === 'true') return; // user opened it — leave alone
+      bio.setAttribute('data-collapsed', ''); // measure the CLAMPED height
+      const overflows = bio.scrollHeight > bio.clientHeight + 1; // +1 absorbs sub-pixel rounding
+      toggle.hidden = !overflows;
+      if (!overflows) bio.removeAttribute('data-collapsed');
+    });
+  }
+
+  document.addEventListener('astro:page-load', syncInstructorToggles);
+  window.addEventListener('resize', () => requestAnimationFrame(syncInstructorToggles));
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', syncInstructorToggles);
+  } else {
+    syncInstructorToggles();
+  }
 </script>

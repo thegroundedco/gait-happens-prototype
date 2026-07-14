@@ -868,8 +868,10 @@ export const items = [
       // Conley/Perez across Fit Feet/Combating Bunions). Her bio is long
       // enough to genuinely overflow InstructorCard's 4-line clamp (live DOM
       // measurement during this fix: ~2740 characters, well past the
-      // clamp), so `bioExpandable` is left unset (defaults to `true`) — her
-      // Read More toggle is real and needed.
+      // clamp — live DOM measurement during the Chunk B2 Task 1 fix), so her
+      // Read More toggle is real and needed; the runtime overflow check in
+      // YourInstructors.astro/InstructorCard.astro measures this directly,
+      // no per-instructor data flag required.
       //
       // McDowell's bio: NEW instructor, never in this catalog before, and a
       // genuine tooling limitation blocked full extraction — `get_metadata`
@@ -914,13 +916,14 @@ export const items = [
       // review wave) as a disclosed deviation from strict verbatim, which
       // the prior version of this comment did not disclose.
       // THIS BIO IS NOT COMPLETE — NEEDS REAL CLIENT COPY before this ships
-      // past a reference build. `bioExpandable: false` below turns off her
-      // card's "Read More" toggle: the text we have IS the entire preview
-      // Figma itself shows before clamping, so — in OUR data — there is
-      // nothing further to reveal, and a working-looking toggle over it
-      // would be a false affordance (see InstructorCard.astro's header
-      // comment for the full reasoning, including why this is a data-level
-      // override rather than a computed text-length heuristic).
+      // past a reference build. No per-instructor override field is needed
+      // here (the earlier stopgap flag for this exact case was removed in
+      // Chunk B2 Task 1): the text we have IS the entire preview Figma
+      // itself shows before clamping, so it doesn't overflow InstructorCard's
+      // 4-line clamp — the runtime measured overflow check in
+      // YourInstructors.astro hides her "Read More" toggle on its own, the
+      // same way it would for any other short bio (see InstructorCard.astro's
+      // header comment for the full reasoning).
       instructors: [
         {
           photo: '/images/plp/walk.jpg',
@@ -939,11 +942,10 @@ export const items = [
           credential: null,
           // Best-effort transcription of Figma's own clamped preview text —
           // see the comment above. NOT a complete bio — needs real client
-          // copy. `bioExpandable: false` — see comment above.
+          // copy.
           bio: [
             "Dr. Milica McDowell holds two Bachelor of Science degrees (Exercise Physiology and Health Promotion, Montana State University), a master's degree (Physical Therapy, University of Colorado Health Sciences Center…",
           ],
-          bioExpandable: false,
         },
       ],
       // ---- Cross-sell — `shop-products` variant (Chunk B1 Task 5) ---------
