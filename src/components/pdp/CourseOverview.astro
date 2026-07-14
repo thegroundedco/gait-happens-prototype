@@ -117,6 +117,19 @@
 // `overview.ordered: true` renders `<ol>` instead of `<ul>` for that
 // course's array. Absent `ordered` defaults to `<ul>` — unchanged for all
 // pre-existing courses (no `ordered` set).
+//
+// Guard fix (final review fix wave): `details`/`image` used to render
+// unconditionally — `<img src={overview.image}>` with no guard gave a
+// broken-image box for a course whose `overview` omits `image`, and a bare
+// `overview.details?.map(...)` still emitted an empty
+// `.course-overview__details` grid `<div>` for one that omits `details`.
+// Both are now wrapped the same way `hasBody`'s block already was: a real
+// element only when there's real content (`details.length > 0` /
+// `Boolean(image)`). Every shipped course sets both fields, so this is a
+// byte-identical no-op today — the Pdp.astro registry entry for this
+// section was ALSO fixed in the same pass so `overview: {}` (or one with
+// only empty fields) can no longer reach this component at all; this
+// guard is the second layer, not the only one.
 const { item } = Astro.props;
 const overview = item.pdp?.overview;
 const bodyIsList = Array.isArray(overview?.body);
@@ -128,18 +141,22 @@ const hasBody = bodyIsList ? overview.body.length > 0 : Boolean(overview?.body);
     <div class="course-overview__inner">
       <h2 class="course-overview__heading">Course Overview</h2>
 
-      <div class="course-overview__details">
-        {overview.details?.map((detail) => (
-          <div class="course-overview__detail">
-            <p class="course-overview__detail-label">{detail.label}</p>
-            <p class="course-overview__detail-value">{detail.value}</p>
-          </div>
-        ))}
-      </div>
+      {overview.details?.length > 0 && (
+        <div class="course-overview__details">
+          {overview.details.map((detail) => (
+            <div class="course-overview__detail">
+              <p class="course-overview__detail-label">{detail.label}</p>
+              <p class="course-overview__detail-value">{detail.value}</p>
+            </div>
+          ))}
+        </div>
+      )}
 
-      <div class="course-overview__media">
-        <img src={overview.image} alt="" loading="lazy" />
-      </div>
+      {overview.image && (
+        <div class="course-overview__media">
+          <img src={overview.image} alt="" loading="lazy" />
+        </div>
+      )}
 
       {hasBody && (
         <div class="course-overview__concepts">

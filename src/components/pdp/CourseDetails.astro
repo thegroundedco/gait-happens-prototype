@@ -1,453 +1,70 @@
 ---
-// Course Details hero (Task 2, Course PDP Chunk A) — Figma 675:4353
-// (desktop, ≥1024, file FX7PDNvhZwyozODaq8Q8i7) / 1109:14377 (mobile — the
-// "Sole Switch Pro Page" > "Course Details" instance inside the
-// professional-courses mobile frame 1109:14374). Same buybox-left /
-// visual-right SHAPE as ../pdp/ProductDetails.astro (eyebrow, title,
-// StarRating, price, CTA row, short copy) and reuses that section's exact
-// eyebrow markup + StarRating import, but two real content differences —
-// both intentional, not oversights:
+// Course Details hero — course PDP buybox-left/visual-right hero section.
+// Figma file FX7PDNvhZwyozODaq8Q8i7; node ID varies per course (see each
+// item's own `pdp` comment in catalog.js). Shares its eyebrow markup +
+// StarRating import with ../pdp/ProductDetails.astro (same shape: eyebrow,
+// title, rating, price, CTA row, short copy).
 //
-// 1. The right column is a branded teal course card ("SoleSwitch / Pro
-//    Course" + a "For Health Professionals" tag), not an image gallery.
-//    Figma's own layer for this card is a single flattened raster image
-//    (`imgRectangle41` in get_design_context's output) — no real text/fill
-//    layers to read — the same situation PdpReviews.astro hit for its
-//    screenshot-only "Reviews Plugin" frame. Per that precedent
-//    ("reference build, not a raw asset dump"), the card is rebuilt here as
-//    real markup + DS tokens (teal background, bold display title, yellow
-//    tag), reading the visible pixels/text off the screenshot rather than
-//    embedding a copy of the PNG. `titleLines` is an array (not a single
-//    wrapped string) so the exact Figma line break ("SoleSwitch" / "Pro
-//    Course" — identical on both desktop and mobile screenshots, so it's a
-//    deliberate break, not width-dependent reflow) renders reliably instead
-//    of depending on font-metric-sensitive text wrapping.
+// Props: `{ item }`. `item.rating`/`item.reviewCount` are sourced
+// top-level like ProductDetails, guarded on `!= null` (not truthiness) —
+// a genuinely unrated `rating: 0` is real data Astro renders, not absence.
 //
-// 2. Figma's buy box literally reuses the PRODUCT hero's cart affordances —
-//    a two-pill course-tier toggle ("Sole Switch Basic" outline / "Sole
-//    Switch Pro" filled-selected) plus a quantity stepper + "Add to Cart"
-//    button. Sole Switch Pro is fulfilled on Kajabi, not the Shopify cart,
-//    so per this task's brief the purchase flow is remapped rather than
-//    copied literally:
-//    - The filled "Add to Cart" button becomes this hero's PRIMARY CTA, an
-//      outbound "Enroll Now" link to `item.pdp.enrollHref`
-//      (target="_blank", rel="noopener noreferrer") — no cart.js import, no
-//      quantity stepper (Kajabi enrollment isn't a quantity purchase).
-//    - The outline "Sole Switch Basic" pill becomes the SECONDARY CTA, kept
-//      as a real link (its Figma label, verbatim) to the Basic-tier course
-//      page (`/courses/sole-switch`, an existing placeholder route — see
-//      sitemap.js).
-//    - The filled "Sole Switch Pro" pill is dropped: it's the tier already
-//      being viewed on this exact page, so keeping it as a 3rd
-//      button-styled element would both be redundant with the primary
-//      Enroll CTA and exceed the brief's explicit "two CTAs" instruction.
-//    See coursepdp-task-2-report.md for the full reasoning + screenshots.
+// Every field below lives under the OPTIONAL `item.pdp` and is guarded to
+// render nothing when absent:
+//   heroTitle              <h1> override for `item.title`.
+//   priceExact              hero price override for `item.price`.
+//   compareAtPrice          optional struck-through original price beside
+//                           `priceExact` (sale pricing).
+//   heroCaption             optional credibility line above `description`
+//                           (shares a tight-gap wrapper with it when both
+//                           are set; unwrapped when `heroCaption` is unset).
+//   description             hero intro paragraph.
+//   buybox = { label, controls: [...] }  an ORDERED LIST of controls under
+//                           ONE shared label. `{ type: 'pills', options: [{
+//                           label, href?, selected? }] }` — an option WITH
+//                           `href` is a real `<a>`; WITHOUT is an inert
+//                           `<span>` (no destination = false affordance,
+//                           same call Testimonial.astro's arrows make).
+//                           `{ type: 'select', placeholder, options,
+//                           ariaLabel? }` — a real native `<select>`
+//                           (styled like FilterSortBar.astro's). Each
+//                           control renders on its own non-emptiness check
+//                           (pills: `options.length > 0`; select:
+//                           `placeholder` OR `options.length > 0`); the
+//                           block renders iff >=1 survives. `options: []`
+//                           is a documented client stub (real list TBD,
+//                           none invented) — it gets `aria-disabled="true"`
+//                           (not `disabled`, to keep Figma's un-greyed
+//                           look) rather than promising an operable
+//                           combobox with nothing behind it. `ariaLabel`
+//                           overrides a select's default accessible name
+//                           (the shared `label`) when it sits beside a
+//                           pill group under that same label.
+//   enrollHref/enrollLabel  primary CTA. Every course is Kajabi-fulfilled,
+//                           not a Shopify cart purchase, so this is a plain
+//                           external `<a>` (no cart.js, no qty stepper) —
+//                           `target`/`rel` added only when `enrollHref` is
+//                           actually external (`isExternalHref`).
+//   instructorsByline       "Course By: …" text beside the avatar row.
+//   heroAvatars              avatar-circle count override (default:
+//                           `instructors.length`) for when the byline
+//                           names fewer people than the full roster —
+//                           byline + count are one visual unit, sourced
+//                           from different data, and must agree. Avatars
+//                           are flat placeholder circles — no photography
+//                           here (YourInstructors.astro owns real
+//                           bios/photos further down the page).
+//   courseCard = { titleLines, variant?, tag? }  branded right-column card
+//                           for a course sold as its own product (mutually
+//                           exclusive with `heroImage`, a plain photo for
+//                           every other course; `alt=""` since it's
+//                           decorative art beside an `<h1>` that already
+//                           names the course in text).
 //
-// `item.pdp.heroTitle` overrides the catalog's shorter `item.title` for
-// just this <h1> (Figma reads "Sole Switch Pro Course", the catalog's
-// `title` is "Sole Switch Pro" — used elsewhere for nav/breadcrumbs/PLP
-// cards/page <title>, so it's left alone) — same targeted-override pattern
-// as ProductDetails' `item.pdp.ctaLabel`. `item.rating`/`item.reviewCount`
-// are sourced top-level exactly like ProductDetails does (mirrored per the
-// task brief), not duplicated under `pdp`.
-//
-// No client script: every interactive element here is a plain <a> (real
-// navigation), so there's nothing to init/leak. `data-pdp-id` is kept on
-// the <section> for parity with ProductDetails/debugging only.
-//
-// ---- Component-generalization fixes (Chunk B1 Task 2 follow-up) ----------
-// Sole Switch (Basic)'s Figma frame (998:14854/999:7197) genuinely diverges
-// from the Sole Switch Pro frame this component was originally built
-// against, in three ways now made data-driven instead of hardcoded:
-//
-// 1. Sale price. `item.pdp.compareAtPrice` is the same OPTIONAL field
-//    ProductDetails.astro already uses (its guard idiom + class names
-//    `-sale`/`-compare` are reused verbatim here) — when absent (Sole
-//    Switch Pro), the price renders exactly as before (no wrapping <span>,
-//    same single text node); when present (Sole Switch: "$50 USD"), a
-//    struck-through compare-at price renders beside the sale price.
-//
-// 2. Course card colour. `item.pdp.courseCard.variant` is an OPTIONAL
-//    string ('yellow' | unset). NavCard.astro takes an arbitrary `variant`
-//    string and interpolates it directly (`nav-card--${variant}`); this
-//    component doesn't reuse that interpolation — it just checks
-//    `variant === 'yellow'` and toggles one fixed modifier class, since
-//    'yellow' is the only variant this course card has ever needed. Unset
-//    (Sole Switch Pro) keeps the base
-//    `.course-details__card` teal background byte-for-byte; `'yellow'`
-//    (Sole Switch) adds a `--yellow` modifier class. Figma's own flattened
-//    card image confirms the title text stays WHITE on both the teal AND
-//    yellow cards (get_design_context + a close crop of the yellow card's
-//    raster asset both show white "SOLESWITCH COURSE" text), so no
-//    additional text-colour variant is needed for the title. The tag pill
-//    (used only on the teal/Health-Professionals card) is unaffected.
-//
-// 3. Course card tag. `item.pdp.courseCard.tag` was already read but
-//    unconditionally rendered as an empty pill when absent — now guarded
-//    with the same optional-field idiom the rest of this file/Testimonial's
-//    `role` already use (`item.pdp.courseCard.tag && <span>...</span>`), so
-//    Sole Switch's tag-less Figma card renders no pill artifact.
-//
-// ---- Hero image branch (Chunk B1 Task 3 follow-up: component gap fix) ----
-// Combating Bunions' Figma hero (675:5542 desktop / 999:7156 mobile) has no
-// branded card at all — its right column raster (`imgRectangle41` in
-// get_design_context's pull, node `I675:5542;173:147` desktop /
-// `I999:7156;181:674` mobile) is a plain product photo, no overlaid text, no
-// colored background (see catalog.js's `combating-bunions` entry, flagged as
-// a STOP-and-report component gap by the task that first authored that
-// item's data). `item.pdp.heroImage` is a second, OPTIONAL field for this
-// case, guarded with the exact same `item.pdp?.x &&` idiom `courseCard`
-// already uses — `courseCard` and `heroImage` are mutually exclusive
-// (an item sets at most one; neither renders anything when both are unset).
-//
-// Shape: a plain string path, e.g. `overview.image` in CourseOverview.astro
-// — not an object, and not ProductDetails.astro's `gallery` array. The
-// gallery shape exists to drive thumbnail-swap interaction across MULTIPLE
-// images; this hero has exactly one static image with no interaction, the
-// same shape CourseOverview's single `image` field already models. Alt text
-// is likewise NOT carried in the data (neither CourseOverview's `image` nor
-// ProductDetails' gallery thumbs carry alt in catalog data — alt is always a
-// judgment call made at render time in the component). Per YourInstructors
-// .astro's placeholder-photo precedent (`alt=""` because the placeholder is
-// a generic shot, not a real likeness — a name-echoing alt would misrepresent
-// it), this image is likewise `alt=""`: it's a stand-in PLP course photo
-// (see catalog.js) reused as decorative art beside an `<h1>` that already
-// names the course in text, not a real product photo with informational
-// content of its own yet. Unlike CourseOverview's image (below-the-fold,
-// `loading="lazy"`), this one is the hero's own right column — the same
-// above-the-fold position as ProductDetails' main gallery image, which
-// intentionally omits `loading="lazy"` (only its secondary thumbnails lazy-
-// load) — so this omits it too, to not delay this page's LCP candidate.
-//
-// Layout: mobile is a literal Figma `h-[210px] w-full` box — identical to
-// `.course-details__card`'s own mobile fixed height (same frame, same slot).
-// Desktop's node is unconstrained (`flex-[1_0_0] ... self-stretch`, no
-// aspect-ratio in the pulled code) — rather than measuring one course's
-// content height off its frame the way `.course-details__card`'s desktop
-// `aspect-ratio: 556 / 399` literal does (a value specific to Sole Switch
-// Pro's own buybox height), this stretches to match the buybox's actual
-// rendered height via `align-self: stretch` with no fixed height/ratio at
-// all — a plain image has no internal content forcing its own minimum size,
-// so it cleanly inherits the row's cross-axis size from its sibling exactly
-// like Figma's own `self-stretch` expresses, and stays correct regardless of
-// how tall any given course's buybox content happens to be. The crop itself
-// (Figma's absolutely-positioned `h-[166.97%] top-[-33.48%]` image) is the
-// same object-fit:cover-via-Figma-percentages idiom CourseOverview.astro's
-// own header comment already documents — reproduced as a plain
-// overflow:hidden + object-fit:cover box, not the literal percentages.
-//
-// ---- Review fix wave (Chunk B1 Task 3 shared-component findings) --------
-// Four latent pilot (Sole Switch Pro) assumptions baked into this file,
-// surfaced by rolling out `combating-bunions`:
-//
-// 1. CRITICAL — the "Select your course" tier block's wrapper `<div>` and
-//    label rendered UNCONDITIONALLY; only the inner pill was guarded on the
-//    old single-purpose tier-pill field (since renamed/reshaped to `pills`
-//    — see the Pill-group generalization section below). Combating Bunions
-//    correctly had no value for that field (single-tier course, no sibling
-//    to cross-link), so the old markup shipped a "SELECT YOUR COURSE"
-//    caption with nothing under it. The guard now wraps the whole
-//    `.course-details__tier` block, the same optional-block idiom
-//    `courseCard`/`heroImage` already use — a no-op for Sole Switch/Sole
-//    Switch Pro, which both set that field (now `pills`).
-//
-// 2. MINOR — `courseCard`/`heroImage` were two independent `&&` guards
-//    (this comment already asserted they're mutually exclusive, but nothing
-//    enforced it). Now an if/else (ternary), so an item that mistakenly set
-//    both can't render three children into the desktop flex row. No-op
-//    today: no item sets both.
-//
-// 3. MINOR — the instructor avatar pair was two hardcoded `<span>`s,
-//    correct for all three courses (all have exactly 2 instructors) but not
-//    derived from anything — a 1- or 3-instructor course would still render
-//    2 circles. Now mapped off `item.pdp.instructors`' own length (the
-//    photo/name per instructor aren't needed here, just the count — real
-//    per-instructor rendering is YourInstructors.astro's job further down
-//    the page). Byte-identical output for all three current courses.
-//
-// 4. MINOR — the enroll CTA hardcoded `target="_blank" rel="noopener
-//    noreferrer"`, assuming `enrollHref` is always external. Now reuses
-//    `isExternalHref` (`src/scripts/links.js`, shared with ComparisonChart
-//    .astro — final review fix wave; previously each component declared its
-//    own copy of the same `/^https?:/` regex) so an internal `enrollHref`
-//    wouldn't wrongly hijack a new tab. All three current enroll links are
-//    external Kajabi URLs, so this is a no-op today.
-//
-// ---- Pill-group generalization (Chunk B1 Task 4 follow-up: 9th finding) --
-// (NOTE: the `pills` field this section documents has since been renamed
-// and reshaped again, into `buybox` — see the "Buy box controls
-// generalization" section at the end of this header comment. The history
-// below is preserved as-is, unedited, for the record.)
-// Fit Feet's Course Details hero (675:8156 desktop / 999:7170 mobile) has a
-// real 4-pill "Language" selector (English/Spanish/French/Japanese) this
-// file had no field or render branch for at all — the 9th finding on this
-// branch, reported not fixed by the task that first authored that item's
-// data. Rather than adding a second, parallel `languages` field next to the
-// existing single-pill tier field (which would just re-hardcode "one label
-// + N pills" a level up), the pilot's tier block — already exactly that
-// shape with N pinned at 1 — is generalized in place:
-//
-//   OLD single-purpose field: { label: href pill }
-//   -> pdp.pills: { label, options: [{ label, href?, selected? }] }
-//
-// `label` is real per-course Figma data now (read off each course's OWN
-// node, never assumed) — Sole Switch/Sole Switch Pro's frames both read
-// "Select your course" (migrated verbatim, just reshaped); Fit Feet's reads
-// "Language". `options` is 1 element for the migrated courses (unchanged
-// content, just moved), 4 for Fit Feet. Combating Bunions sets no `pills`
-// at all (its own frames show neither), so the whole block still renders
-// nothing there — the exact guard-the-whole-wrapper fix #1 above already
-// established, now keyed off `pills`.
-//
-// Interactive vs inert, per option: an option with an `href` renders as a
-// real `<a>` (Sole Switch/Sole Switch Pro's single cross-link pill, real
-// navigation, unchanged behavior). An option WITHOUT `href` renders as a
-// plain, non-interactive `<span>` — verified in Figma that neither language
-// pill links anywhere in either frame (each is an unlinked "Button" node,
-// no prototype interaction): this is a Kajabi/Shopify-side language-variant
-// control this reference build doesn't wire up. A `<button>` styled inert
-// would still promise "this is a control" to assistive tech; a control that
-// does nothing is a false affordance — the exact reasoning
-// Testimonial.astro's decorative (`aria-hidden`, non-`<button>`) arrows
-// already established for a single-testimonial page, applied here the same
-// way (though unlike those purely-iconographic arrows, the language names
-// ARE meaningful text content, so these spans are NOT `aria-hidden` — only
-// their non-interactivity is inherited from that precedent, not their
-// invisibility to assistive tech). `English`'s filled/selected state is
-// real Figma data (`selected: true`), reflected as a `--selected` modifier
-// class (fills the pill, reusing the same 1px teal border so its box stays
-// the same size as its outline siblings — no extra CSS needed to prevent a
-// size jump). See the "Review fix wave" section below for how the
-// selected state is exposed to assistive tech (superseding an earlier
-// `aria-current`-on-`<span>` approach) and for the markup's actual
-// two-level shape.
-//
-// ---- Review fix wave (pill-group findings) -------------------------------
-// Two follow-up fixes to the pill-group generalization above, caught on
-// review before this branch merged:
-//
-// 1. Markup shape / geometry. The first pass deliberately flattened
-//    Figma's two-level structure (675:8156;181:819 column > nested
-//    181:822 pill row) into a single `.course-details__tier` flex-wrap
-//    container, reasoning that the tradeoff (a wrong 12px gap between
-//    WRAPPED pill rows, vs Figma's 8px) was worth staying byte-identical
-//    with the two already-shipped Sole Switch pages. That traded away
-//    correctness on the one page this generalization exists to build
-//    (`/courses/fit-feet`, the only course whose pills actually wrap) to
-//    preserve byte-identity on two pages that don't need it — the wrong
-//    side of that tradeoff. Fixed by adding the `.course-details__pills`
-//    wrapper Figma actually has: `.course-details__tier` is now a column
-//    (`gap: var(--space-3)`, i.e. 12px, label-to-pills) containing
-//    `.course-details__pills`, a flex-wrap row (`gap: var(--space-2)`,
-//    8px) around just the options — so 8px now governs wrapped-row gaps
-//    too, matching Figma exactly. The label's `flex: 1 0 100%` line-break
-//    hack is gone (the column layout makes it redundant). Sole Switch/Sole
-//    Switch Pro now differ from their previously-shipped HTML by exactly
-//    one wrapper `<div>` — same label text, same pill(s), same href,
-//    same computed geometry (their pill count never wraps, so the 12-vs-8
-//    gap was never visible there either way).
-//
-// 2. `aria-current="true"` on the inert `<span>` (the language pills) was
-//    the wrong instrument: a role-less generic `<span>` doesn't reliably
-//    surface "current" state to screen readers (no mappable role, and the
-//    four pills aren't exposed as a set), leaving `English`'s selected
-//    state carried by background fill alone — a WCAG 1.4.1 colour-only
-//    smell. Replaced with a visually-hidden " (selected)" text node inside
-//    the selected span, `.course-details__sr-only` — byte-for-byte the
-//    same clip-rect utility `.comparison-chart__sr-only` /
-//    `.star-rating__sr-only` / `.testimonial__sr-only` already establish
-//    in this repo (now a 4th instance of the same idiom, not a new one).
-//    `aria-current="true"` moved to the real `<a>` branch instead (Sole
-//    Switch/Sole Switch Pro's cross-link pill) — the canonically correct,
-//    universally-supported element for it; a no-op today since no shipped
-//    `<a>` option also sets `selected: true`, but no longer backwards.
-//
-// 3. MINOR — the `pills` guard checked presence (`item.pdp?.pills &&`),
-//    not emptiness. `pills: { label, options: [] }` would have re-created
-//    the exact "caption with nothing under it" bug the courseCard/heroImage
-//    guard fix (above) already killed once, and `pills: { label }` with no
-//    `options` key would throw at build (`.map` on `undefined`). Guard is
-//    now `item.pdp?.pills?.options?.length > 0`, which also subsumes the
-//    old presence check.
-//
-// ---- Hero caption (Chunk B2 follow-up: component gap fix) ---------------
-// Gait Foundations' Course Details hero (675:9037 desktop / 1116:14701
-// mobile) shows a short credibility-stat line, "*900+ Professionals
-// Certified", in its OWN <p> directly above the intro paragraph — confirmed
-// via get_design_context on both breakpoints that each frame's own text
-// node (675:9037;173:130 desktop / 1116:14701;181:664 mobile) is a single
-// wrapper containing exactly these two <p> children, not one paragraph with
-// the stat folded into its text. This file had no field or render path for
-// a second caption line at all (`description` renders exactly one
-// paragraph), so the line was reported (not fixed) by the task that first
-// authored gait-foundations' own catalog data — fixed here per that same
-// "report now, generalize later" precedent this file's `pills`/`courseCard`
-// /`heroImage` fields above already followed.
-//
-// `item.pdp.heroCaption` is a new OPTIONAL plain string, read/guarded
-// exactly like `description`/`instructorsByline` already are on this same
-// file — a bare `&&` check. An empty string is already falsy in JS, so no
-// extra `.length`/emptiness check is needed the way `pills.options` and
-// `threeColumn.columns` (both arrays, where `{ options: [] }` would slip
-// past a bare presence check) require one. Absent (every course before
-// Gait Foundations) renders NOTHING — not even a wrapper element — so this
-// is a byte-identical no-op for every other shipped PDP.
-//
-// Markup: when present, `heroCaption` and `description` share a nested
-// `.course-details__intro-block` wrapper, mirroring Figma's own single
-// text-block node that holds both paragraphs, so their own tight 8px gap
-// (`--space-2`, Figma's literal `mb-[8px]` on the caption `<p>`) is
-// independent of the buybox's outer --space-5 (24px) rhythm governing the
-// gap to this block's neighbors — the same "nested wrapper carries its own
-// tighter internal gap" pattern `.course-details__tier`/
-// `.course-details__pills` already established for the pill-group above.
-// When `heroCaption` is unset, `description` renders unwrapped exactly as
-// before (the same lone `<p>`, no extra `<div>`) — required for the ten
-// already-shipped PDPs to stay byte-identical.
-//
-// Typography: Figma's own text-block node uses ONE font/colour for both
-// paragraphs (type/body-sm, `--text-primary`) — the caption isn't bold, a
-// different colour, or a caption/eyebrow style; it's a second body-sm
-// paragraph, just tightly spaced above the first. `.course-details__caption`
-// therefore reuses `.course-details__intro`'s exact font/colour
-// declarations rather than inventing a new type style.
-//
-// ---- Select control (Chunk B2 review fix wave: component gap fix) -------
-// (NOTE: `pills`/`pills.control` are likewise superseded by `buybox` — see
-// the "Buy box controls generalization" section at the end of this header
-// comment. The history below is preserved as-is, unedited, for the record.)
-// Trainer Certification's own buybox (683:10088 desktop / 1116:17399 mobile,
-// both node `...;181:1352`/`;181:1388`, "Course Type") shows "SELECT YOUR
-// COURSE" over a real bordered dropdown — placeholder "Location…" + a
-// chevron — not a pill/button. The task that first authored this course's
-// catalog data correctly found `pills` had no render path for this (only
-// button-styled options, real `<a>` links or inert `<span>`s) and left the
-// field unset rather than force-fitting a select into a pill. This is fixed
-// here by EXTENDING `pills` rather than adding a parallel field — the same
-// generalization move as the pill-group section above (`pills` itself was
-// once a single-purpose tier field, generalized in place instead of
-// growing a second, parallel one) — via a new `control: 'pills' | 'select'`
-// key, defaulting to `'pills'` so all ten already-shipped courses (which
-// never set `control` at all) take the exact same branch and render the
-// exact same markup as before this fix.
-//
-// Guard: NOT the same emptiness check for both control types. `'pills'`
-// keeps the pre-existing `options.length > 0` guard verbatim. `'select'` is
-// guarded on `label` alone — Trainer Certification's own `options` array is
-// DELIBERATELY empty (Figma exposes only the closed/placeholder state of
-// this control, with no option list behind it to pull), so gating on
-// `options.length` here would hide a real, Figma-verbatim control behind the
-// same guard that (correctly) hides an accidentally-empty pill list. This is
-// a documented stub for the porting team, not a false affordance: the
-// select renders with its own real Figma-verbatim placeholder text, an
-// empty option list beneath it (see catalog.js's own comment on this field
-// — the client must supply the real location list; none is invented here).
-//
-// Markup: a real native `<select>`, not a fake bordered `<div>` — see
-// `.course-details__select`'s own CSS comment for why it reuses
-// FilterSortBar.astro's exact select styling/precedent (including that
-// file's choice not to add a custom chevron overlay) rather than a new
-// styling approach.
-//
-// ---- Buy box controls generalization (review fix wave: pills -> buybox) --
-// Functional Gait Assessment Level 1's own "Course Type" block (675:9358
-// node `I675:9358;181:1352` desktop / 1116:15572 node `I1116:15572;
-// 181:1388` mobile) shows BOTH a 2-option pill row ("Online On-Demand"
-// outline / "In-Person" filled-selected) AND a "Location…" select beneath
-// it, under ONE shared label — a combination the `pills` field (as of the
-// "Select control" section above) could not express: `pillsControl` picked
-// EXACTLY ONE branch, pills OR select, never both. This is the 15th finding
-// on this branch (Task 5 correctly found it and left `pills` unset rather
-// than guess which control to drop).
-//
-// This field has now been generalized THREE times — `secondaryCta` (a
-// single link) -> `pills` (a label + N button-styled options) -> `pills`
-// + `control: 'select'` (a label + EITHER an option list OR a select) —
-// and every widening changed the control's TYPE, never its CARDINALITY.
-// That was the actual missing axis: a course hero can need MORE THAN ONE
-// control under one shared label. Rather than keep the block-level
-// `control` flag and bolt on a second, parallel block (which would either
-// duplicate the shared label or force an awkward `pills2` field), `pills`
-// is renamed to `buybox` (the name was a lie the moment it grew
-// `control: 'select'` — a select isn't a pill) and reshaped to a label
-// governing an ORDERED LIST of `controls`:
-//
-//   OLD: { label, options }                     -> pills, ONE control
-//   OLD: { label, control: 'select', ... }       -> select, ONE control
-//   NEW: { label, controls: [ { type, ... } ] }  -> N controls, any mix
-//
-// `controls` is NOT an array of `{ label, options }` GROUPS — that would
-// duplicate the one shared label Figma itself shows exactly once per block.
-// Each entry is just the TYPE-SPECIFIC payload (`type: 'pills'` + `options`,
-// or `type: 'select'` + `placeholder`/`options`), rendered in array order —
-// Figma's own top-to-bottom order (pill row, then select) is preserved by
-// authoring the array in that same order, not by any special-casing in this
-// component.
-//
-// MIGRATION: every existing `pills` user is migrated MECHANICALLY, with
-// byte-identical rendered output (see each item's own comment in
-// catalog.js for its specific before/after):
-//   { label, options }                                  ->
-//     { label, controls: [{ type: 'pills', options }] }
-//   { label, control: 'select', placeholder, options }  ->
-//     { label, controls: [{ type: 'select', placeholder, options }] }
-//
-// GUARDS ARE NOW PER-CONTROL, NOT PER-BLOCK — this is where the old code
-// was already fragile (the select's guard keyed on the SHARED `label`,
-// which was fine when a block only ever had one control, but would have
-// been wrong the moment two controls shared that label: an empty select
-// sitting next to a real pill group would have rendered anyway, keyed off
-// the pill group's own label instead of its own emptiness). Each control
-// now survives or dies on its OWN non-emptiness check — `pills`:
-// `options.length > 0`; `select`: `placeholder || options.length > 0`
-// (Trainer Certification's/this course's own select both have
-// `options: []` by design, so `placeholder` alone still lets the
-// documented-stub control render). The whole `.course-details__tier` block
-// renders iff AT LEAST ONE control survives its own check; the shared
-// `<span>` label itself is separately guarded on its own non-emptiness (an
-// empty/absent `buybox.label` renders no label, even if a control still
-// renders) — no empty wrapper, label, `<select>`, or pill row ever leaks
-// through either guard.
-//
-// A11Y: the select used to take `aria-label={pills.label}` — safe when a
-// select was the ONLY control under that label, but under a label SHARED
-// with a pill group (this course's own case) that would give the select
-// the exact same accessible name as the adjacent pill group ("Course Type"
-// naming both), the exact ambiguity `aria-label` exists to prevent.
-// `selectAccessibleName()` below defaults to the shared block `label` —
-// BYTE-IDENTICAL to Trainer Certification's already-shipped select, which
-// authors no override — but a control-level `ariaLabel` can opt out of that
-// default. This course's own select is the one control that needs to: it
-// authors `ariaLabel: 'Location'` (see catalog.js), distinct from its
-// block's shared "Course Type" label, so the two adjacent controls under
-// one caption are never given the same accessible name.
-//
-// Markup/CSS: UNCHANGED. `.course-details__tier`'s existing column layout
-// (`flex-direction: column`, `gap: var(--space-3)`) already gives a uniform
-// 12px gap between the label and EVERY child after it — Figma's own
-// "Course Type" node (I675:9358;181:1352) is itself a single gap-12 column
-// containing the label, then the pill row, then the select, so rendering
-// multiple controls as additional siblings in that same column reproduces
-// Figma exactly with no new CSS needed. `.course-details__pills`/
-// `.course-details__select`/`.course-details__pill*` are reused verbatim,
-// unchanged, per control.
-//
-// ---- Rating row guard (Chunk B2 review fix wave: component gap fix) -----
-// Gait Guru Membership's own Course Details hero (682:9761 desktop /
-// 1129:16046 mobile) is the first on this branch whose Figma frame has NO
-// rating row at all (confirmed via get_design_context on both breakpoints —
-// no StarRating instance in either pulled tree). `.course-details__rating`
-// used to render UNCONDITIONALLY (`<StarRating rating={item.rating ?? 0}
-// count={item.reviewCount ?? 0} />`), unlike PlpCard.astro's own correctly
-// guarded rating row (`{item.rating && <StarRating .../>}`) — so an item
-// with no `rating` rendered a false "☆☆☆☆☆ (0)" row (and announced "Rated 0
-// out of 5, 0 reviews" to screen readers) that doesn't exist in Figma.
-// Fixed by guarding the WHOLE `.course-details__rating` wrapper on
-// `item.rating` (not just the `<StarRating>` child — the div carries its
-// own `display: flex` layout, so guarding only the child would leave an
-// empty flex box behind) and dropping the `?? 0` fallbacks, which were
-// exactly what made the absence silent instead of loud. Byte-identical
-// no-op for all twelve other shipped PDPs, which all have a real `rating`.
+// No client script: every interactive element is a plain `<a>` or native
+// `<select>` (real navigation / a real form control) — nothing to
+// init/leak. `data-pdp-id` on the `<section>` is debugging parity with
+// ProductDetails only.
 import StarRating from '../plp/StarRating.astro';
 import { isExternalHref } from '../../scripts/links.js';
 
@@ -471,11 +88,16 @@ const buybox = item.pdp?.buybox;
 const buyboxControls = (buybox?.controls ?? [])
   .map((control) => {
     const type = control.type === 'select' ? 'select' : 'pills';
-    const show =
-      type === 'select'
-        ? Boolean(control.placeholder) || (control.options?.length ?? 0) > 0
-        : (control.options?.length ?? 0) > 0;
-    return { ...control, type, show };
+    const optionCount = control.options?.length ?? 0;
+    const show = type === 'select' ? Boolean(control.placeholder) || optionCount > 0 : optionCount > 0;
+    // A select with zero real options is a documented stub, not an
+    // operable control — it can survive `show` (its placeholder alone is
+    // enough to render, see the guard above) but still has nothing behind
+    // it to select. Computed once here, consumed as `aria-disabled` in the
+    // markup below, so the shell stops promising operability it can't
+    // deliver (review fix wave — see this file's header comment).
+    const disabled = type === 'select' && optionCount === 0;
+    return { ...control, type, show, disabled };
   })
   .filter((control) => control.show);
 // The whole `.course-details__tier` block renders iff at least one control
@@ -496,6 +118,20 @@ const showBuybox = buyboxControls.length > 0;
 function selectAccessibleName(control, blockLabel) {
   return control.ariaLabel ?? blockLabel;
 }
+
+// Hero avatar count — defaults to `instructors.length` (BYTE-IDENTICAL for
+// 8 of 9 courses, whose byline names every instructor on the roster).
+// `item.pdp.heroAvatars` is an OPTIONAL override count for the one course
+// where that default is wrong: FGA L1's own byline names only 2 of its 4
+// real instructors (see catalog.js's own comment), and Figma's hero
+// (675:9358) shows exactly 2 circles beside those 2 names, not 4 — the
+// same "two halves of one visual unit sourced from two different fields"
+// defect this branch exists to kill. `heroAvatars` is a plain count, not a
+// second name list: the avatars themselves are decorative placeholder
+// circles with no per-instructor identity to carry (see
+// `.course-details__avatar`'s own CSS comment), so a count is all the
+// override needs to express.
+const heroAvatarCount = item.pdp?.heroAvatars ?? item.pdp?.instructors?.length ?? 0;
 ---
 <section class="course-details" data-pdp-id={item.id}>
   <div class="course-details__inner">
@@ -505,7 +141,7 @@ function selectAccessibleName(control, blockLabel) {
       <div class="course-details__buybox">
         <div class="course-details__heading">
           <h1 class="course-details__title">{item.pdp?.heroTitle ?? item.title}</h1>
-          {item.rating && (
+          {item.rating != null && (
             <div class="course-details__rating">
               <StarRating rating={item.rating} count={item.reviewCount} />
             </div>
@@ -540,8 +176,11 @@ function selectAccessibleName(control, blockLabel) {
                 <select
                   class="course-details__select"
                   aria-label={selectAccessibleName(control, buybox.label)}
+                  aria-disabled={control.disabled ? 'true' : undefined}
                 >
-                  <option value="" selected disabled hidden>{control.placeholder}</option>
+                  {control.placeholder && (
+                    <option value="" selected disabled hidden>{control.placeholder}</option>
+                  )}
                   {(control.options ?? []).map((option) => (
                     <option value={option.href ?? option.label}>{option.label}</option>
                   ))}
@@ -582,11 +221,13 @@ function selectAccessibleName(control, blockLabel) {
 
         {item.pdp?.instructorsByline && (
           <div class="course-details__instructors">
-            <span class="course-details__avatars" aria-hidden="true">
-              {(item.pdp.instructors ?? []).map(() => (
-                <span class="course-details__avatar"></span>
-              ))}
-            </span>
+            {heroAvatarCount > 0 && (
+              <span class="course-details__avatars" aria-hidden="true">
+                {Array.from({ length: heroAvatarCount }).map(() => (
+                  <span class="course-details__avatar"></span>
+                ))}
+              </span>
+            )}
             <p class="course-details__instructors-text">{item.pdp.instructorsByline}</p>
           </div>
         )}

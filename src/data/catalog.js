@@ -1837,12 +1837,15 @@ export const items = [
     // this item's data) because CourseDetails.astro had no render path for
     // it at all. The follow-up task generalized the pilot's single-pill
     // "Select your course" tier block (its old single-purpose field) into
-    // one data-driven `pdp.pills = { label, options }` shape that
-    // expresses both cases —
-    // see CourseDetails.astro's header comment. `pills.options` below is
-    // set from this course's own `pdp.pills` field, not a new parallel
-    // field, per that task's explicit "generalize, don't bolt on"
-    // instruction. Verified: neither pill links anywhere in either Figma
+    // one data-driven `pills = { label, options }` shape that expressed
+    // both cases — since superseded a SECOND time (see CourseDetails
+    // .astro's "Buy box controls generalization" header comment): this
+    // course's own selector data 78 lines below no longer lives under
+    // `pills` at all, it's `pdp.buybox = { label, controls: [{ type:
+    // 'pills', options }] }`. `buybox`'s pill options are still sourced
+    // from this course's own selector data, not a new parallel field, per
+    // that task's explicit "generalize, don't bolt on" instruction (now
+    // honored twice over). Verified: neither pill links anywhere in either Figma
     // frame (each is a plain unlinked "Button" node, no prototype
     // interaction, no destination) — these are a Kajabi/Shopify-side
     // language-variant control this reference build doesn't wire up, so
@@ -3189,12 +3192,22 @@ export const items = [
       // plural, unlike every other course's "Course By:" singular — kept
       // verbatim, not "corrected"). This names only 2 of the 4 real
       // instructors this course's own Your Instructors section lists below
-      // (Conley, Perez, Drewes, Schilling) — CourseDetails.astro's avatar
-      // circles are derived from `instructors.length` (so 4 circles will
-      // still render), but the byline TEXT itself under-lists the roster —
-      // a genuine Figma content gap, flagged here rather than silently
-      // padded with invented names.
+      // (Conley, Perez, Drewes, Schilling) — a genuine Figma content gap
+      // (the roster itself isn't padded/trimmed to match), flagged here
+      // rather than silently invented around.
+      //
+      // ---- RESOLVED (final review fix wave): avatar/byline mismatch ------
+      // CourseDetails.astro's avatar circles used to be derived unconditionally
+      // from `instructors.length`, so this hero rendered 4 circles beside a
+      // byline naming only 2 people — a "two halves of one visual unit
+      // sourced from two different fields" defect, confirmed wrong against
+      // Figma's own hero screenshot (675:9358 shows exactly 2 circles).
+      // `heroAvatars` is now an optional override count (see
+      // CourseDetails.astro's own comment) — set to 2 here, matching this
+      // byline and Figma exactly. Every other course leaves `heroAvatars`
+      // unset and keeps defaulting to `instructors.length`, byte-identical.
       instructorsByline: 'Courses By: Dr. Perez and Dr. Schilling',
+      heroAvatars: 2,
       // CLIENT-CONTENT FLAG: mobile's own byline (1116:15572 node
       // `I1116:15572;181:673`) instead reads "Course By: Dr. Conley and Dr.
       // Riley" — Dr. Riley doesn't teach this course at all (not in the real
@@ -3624,7 +3637,12 @@ export const items = [
     title: 'Functional Gait Assessment Level 2',
     kind: 'course',
     badges: ['Course', 'Professional'],
-    price: '$897.00 USD',
+    // Whole-dollar format ("$897 USD"), matching every sibling course
+    // card's own top-level `price` ("$150 USD", "$249 USD", etc.) — this
+    // item's OWN new field, added this chunk, not one of the pre-existing
+    // disputed catalog-vs-Figma values batched for the client elsewhere on
+    // this branch, so normalizing its format (not its number) is in scope.
+    price: '$897 USD',
     priceRange: null,
     description: 'FGA Level 2 is everything you need to take your work with clients to the next level.',
     // No dedicated L2 photography exists yet — falls back to a flat

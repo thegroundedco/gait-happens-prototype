@@ -15,10 +15,14 @@
 // Each registry entry's `props` resolver reproduces exactly what that
 // section received before this refactor, INCLUDING its guard: `four-column`
 // only renders when `item.pdp.features` is non-empty, `pdp-reviews` only
-// when `item.pdp.reviews` is truthy. A resolver returning `null` means
-// "guarded off" — no section, and (unlike a naive `{...data}` spread) no
-// empty `data-reveal` wrapper either, matching the pre-refactor
-// `{condition && (<div data-reveal>...)}` output byte-for-byte.
+// when `item.pdp.reviews` carries a real rating/count (see that entry's own
+// comment below — final review fix wave; every object-valued section's
+// guard now checks its own non-emptiness, not bare presence, the same
+// `?.length > 0` standard the array-valued sections below already held
+// themselves to). A resolver returning `null` means "guarded off" — no
+// section, and (unlike a naive `{...data}` spread) no empty `data-reveal`
+// wrapper either, matching the pre-refactor `{condition && (<div
+// data-reveal>...)}` output byte-for-byte.
 //
 // A `type` with no registry entry renders nothing — no crash, no markup,
 // just a dev-only console.warn — so a course item can list its full
@@ -69,11 +73,23 @@ const REGISTRY = {
     props: (item) => ({ item }),
   },
   'course-overview': {
-    // Guarded like `four-column`/`pdp-reviews` — only items with real
-    // overview data (`item.pdp.overview`) render this section; other course
-    // items without it yet render nothing rather than an empty section.
+    // Guarded on the fields that actually matter (final review fix wave),
+    // not bare presence — `overview: {}` (or one with only empty fields)
+    // used to pass a presence check and still render the static "Course
+    // Overview" <h2> with nothing underneath it, the same
+    // caption-with-nothing-under-it trap this branch already killed once
+    // for CourseDetails.astro's own tier block. Real content is an image,
+    // a non-empty `details` array, or a non-empty `body` (string OR array —
+    // matches CourseOverview.astro's own `hasBody` derivation, since a
+    // bare `overview.body` truthiness check would let `body: []` slip
+    // through: arrays are always truthy regardless of length).
     Component: CourseOverview,
-    props: (item) => (item.pdp?.overview ? { item } : null),
+    props: (item) => {
+      const overview = item.pdp?.overview;
+      const hasBody = Array.isArray(overview?.body) ? overview.body.length > 0 : Boolean(overview?.body);
+      const hasContent = Boolean(overview?.image) || (overview?.details?.length ?? 0) > 0 || hasBody;
+      return hasContent ? { item } : null;
+    },
   },
   'four-column': {
     Component: FourColumn,
@@ -83,16 +99,36 @@ const REGISTRY = {
         : null,
   },
   'youll-stop-and-instead': {
-    // Guarded like `course-overview` — only items with real
-    // `item.pdp.youllStop` data render this section.
+    // Guarded on the fields that actually matter (final review fix wave) —
+    // the component reads `youllStop.stop.lead`/`.stop.body`/
+    // `.instead.lead`/`.instead.body` directly, with no `?.` on the way
+    // in, so a bare `youllStop &&` presence check would let `youllStop: {}`
+    // through to a build-time crash (`.stop` of `undefined`), and a looser
+    // `youllStop.stop &&`/`.instead &&` check would still let either half
+    // render with an empty lead or body. Requires all four leaf fields.
     Component: YoullStopAndInstead,
-    props: (item) => (item.pdp?.youllStop ? { item } : null),
+    props: (item) => {
+      const youllStop = item.pdp?.youllStop;
+      const hasStop = Boolean(youllStop?.stop?.lead) && Boolean(youllStop?.stop?.body);
+      const hasInstead = Boolean(youllStop?.instead?.lead) && Boolean(youllStop?.instead?.body);
+      return hasStop && hasInstead ? { item } : null;
+    },
   },
   'comparison-chart': {
-    // Guarded like `course-overview`/`youll-stop-and-instead` — only items
-    // with real `item.pdp.comparison` data render this section.
+    // Guarded on the fields that actually matter (final review fix wave) —
+    // the component reads `comparison.columns[0]`/`[1]` and maps
+    // `comparison.rows` directly, with no `?.` on the way in, so a bare
+    // `comparison &&` presence check would let `comparison: {}` through to
+    // a build-time crash. Requires a real 2-column header and at least one
+    // row (matches this section's actual `{ columns: [c1, c2], rows }`
+    // contract — see ComparisonChart.astro's own header comment).
     Component: ComparisonChart,
-    props: (item) => (item.pdp?.comparison ? { item } : null),
+    props: (item) => {
+      const comparison = item.pdp?.comparison;
+      const hasColumns = (comparison?.columns?.length ?? 0) >= 2;
+      const hasRows = (comparison?.rows?.length ?? 0) > 0;
+      return hasColumns && hasRows ? { item } : null;
+    },
   },
   'testimonial': {
     // Guarded like `four-column`/`your-instructors`/`faqs` above — `item.
@@ -144,18 +180,41 @@ const REGISTRY = {
     props: () => ({}),
   },
   'cross-sell': {
-    // Guarded like every other section above — an item that lists
-    // `cross-sell` without a real `item.pdp.crossSell` block would otherwise
-    // render a broken band (empty heading, zero cards, a "Shop All" `<a>`
-    // with no `href`). The catalog can't trip this today (guarded by
-    // catalog.test.mjs), but the composer is the artifact being ported, so
-    // it shouldn't fail open.
+    // Guarded on the fields that actually matter (final review fix wave) —
+    // the old bare `item.pdp?.crossSell &&` presence check is exactly the
+    // trap this comment already warned about: `crossSell: {}` would pass
+    // it and render the broken band described above (empty heading, zero
+    // cards, a "Shop All" `<a>` with no `href`) instead of being caught.
+    // Requires the 3 fields the CTA-guard idiom (`label && href`)
+    // generalizes to here: a real `heading`, at least one `itemIds` entry,
+    // and a real `shopAllHref`. The catalog can't trip this today (guarded
+    // by catalog.test.mjs), but the composer is the artifact being ported,
+    // so it shouldn't fail open.
     Component: CrossSell,
-    props: (item) => (item.pdp?.crossSell ? { crossSell: item.pdp.crossSell } : null),
+    props: (item) => {
+      const crossSell = item.pdp?.crossSell;
+      const hasContent =
+        Boolean(crossSell?.heading) && (crossSell?.itemIds?.length ?? 0) > 0 && Boolean(crossSell?.shopAllHref);
+      return hasContent ? { crossSell } : null;
+    },
   },
   'pdp-reviews': {
+    // Guarded on the fields that actually matter (final review fix wave) —
+    // PdpReviews.astro defaults `rating`/`count`/`distribution` internally
+    // (`= 0`/`= 0`/`= []`), so a bare `item.pdp?.reviews &&` presence check
+    // let `reviews: {}` through to a fully-rendered "★☆☆☆☆ Rated 0 out of
+    // 5, based on 0 reviews" band instead of rendering nothing. `!= null`
+    // (not bare truthiness) on both fields, matching this branch's own
+    // "0 is a real value, not an absence" rule (see PlpCard.astro/
+    // CourseDetails.astro's own rating guards) — a genuinely zero-review
+    // course (`rating: 0, count: 0`) is still real content and should
+    // still render.
     Component: PdpReviews,
-    props: (item) => (item.pdp?.reviews ? { reviews: item.pdp.reviews } : null),
+    props: (item) => {
+      const reviews = item.pdp?.reviews;
+      const hasContent = reviews != null && reviews.rating != null && reviews.count != null;
+      return hasContent ? { reviews } : null;
+    },
   },
   'logo-wall': {
     Component: LogoWall,

@@ -39,8 +39,8 @@ const noun = resolvedItems.length > 0 && resolvedItems.every((it) => it.kind ===
     </div>
     <FilterSortBar count={count} noun={noun} />
   </div>
-  <!-- Grouped: one grid-wrapper per persona section. Ungrouped: single grid,
-       breaking out to full width (Polaroid-style full-bleed cards). -->
+  {/* Grouped: one grid-wrapper per persona section. Ungrouped: single grid,
+       breaking out to full width (Polaroid-style full-bleed cards). */}
   {groups ? (
     groups.map((group) => (
       <div class="plp__grid-wrapper" data-reveal>
@@ -61,8 +61,8 @@ const noun = resolvedItems.length > 0 && resolvedItems.every((it) => it.kind ===
   <div data-reveal>
     <LogoWall logos={pressLogos} />
   </div>
-  <!-- One Quick-Add modal per PLP page (Task 8) — populated at runtime for
-       whichever card's `[data-quick-add]` trigger was clicked (PlpCard.astro). -->
+  {/* One Quick-Add modal per PLP page (Task 8) — populated at runtime for
+       whichever card's `[data-quick-add]` trigger was clicked (PlpCard.astro). */}
   <QuickAddModal />
 </div>
 <style>
