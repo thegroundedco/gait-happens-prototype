@@ -5024,14 +5024,26 @@ export const collections = {
 
 // ---- Press / "As Seen In" -------------------------------------------
 
+// Press logos for the "As Seen In" band (LogoWall.astro). Real logo images
+// exported from the design system (file B0fHmlEEm9OdOOnAbnmI8d, node 180:340).
+// `name` is the accessible alt text; `src` is the committed image path.
 export const pressLogos = [
-  'The New York Times',
-  'People',
-  'New York Post',
-  'National Geographic',
-  'WebMD',
-  'Bicycling',
-  "Women's Health",
+  { name: 'The New York Times', src: '/images/logos/the-new-york-times.png' },
+  { name: 'People', src: '/images/logos/people.png' },
+  { name: 'New York Post', src: '/images/logos/new-york-post.png' },
+  { name: 'National Geographic', src: '/images/logos/national-geographic.png' },
+  { name: 'WebMD', src: '/images/logos/webmd.png' },
+  { name: 'Bicycling', src: '/images/logos/bicycling.png' },
+  { name: "Women's Health", src: '/images/logos/womens-health.png' },
+  { name: "Men's Health", src: '/images/logos/mens-health.png' },
+  { name: 'Forbes', src: '/images/logos/forbes.png' },
+  { name: "Runner's World", src: '/images/logos/runners-world.png' },
+  { name: 'Yahoo', src: '/images/logos/yahoo.png' },
+  { name: 'GQ', src: '/images/logos/gq.png' },
+  { name: '9News', src: '/images/logos/9news.png' },
+  { name: 'Shape', src: '/images/logos/shape.png' },
+  { name: 'Fox News', src: '/images/logos/fox-news.png' },
+  { name: 'CBS', src: '/images/logos/cbs.png' },
 ];
 
 // ---- PDP brand content --------------------------------------------------
