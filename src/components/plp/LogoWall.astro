@@ -64,10 +64,10 @@ const { logos = pressLogos } = Astro.props;
   .logo-wall__group {
     display: flex;
     align-items: center;
-    gap: var(--space-6);
+    gap: var(--space-5);
     /* trailing gap so the two groups stream with a uniform gap everywhere,
        making the -50% loop point invisible */
-    padding-inline-end: var(--space-6);
+    padding-inline-end: var(--space-5);
     list-style: none;
     margin: 0;
   }
@@ -84,5 +84,6 @@ const { logos = pressLogos } = Astro.props;
   @media (prefers-reduced-motion: reduce) {
     .logo-wall__track { animation: none; }
     .logo-wall__viewport { overflow-x: auto; }
+    .logo-wall__group[aria-hidden] { display: none; }
   }
 </style>
