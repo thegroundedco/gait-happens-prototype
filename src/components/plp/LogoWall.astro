@@ -1,6 +1,7 @@
 ---
-// Full-width "As Seen In" press band. Placeholder text wordmarks (real
-// logo marks are a later content swap) rendered from `pressLogos` by default.
+// Full-width "As Seen In" press band. Real press-logo images from the design
+// system (see `pressLogos` in catalog.js). Rendered on every PLP (Plp.astro)
+// and every PDP (Pdp.astro's `logo-wall` registry). Task 2 adds the marquee.
 import { pressLogos } from '../../data/catalog.js';
 
 const { logos = pressLogos } = Astro.props;
@@ -9,17 +10,16 @@ const { logos = pressLogos } = Astro.props;
   <div class="logo-wall__pad">
     <h2 class="logo-wall__heading">As Seen In</h2>
     <ul class="logo-wall__row">
-      {logos.map((name) => (
-        <li class="logo-wall__item">{name}</li>
+      {logos.map((logo) => (
+        <li class="logo-wall__item">
+          <img class="logo-wall__img" src={logo.src} alt={logo.name} loading="lazy" />
+        </li>
       ))}
     </ul>
   </div>
 </section>
 <style>
-  .logo-wall {
-    background: var(--color-paper);
-  }
-
+  .logo-wall { background: var(--color-paper); }
   .logo-wall__pad {
     max-width: var(--container-max);
     margin-inline: auto;
@@ -27,13 +27,11 @@ const { logos = pressLogos } = Astro.props;
     padding-inline: var(--space-5);
     text-align: center;
   }
-
   .logo-wall__heading {
-    font: var(--type-h4);
+    font: var(--type-h3);
     color: var(--color-teal);
     margin-bottom: var(--space-6);
   }
-
   .logo-wall__row {
     display: flex;
     flex-wrap: wrap;
@@ -42,12 +40,10 @@ const { logos = pressLogos } = Astro.props;
     gap: var(--space-6);
     list-style: none;
   }
-
-  .logo-wall__item {
-    font: var(--type-label);
-    color: var(--color-ink-70);
-    text-transform: uppercase;
-    letter-spacing: var(--tracking-caption);
-    white-space: nowrap;
+  .logo-wall__img {
+    height: 44px;
+    width: auto;
+    object-fit: contain;
+    display: block;
   }
 </style>
