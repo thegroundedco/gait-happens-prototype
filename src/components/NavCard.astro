@@ -1,12 +1,19 @@
 ---
 // One card inside a MegaMenu panel. Variant is derived from the panel's `style`
-// and the card's own `variant` (see `menus[].cards[]` in src/data/sitemap.js):
-//   style 'cards' → 'yellow' (photo + label, e.g. Shop Best Sellers) or
-//                   'teal'   (CTA, no photo, big label — e.g. "Shop All")
-//   style 'bars'  → 'bar'    (Resources — small yellow text bar)
-//   style 'white' → 'white'  (Contact — white card, big label)
+// and the card's own `kind`/`variant` (see `menus[].cards[]` in src/data/sitemap.js):
+//   style 'cards' → 'yellow'   (photo + label, e.g. The Foot Health Kit) or
+//                   'teal'     (CTA, no photo, big label — e.g. "Shop All")
+//                   'teal-bar' (kind:'bar' — teal collection CTA bar, e.g.
+//                               Shop Best Sellers; grouped by MegaMenu.astro
+//                               into a stacked column alongside photo cards)
+//   style 'bars'  → 'bar'      (Resources — small yellow text bar)
+//   style 'white' → 'white'    (Contact — white card, big label)
 const { card, style } = Astro.props;
-const variant = style === 'bars' ? 'bar' : style === 'white' ? 'white' : (card.variant ?? 'yellow');
+const variant =
+  style === 'bars' ? 'bar' :
+  style === 'white' ? 'white' :
+  card.kind === 'bar' ? 'teal-bar' :
+  (card.variant ?? 'yellow');
 const big = variant === 'teal' || variant === 'white';
 const arrowSrc = big ? '/images/nav/arrow-lg.svg' : '/images/nav/arrow.svg';
 const arrowSize = big ? 64 : 24;
@@ -26,7 +33,9 @@ const fit = card.fit ?? 'cover';
   )}
   <span class={`nav-card__row${big ? ' nav-card__row--display' : ''}`}>
     <span class={`nav-card__label${big ? ' nav-card__label--display' : ''}`}>{card.label}</span>
-    <img class="nav-card__arrow" src={arrowSrc} width={arrowSize} height={arrowSize} alt="" />
+    {variant === 'teal-bar'
+      ? <span class="nav-card__arrow" aria-hidden="true" />
+      : <img class="nav-card__arrow" src={arrowSrc} width={arrowSize} height={arrowSize} alt="" />}
   </span>
 </a>
 <style>
@@ -64,6 +73,10 @@ const fit = card.fit ?? 'cover';
   .nav-card--teal { background: var(--color-teal); color: var(--color-ink); }
   .nav-card--bar { background: var(--color-yellow); color: var(--color-ink); }
   .nav-card--white { background: var(--color-paper); color: var(--color-ink); }
+  /* Shop's two "bar" CTAs (Shop Best Sellers / Shop All Products, Figma
+     1217:1577): same box as .nav-card--bar (fills its .mega__col slot),
+     but teal with a white label + white arrow. */
+  .nav-card--teal-bar { background: var(--color-teal); color: var(--color-paper); flex: 1 1 0; min-height: 0; }
 
   .nav-card__media {
     position: relative;
@@ -95,6 +108,19 @@ const fit = card.fit ?? 'cover';
   .nav-card__arrow {
     flex-shrink: 0;
     transition: transform var(--motion-fast) var(--ease-out-expo);
+  }
+  /* teal-bar's arrow is a blank <span> (not an <img>, per the other variants)
+     recoloured white via a currentColor mask — arrow.svg is a fixed dark
+     colour and an <img> can't be recoloured by masking itself. Same
+     mask+currentColor technique as PlpCard.astro's `.plp-card__cta-arrow`.
+     Scoped to .nav-card--teal-bar only so the Resources yellow bars and the
+     photo-card <img> arrows are untouched. */
+  .nav-card--teal-bar .nav-card__arrow {
+    width: 24px;
+    height: 24px;
+    background-color: currentColor;
+    -webkit-mask: url(/images/nav/arrow.svg) no-repeat center / contain;
+    mask: url(/images/nav/arrow.svg) no-repeat center / contain;
   }
   .nav-card:hover .nav-card__arrow,
   .nav-card:focus-visible .nav-card__arrow {
