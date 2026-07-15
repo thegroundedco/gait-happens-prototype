@@ -14,7 +14,10 @@ export const menus = [
     //    becoming orphaned.
     cards: [
       { kind: 'photo', label: 'The Foot Health Kit', href: '/products/foot-health-kit', image: '/images/plp/foot-health-kit.jpg', variant: 'yellow' },
-      { kind: 'photo', label: 'Walk - One Step at a Time', href: '/products/walk', image: '/images/nav/featured-products.png', variant: 'yellow', fit: 'contain' },
+      // italic: true — Figma renders this label Montserrat Bold Italic (it's
+      // a book title), vs. Foot Health Kit's plain Bold. Optional per-card
+      // flag on NavCard.astro; absent elsewhere ⇒ upright, unchanged.
+      { kind: 'photo', label: 'Walk - One Step at a Time', href: '/products/walk', image: '/images/nav/featured-products.png', variant: 'yellow', fit: 'contain', italic: true },
       { kind: 'bar', label: 'Shop Best Sellers', href: '/collections/best-sellers' },
       { kind: 'bar', label: 'Shop All Products', href: '/collections/all' },
     ],
