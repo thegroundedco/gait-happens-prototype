@@ -1,7 +1,18 @@
 ---
 // Full-width "As Seen In" press band. Real press-logo images from the design
 // system (see `pressLogos` in catalog.js). Rendered on every PLP (Plp.astro)
-// and every PDP (Pdp.astro's `logo-wall` registry). Task 2 adds the marquee.
+// and every PDP (Pdp.astro's `logo-wall` registry).
+//
+// Task 2: CSS-only auto-scrolling marquee. The track renders the 16 logos
+// TWICE (a visible group + an aria-hidden duplicate) and animates translateX
+// from 0 to -50%. Because the track is exactly two copies of the same group,
+// -50% of the track's width equals exactly one group's width, so at the end
+// of the loop the duplicate group sits precisely where the visible group
+// started — the reset back to translateX(0) is visually indistinguishable
+// from the frame before it, so the loop has no seam. This only holds if the
+// gap between the two groups equals the gap between logos within a group,
+// which is why each group carries a trailing padding-inline-end equal to the
+// inter-logo gap (see .logo-wall__group below).
 import { pressLogos } from '../../data/catalog.js';
 
 const { logos = pressLogos } = Astro.props;
@@ -9,13 +20,20 @@ const { logos = pressLogos } = Astro.props;
 <section class="logo-wall">
   <div class="logo-wall__pad">
     <h2 class="logo-wall__heading">As Seen In</h2>
-    <ul class="logo-wall__row">
-      {logos.map((logo) => (
-        <li class="logo-wall__item">
-          <img class="logo-wall__img" src={logo.src} alt={logo.name} loading="lazy" />
-        </li>
-      ))}
-    </ul>
+    <div class="logo-wall__viewport">
+      <div class="logo-wall__track">
+        <ul class="logo-wall__group">
+          {logos.map((logo) => (
+            <li class="logo-wall__item"><img class="logo-wall__img" src={logo.src} alt={logo.name} loading="lazy" /></li>
+          ))}
+        </ul>
+        <ul class="logo-wall__group" aria-hidden="true">
+          {logos.map((logo) => (
+            <li class="logo-wall__item"><img class="logo-wall__img" src={logo.src} alt="" loading="lazy" /></li>
+          ))}
+        </ul>
+      </div>
+    </div>
   </div>
 </section>
 <style>
@@ -32,18 +50,39 @@ const { logos = pressLogos } = Astro.props;
     color: var(--color-teal);
     margin-bottom: var(--space-6);
   }
-  .logo-wall__row {
+
+  .logo-wall__viewport { overflow: hidden; }
+  .logo-wall__track {
     display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: center;
-    gap: var(--space-6);
-    list-style: none;
+    width: max-content;
+    animation: logo-wall-scroll 50s linear infinite;
   }
-  .logo-wall__img {
-    height: 44px;
-    width: auto;
-    object-fit: contain;
-    display: block;
+  /* pause when a user wants to read it */
+  .logo-wall__viewport:hover .logo-wall__track,
+  .logo-wall__viewport:focus-within .logo-wall__track { animation-play-state: paused; }
+
+  .logo-wall__group {
+    display: flex;
+    align-items: center;
+    gap: var(--space-6);
+    /* trailing gap so the two groups stream with a uniform gap everywhere,
+       making the -50% loop point invisible */
+    padding-inline-end: var(--space-6);
+    list-style: none;
+    margin: 0;
+  }
+  .logo-wall__img { height: 44px; width: auto; object-fit: contain; display: block; }
+
+  @keyframes logo-wall-scroll {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-50%); }
+  }
+
+  /* Reduced motion: freeze + make the row statically scrollable so every
+     logo stays reachable. (WCAG 2.2.2 note: hover/focus pause doesn't cover
+     TOUCH users; a dev team may want a visible pause button before launch.) */
+  @media (prefers-reduced-motion: reduce) {
+    .logo-wall__track { animation: none; }
+    .logo-wall__viewport { overflow-x: auto; }
   }
 </style>
