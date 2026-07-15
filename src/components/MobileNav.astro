@@ -5,6 +5,14 @@
 // Each `type:'mega'` menu becomes a <details> accordion of its `cards`; the
 // `type:'link'` menu (About) becomes a plain link — same source data Header.astro
 // and MegaMenu.astro already use for the desktop nav.
+//
+// Shop task (feat/nav-shop-menu, chunk 2): Shop's cards now carry a `kind`
+// ('photo' | 'bar' — see sitemap.js), so its accordion body renders as
+// stacked photo cards + a two-up teal bar row (Figma 1217:1579) instead of
+// the plain text-link <ul>. Discriminant is `m.cards?.some((c) => c.kind)` —
+// Courses/Resources/Contact have no `kind` on any card, so they fall through
+// to the original <ul> branch completely unchanged (byte-identical; see
+// task-2-report.md for the before/after diff proof).
 import { menus, accountMenu } from '../data/sitemap.js';
 ---
 <aside class="mobile-nav" data-util-panel="menu" id="mobile-nav" aria-hidden="true" inert>
@@ -12,6 +20,43 @@ import { menus, accountMenu } from '../data/sitemap.js';
     {menus.map((m) =>
       m.type === 'link' ? (
         <a class="m-item" href={m.href}>{m.label}</a>
+      ) : m.cards?.some((c) => c.kind) ? (
+        <details class="m-acc m-acc--cards">
+          <summary>{m.label}</summary>
+          <div class="m-cards">
+            {m.cards.filter((c) => c.kind !== 'bar').map((c) => (
+              <a class="m-photo-card" href={c.href}>
+                {c.image && (
+                  // `c.fit`/`c.italic` (sitemap.js) carry the Walk card's desktop
+                  // fidelity fixes (Task 1: NavCard.astro's contain-fit white
+                  // media panel + italic label) into mobile too — see brief
+                  // point 2b. Both are optional/absent everywhere else, so this
+                  // is a no-op for Foot Health Kit (cover, upright).
+                  <span class={`m-photo-card__media${c.fit === 'contain' ? ' m-photo-card__media--contain' : ''}`}>
+                    <img class="m-photo-card__img" src={c.image} alt="" loading="lazy" style={`object-fit: ${c.fit ?? 'cover'};`} />
+                  </span>
+                )}
+                <span class={`m-photo-card__label${c.italic ? ' m-photo-card__label--italic' : ''}`}>{c.label}</span>
+              </a>
+            ))}
+            {m.cards.some((c) => c.kind === 'bar') && (
+              <div class="m-bars">
+                {m.cards.filter((c) => c.kind === 'bar').map((c) => (
+                  <a class="m-bar" href={c.href}>
+                    <span class="m-bar__label">{c.label}</span>
+                    {/* Blank masked span, not an <img> — arrow.svg is a fixed
+                        dark color and an <img> can't be recoloured by masking
+                        itself. Same currentColor-mask technique as Task 1's
+                        NavCard.astro `.nav-card--teal-bar .nav-card__arrow`
+                        (itself following PlpCard.astro's `.plp-card__cta-arrow`
+                        precedent) — see brief point 3. */}
+                    <span class="m-bar__arrow" aria-hidden="true" />
+                  </a>
+                ))}
+              </div>
+            )}
+          </div>
+        </details>
       ) : (
         <details class="m-acc">
           <summary>{m.label}</summary>
@@ -70,6 +115,100 @@ import { menus, accountMenu } from '../data/sitemap.js';
        here is the paper token dimmed via opacity instead. */
     color: var(--color-paper);
     opacity: 0.7;
+  }
+
+  /* Shop mobile card body (Figma 1217:1579): stacked yellow photo cards, then
+     a two-up teal bar row. `.m-cards`'s anchors are still descendants of
+     `.m-acc` (the details keeps both classes — see markup), so the generic
+     `.m-acc a` rule above (display/font/padding/color/opacity) would
+     otherwise leak onto them; every selector below is deliberately written
+     as two classes (`.m-cards .m-photo-card` / `.m-cards .m-bar`, not just
+     one) so its specificity (0,2,0) beats `.m-acc a`'s (0,1,1) regardless of
+     source order, and every property `.m-acc a` sets is repeated here
+     explicitly (never left to accidentally match) so nothing is inherited
+     from that leak. Courses/Resources/Contact never get the `--cards`
+     class or render into `.m-cards`, so none of this touches them. */
+  .m-cards {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    padding-block: var(--space-2) var(--space-3);
+  }
+
+  .m-cards .m-photo-card {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-4);
+    background: var(--color-yellow);
+    color: var(--color-ink);
+    opacity: 1;
+  }
+
+  .m-cards .m-photo-card__media {
+    position: relative;
+    flex: 1 1 0;
+    aspect-ratio: 1 / 1;
+    overflow: hidden;
+  }
+  /* Contain-fit images (Walk's book cover) letterbox inside their square slot;
+     Figma backs that letterbox area with a white panel rather than letting
+     the card's own yellow background show through (yellow book cover on
+     yellow letterbox = illegible) — same fix as NavCard.astro's desktop
+     `.nav-card__media--contain`. No-op for any card using the default
+     `fit: 'cover'` (Foot Health Kit, Courses' photo cards). */
+  .m-cards .m-photo-card__media--contain {
+    background: var(--color-paper);
+  }
+  .m-cards .m-photo-card__img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .m-cards .m-photo-card__label {
+    flex: 1 1 0;
+    font: var(--type-nav-label);
+  }
+  /* Optional per-card italic (sitemap.js `card.italic`) — Walk's book title
+     renders Montserrat Bold Italic in Figma vs. Foot Health Kit's plain
+     Bold. Absent everywhere else ⇒ upright, unchanged. */
+  .m-cards .m-photo-card__label--italic { font-style: italic; }
+
+  .m-cards .m-bars {
+    display: flex;
+    gap: var(--space-3);
+  }
+
+  .m-cards .m-bar {
+    flex: 1 1 0;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: var(--space-2);
+    min-height: 125px;
+    padding: var(--space-4);
+    background: var(--color-teal);
+    color: var(--color-paper);
+    opacity: 1;
+  }
+
+  .m-cards .m-bar__label {
+    font: var(--type-nav-label);
+  }
+
+  /* Masked (not <img>) so the arrow paints white via currentColor — arrow.svg
+     is a fixed dark color and an <img> can't be recoloured by masking itself.
+     Same technique as NavCard.astro's `.nav-card--teal-bar .nav-card__arrow`
+     (Task 1), itself following PlpCard.astro's `.plp-card__cta-arrow`. */
+  .m-cards .m-bar__arrow {
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+    background-color: currentColor;
+    -webkit-mask: url(/images/nav/arrow.svg) no-repeat center / contain;
+    mask: url(/images/nav/arrow.svg) no-repeat center / contain;
   }
 
   .mobile-scrim {
