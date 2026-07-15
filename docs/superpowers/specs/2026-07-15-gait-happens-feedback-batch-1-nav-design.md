@@ -18,6 +18,7 @@ A client feedback batch on **navigation, PLPs, and product PDPs** (course-PDP fe
 5. **Walk cross-sell + instructor photos** — `CrossSell` `shop-products` variant: equal columns, fix hover overflow, Shop All bottom-left; + Dr. Conley / Dr. McDowell photos **exported from the Walk PDP Figma frame `721:7417`**.
 
 **Decisions locked (2026-07-15):**
+- **The `bar`/stacked-column pattern this chunk builds is a reusable primitive — the client confirmed the About menu will also use it.** About is a **plain link today** (`sitemap.js`: `{ id:'about', type:'link', href:'/pages/about' }`), and there is **no About mega panel in the "Updated Navigation" Figma frame** (`1217:1576` contains only Shop/Courses/Resources/Contact). So converting About to a stacked-card mega menu is a **later follow-up** that needs its own Figma design + link contents; it is **out of scope for Chunk 1**, but Chunk 1 must build the `bar`/grouping mechanism so About (and any menu) can adopt it by data alone. If the mechanism can't stay data-only and reusable, that's a finding to report.
 - Instructor photos → export from Figma `721:7417` (Chunk 5).
 - **Foot Fest quick-add modal → DEFERRED to Chunk C** (bespoke multi-session "Add to Weekend" picker; Foot Fest PDP doesn't exist yet).
 - **Add to Cart → yellow with black text ON HOVER**; default stays teal/white (matches the Figma quick-add modals showing teal buttons at rest) (Chunk 4).
