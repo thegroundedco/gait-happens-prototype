@@ -24,12 +24,12 @@ const { logos = pressLogos } = Astro.props;
       <div class="logo-wall__track">
         <ul class="logo-wall__group">
           {logos.map((logo) => (
-            <li class="logo-wall__item"><img class="logo-wall__img" src={logo.src} alt={logo.name} loading="lazy" /></li>
+            <li class="logo-wall__item"><img class="logo-wall__img" src={logo.src} alt={logo.name} /></li>
           ))}
         </ul>
         <ul class="logo-wall__group" aria-hidden="true">
           {logos.map((logo) => (
-            <li class="logo-wall__item"><img class="logo-wall__img" src={logo.src} alt="" loading="lazy" /></li>
+            <li class="logo-wall__item"><img class="logo-wall__img" src={logo.src} alt="" /></li>
           ))}
         </ul>
       </div>
