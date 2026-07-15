@@ -1,10 +1,25 @@
 export const menus = [
   {
     id: 'shop', label: 'Shop', type: 'mega', style: 'cards',
+    // Figma node 1217:1577 (desktop Shop panel): two yellow photo cards, then
+    // a teal column of two stacked "bar" CTAs (Task 1, feat/nav-shop-menu).
+    // Product photos reuse existing repo assets rather than adding new files
+    // (see task-1-report.md for the byte-level match that drove each choice):
+    //  - foot-health-kit.jpg is the same crop as the plp asset (just a
+    //    higher-res Figma export) → reuse /images/plp/foot-health-kit.jpg.
+    //  - the Walk book-cover crop is byte-identical to the *existing*
+    //    /images/nav/featured-products.png (the old "Featured Products"
+    //    card's image) — NOT plp/walk.jpg (a different crop/photo) — so it
+    //    is reused here (with its established `fit: 'contain'`) instead of
+    //    becoming orphaned.
     cards: [
-      { label: 'Shop Best Sellers', href: '/collections/best-sellers', image: '/images/nav/shop-best-sellers.jpg', variant: 'yellow' },
-      { label: 'Featured Products', href: '/collections/featured', image: '/images/nav/featured-products.png', variant: 'yellow', fit: 'contain' },
-      { label: 'Shop All', href: '/collections/all', variant: 'teal' },
+      { kind: 'photo', label: 'The Foot Health Kit', href: '/products/foot-health-kit', image: '/images/plp/foot-health-kit.jpg', variant: 'yellow' },
+      // italic: true — Figma renders this label Montserrat Bold Italic (it's
+      // a book title), vs. Foot Health Kit's plain Bold. Optional per-card
+      // flag on NavCard.astro; absent elsewhere ⇒ upright, unchanged.
+      { kind: 'photo', label: 'Walk - One Step at a Time', href: '/products/walk', image: '/images/nav/featured-products.png', variant: 'yellow', fit: 'contain', italic: true },
+      { kind: 'bar', label: 'Shop Best Sellers', href: '/collections/best-sellers' },
+      { kind: 'bar', label: 'Shop All Products', href: '/collections/all' },
     ],
   },
   {

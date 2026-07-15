@@ -1,15 +1,24 @@
 ---
 // Renders the panel for one mega menu (see `menus` in src/data/sitemap.js).
-// 'cards' (Shop, Courses) and 'white' (Contact) styles are a single row of
-// 3 NavCards. 'bars' (Resources) is 3 columns of 2 stacked bar NavCards —
-// matching the Figma source (node 848:10673), which groups the 6 links
-// column-first: col[c] = cards at index i where i % 3 === c.
+// 'cards' (Shop, Courses) and 'white' (Contact) styles are a row of NavCards.
+// 'bars' (Resources) is 3 columns of 2 stacked bar NavCards — matching the
+// Figma source (node 848:10673), which groups the 6 links column-first:
+// col[c] = cards at index i where i % 3 === c.
+// Within a 'cards'/'white' row, any trailing `kind:'bar'` cards (Shop's teal
+// collection CTAs, Figma node 1217:1577) are pulled into one stacked
+// .mega__col instead of rendering as direct row children — see barCards below.
 import NavCard from './NavCard.astro';
 const { menu } = Astro.props;
 const panelId = `mega-panel-${menu.id}`;
 const columns = menu.style === 'bars'
   ? Array.from({ length: 3 }, (_, c) => menu.cards.filter((_, i) => i % 3 === c))
   : null;
+// Cards panels may carry trailing `kind:'bar'` cards (Shop). Group them into
+// one stacked right-hand column (reusing the same .mega__col primitive the
+// Resources columns above use); menus with no bar cards render exactly as
+// before — `barCards` is empty and `leadCards` is the full, unfiltered list.
+const barCards = menu.style === 'bars' ? [] : menu.cards.filter((c) => c.kind === 'bar');
+const leadCards = menu.style === 'bars' ? menu.cards : menu.cards.filter((c) => c.kind !== 'bar');
 ---
 <div class="mega" data-menu-panel={menu.id} id={panelId} inert>
   <div class="mega__pad">
@@ -20,7 +29,16 @@ const columns = menu.style === 'bars'
               {col.map((card) => <NavCard card={card} style={menu.style} />)}
             </div>
           ))
-        : menu.cards.map((card) => <NavCard card={card} style={menu.style} />)}
+        : (
+          <>
+            {leadCards.map((card) => <NavCard card={card} style={menu.style} />)}
+            {barCards.length > 0 && (
+              <div class="mega__col">
+                {barCards.map((card) => <NavCard card={card} style={menu.style} />)}
+              </div>
+            )}
+          </>
+        )}
     </div>
   </div>
 </div>
