@@ -342,7 +342,7 @@
 
     if (item.sizeChart && e.sizeChart && e.sizeChartHead && e.sizeChartBody) {
       e.sizeChart.hidden = false;
-      e.sizeChartHead.innerHTML = `<tr>${item.sizeChart.columns.map((c) => `<th>${escapeHtml(c)}</th>`).join('')}</tr>`;
+      e.sizeChartHead.innerHTML = `<tr>${item.sizeChart.columns.map((c) => `<th scope="col">${escapeHtml(c)}</th>`).join('')}</tr>`;
       e.sizeChartBody.innerHTML = item.sizeChart.rows
         .map((row) => `<tr>${row.map((cell) => `<td>${escapeHtml(cell)}</td>`).join('')}</tr>`)
         .join('');
@@ -677,9 +677,9 @@
      spacer sizing note), mounted above the size selector. Not a caption
      (this is a full sentence, not an uppercase label like the variants/
      buybox labels below), so it uses the smallest plain body token instead
-     of `--type-caption`. Small margin-bottom on top of `.quick-add-modal__
-     options`' own flex `gap` pulls it a bit closer to the size pills right
-     below it than to whatever preceded it. */
+     of `--type-caption`. It's the first child of `.quick-add-modal__options`,
+     so the small margin-bottom just adds a little breathing room below the
+     note, on top of that block's own flex `gap`, before the size selector. */
   .quick-add-modal__note[hidden] { display: none; }
   .quick-add-modal__note {
     font: var(--type-body-sm);
