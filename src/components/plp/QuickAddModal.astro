@@ -36,6 +36,15 @@
       </div>
 
       <div class="quick-add-modal__options">
+        <!-- Task 3 (Foot Health Kit helper note) — optional per-item helper
+             line, mounted above the size selector so a kit's own toe-spacer
+             sizing note is legible before the pills below it. SSR-stable and
+             `hidden` by default; populate() sets textContent + unhides it
+             ONLY when the current item carries `item.quickAddNote` (today,
+             only foot-health-kit), and re-hides + clears it for every other
+             item so nothing leaks across quick-add opens. -->
+        <p class="quick-add-modal__note" data-quick-add-note hidden></p>
+
         <div class="quick-add-modal__variants" data-quick-add-variants hidden>
           <span class="quick-add-modal__variants-label" data-quick-add-variants-label>Size</span>
           <div class="quick-add-modal__pills" data-quick-add-pills></div>
@@ -128,6 +137,7 @@
       title: document.querySelector('[data-quick-add-title]'),
       price: document.querySelector('[data-quick-add-price]'),
       image: document.querySelector('[data-quick-add-image]'),
+      note: document.querySelector('[data-quick-add-note]'),
       variantsWrap: document.querySelector('[data-quick-add-variants]'),
       variantsLabel: document.querySelector('[data-quick-add-variants-label]'),
       pills: document.querySelector('[data-quick-add-pills]'),
@@ -283,6 +293,19 @@
       e.image.alt = item.title;
     }
 
+    // Task 3 — reset on EVERY populate() call so a previous item's note
+    // never leaks into the next: only show + fill it when the new item
+    // actually carries `item.quickAddNote` (today, only foot-health-kit).
+    if (e.note) {
+      if (item.quickAddNote) {
+        e.note.textContent = item.quickAddNote;
+        e.note.hidden = false;
+      } else {
+        e.note.textContent = '';
+        e.note.hidden = true;
+      }
+    }
+
     if (item.variants && e.variantsWrap && e.pills) {
       e.variantsWrap.hidden = false;
       if (e.variantsLabel) e.variantsLabel.textContent = item.variants.label;
@@ -366,10 +389,31 @@
     trigger?.focus();
   }
 
-  // NOTE: still reads only the product `variant` key — a course's own
-  // buybox selections (state.selections.c0/c1…, plus the Location <select>'s
-  // live DOM value) aren't summarized into the cart line yet; that's Task
-  // 3's cart-line-summary scope, not this task's.
+  // Task 3 (cart-line selection summary): builds one readable string out of
+  // every current selection so the cart drawer shows what was actually
+  // chosen, not just the item name. `state.selections` already stores
+  // LABELS (not raw values) — a product's size ('Small') or a course pill's
+  // option label — keyed in control order (see this file's `state` header
+  // comment), so `Object.values(...)` alone yields the parts in the right
+  // order. The Location `<select>` is deliberately NOT in `state.selections`
+  // (see that same header comment) so it's read straight off the DOM here;
+  // its TEXT is used rather than `.value` because renderBuyboxControl's
+  // `<option value="${opt.href ?? opt.label}">` can put an HREF in `.value`
+  // (mirroring CourseDetails.astro's own PDP select) — using `.value`
+  // directly would leak a URL into the cart line instead of a label like
+  // "In-Person". The placeholder option has `value=""`, which is falsy, so
+  // an unchosen select is correctly omitted rather than stringified. Yields
+  // e.g. "Small" for a sized product, "In-Person" for a course with a real
+  // Location choice, or `null` for an item with no selectable variant at all
+  // (e.g. Sole Switch's href-only cross-sell pill contributes no key to
+  // `state.selections`).
+  function selectionSummary() {
+    const pillParts = Object.values(state.selections).filter(Boolean);
+    const sel = document.querySelector('[data-quick-add-select]');
+    const selText = sel && sel.value ? (sel.options[sel.selectedIndex]?.text ?? null) : null;
+    return [...pillParts, selText].filter(Boolean).join(' / ') || null;
+  }
+
   function submitAddToCart() {
     const item = state.item;
     if (!item) return;
@@ -377,7 +421,7 @@
     addLine({
       id: item.id,
       title: item.title,
-      variant: state.selections.variant ?? null,
+      variant: selectionSummary(),
       price: item.price ?? item.priceRange,
       qty: state.qty,
       image: item.image,
@@ -627,6 +671,20 @@
     flex-direction: column;
     gap: var(--space-5); /* 24px, confirmed both breakpoints */
     width: 100%;
+  }
+
+  /* Task 3 — optional per-item helper line (e.g. Foot Health Kit's toe-
+     spacer sizing note), mounted above the size selector. Not a caption
+     (this is a full sentence, not an uppercase label like the variants/
+     buybox labels below), so it uses the smallest plain body token instead
+     of `--type-caption`. Small margin-bottom on top of `.quick-add-modal__
+     options`' own flex `gap` pulls it a bit closer to the size pills right
+     below it than to whatever preceded it. */
+  .quick-add-modal__note[hidden] { display: none; }
+  .quick-add-modal__note {
+    font: var(--type-body-sm);
+    color: var(--color-ink-70);
+    margin: 0 0 var(--space-2);
   }
 
   .quick-add-modal__variants[hidden] { display: none; }

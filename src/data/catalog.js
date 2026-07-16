@@ -163,6 +163,12 @@ export const items = [
     // (same corrected "13 OR LARGER" row) since it's the same physical
     // spacers being sized.
     variants: { label: 'Size', options: ['Small', 'Medium', 'Large'] },
+    // Task 3 (quick-add helper note): the kit bundles toe spacers, so its
+    // own quick-add modal's size pills ARE the toe-spacer size — this note
+    // renders above them (QuickAddModal.astro's populate()) to make that
+    // relationship explicit instead of leaving "Size" to look generic. No
+    // other item authors `quickAddNote`.
+    quickAddNote: 'Please select the Toe Spacer size for your kit',
     sizeChart: {
       columns: ['Size', 'Women', 'Men', 'EU Size', 'UK Size'],
       rows: [
