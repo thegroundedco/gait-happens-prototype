@@ -21,39 +21,46 @@
 >
   <button type="button" class="quick-add-modal__close" data-quick-add-close aria-label="Close quick add">✕</button>
 
-  <div class="quick-add-modal__media">
-    <img data-quick-add-image src="" alt="" width="420" height="420" />
+  <div class="quick-add-modal__top">
+    <div class="quick-add-modal__media">
+      <img data-quick-add-image src="" alt="" width="420" height="420" />
+    </div>
+
+    <div class="quick-add-modal__panel">
+      <div class="quick-add-modal__title-row">
+        <h3 class="quick-add-modal__title" id="quick-add-title" data-quick-add-title></h3>
+        <p class="quick-add-modal__price" data-quick-add-price></p>
+      </div>
+
+      <div class="quick-add-modal__options">
+        <div class="quick-add-modal__variants" data-quick-add-variants hidden>
+          <span class="quick-add-modal__variants-label" data-quick-add-variants-label>Size</span>
+          <div class="quick-add-modal__pills" data-quick-add-pills></div>
+        </div>
+
+        <div class="quick-add-modal__quantity-row">
+          <div class="quick-add-modal__qty">
+            <span class="quick-add-modal__qty-label" id="quick-add-qty-label">Quantity</span>
+            <div class="quick-add-modal__stepper" role="group" aria-labelledby="quick-add-qty-label">
+              <button type="button" class="quick-add-modal__step" data-quick-add-qty-decr aria-label="Decrease quantity">−</button>
+              <span class="quick-add-modal__qty-value" data-quick-add-qty-value aria-live="polite">1</span>
+              <button type="button" class="quick-add-modal__step" data-quick-add-qty-incr aria-label="Increase quantity">+</button>
+            </div>
+          </div>
+
+          <button type="button" class="quick-add-modal__add" data-quick-add-submit>Add to Cart</button>
+        </div>
+      </div>
+    </div>
   </div>
 
-  <div class="quick-add-modal__body">
-    <h3 class="quick-add-modal__title" id="quick-add-title" data-quick-add-title></h3>
-    <p class="quick-add-modal__price" data-quick-add-price></p>
-
-    <div class="quick-add-modal__variants" data-quick-add-variants hidden>
-      <span class="quick-add-modal__variants-label" data-quick-add-variants-label>Size</span>
-      <div class="quick-add-modal__pills" data-quick-add-pills></div>
+  <div class="quick-add-modal__sizechart" data-quick-add-sizechart hidden>
+    <div class="quick-add-modal__sizechart-scroll">
+      <table>
+        <thead data-quick-add-sizechart-head></thead>
+        <tbody data-quick-add-sizechart-body></tbody>
+      </table>
     </div>
-
-    <details class="quick-add-modal__sizechart" data-quick-add-sizechart hidden>
-      <summary>Size chart</summary>
-      <div class="quick-add-modal__sizechart-scroll">
-        <table>
-          <thead data-quick-add-sizechart-head></thead>
-          <tbody data-quick-add-sizechart-body></tbody>
-        </table>
-      </div>
-    </details>
-
-    <div class="quick-add-modal__qty">
-      <span class="quick-add-modal__qty-label" id="quick-add-qty-label">Quantity</span>
-      <div class="quick-add-modal__stepper" role="group" aria-labelledby="quick-add-qty-label">
-        <button type="button" class="quick-add-modal__step" data-quick-add-qty-decr aria-label="Decrease quantity">−</button>
-        <span class="quick-add-modal__qty-value" data-quick-add-qty-value aria-live="polite">1</span>
-        <button type="button" class="quick-add-modal__step" data-quick-add-qty-incr aria-label="Increase quantity">+</button>
-      </div>
-    </div>
-
-    <button type="button" class="quick-add-modal__add" data-quick-add-submit>Add to Cart</button>
   </div>
 </div>
 <script>
@@ -170,14 +177,12 @@
 
     if (item.sizeChart && e.sizeChart && e.sizeChartHead && e.sizeChartBody) {
       e.sizeChart.hidden = false;
-      e.sizeChart.open = false;
       e.sizeChartHead.innerHTML = `<tr>${item.sizeChart.columns.map((c) => `<th>${escapeHtml(c)}</th>`).join('')}</tr>`;
       e.sizeChartBody.innerHTML = item.sizeChart.rows
         .map((row) => `<tr>${row.map((cell) => `<td>${escapeHtml(cell)}</td>`).join('')}</tr>`)
         .join('');
     } else if (e.sizeChart) {
       e.sizeChart.hidden = true;
-      e.sizeChart.open = false;
     }
 
     renderQty();
@@ -357,7 +362,7 @@
     left: 50%;
     transform: translate(-50%, -50%) scale(0.96);
     opacity: 0;
-    width: min(420px, 92vw);
+    width: min(800px, 94vw);
     max-height: 88vh;
     overflow-y: auto;
     background: var(--color-paper);
@@ -391,11 +396,40 @@
     z-index: 1;
   }
 
+  /* ---- Top region: image + controls -------------------------------
+     Figma 1062:21145 (desktop, product): a row = [Product Details column
+     ~493px | gap 48px | square image ~211px on the right], padding 24px
+     all around. Figma 1078:16077 (mobile): the same content in a column,
+     image first (matches this component's pre-existing DOM order — the
+     image markup is already first, ahead of the panel), padding 24px. The
+     image stays FIRST in the DOM at both breakpoints (needed for mobile's
+     "image on top" order with a plain column) — desktop uses
+     `row-reverse` (not `row`) so the visual order still lands
+     [panel, image] left-to-right without reordering the DOM.
+     Root gap between this region and the size-chart below is 0 in Figma
+     at both breakpoints (confirmed on both pulls) — this padding is what
+     creates ALL the visual spacing, and the size chart is a flush,
+     full-bleed sibling right after it (no extra margin added below). */
+  .quick-add-modal__top {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-6); /* 32px — Figma mobile's outer "Quick Add" gap */
+    padding: var(--space-5); /* 24px, confirmed both breakpoints */
+    width: 100%;
+  }
+  @media (min-width: 768px) {
+    .quick-add-modal__top {
+      flex-direction: row-reverse;
+      align-items: flex-start;
+      gap: var(--space-7); /* 48px, confirmed desktop row gap */
+    }
+  }
+
   .quick-add-modal__media {
     width: 100%;
     aspect-ratio: 1 / 1;
-    max-height: 280px;
     overflow: hidden;
+    flex: 0 0 auto;
   }
   .quick-add-modal__media img {
     width: 100%;
@@ -403,18 +437,53 @@
     object-fit: cover;
     display: block;
   }
-
-  .quick-add-modal__body {
-    padding: var(--space-5);
-    display: grid;
-    gap: var(--space-4);
+  @media (min-width: 768px) {
+    .quick-add-modal__media {
+      width: 211px;
+      max-width: 211px;
+      max-height: 211px;
+    }
   }
 
-  .quick-add-modal__title { font: var(--type-h4); color: var(--color-ink); }
-  .quick-add-modal__price { font: var(--type-label); color: var(--color-ink); }
+  .quick-add-modal__panel {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-7); /* 48px — Figma desktop's Product Details gap */
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .quick-add-modal__title-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: var(--space-4); /* 16px, confirmed both breakpoints */
+    width: 100%;
+  }
+  .quick-add-modal__title {
+    font: var(--type-h3);
+    color: var(--color-ink);
+    flex: 1 1 0;
+    min-width: 0;
+  }
+  .quick-add-modal__price {
+    font: var(--type-caption);
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-caption);
+    color: var(--color-ink);
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .quick-add-modal__options {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-5); /* 24px, confirmed both breakpoints */
+    width: 100%;
+  }
 
   .quick-add-modal__variants[hidden] { display: none; }
-  .quick-add-modal__variants { display: grid; gap: var(--space-2); }
+  .quick-add-modal__variants { display: flex; flex-direction: column; gap: var(--space-3); width: 100%; }
   .quick-add-modal__variants-label {
     font: var(--type-caption);
     text-transform: uppercase;
@@ -441,34 +510,28 @@
     color: var(--color-paper);
   }
 
-  .quick-add-modal__sizechart[hidden] { display: none; }
-  .quick-add-modal__sizechart summary {
-    font: var(--type-label);
-    cursor: pointer;
-    color: var(--color-teal);
-  }
-  .quick-add-modal__sizechart-scroll { overflow-x: auto; margin-top: var(--space-3); }
-  .quick-add-modal__sizechart table {
+  /* Quantity row: stepper + Add to Cart side by side, per the brief (no
+     breakpoint override specified for this rule — kept constant even
+     though the mobile Figma pull itself shows these stacked; see the
+     task report for that discrepancy). */
+  .quick-add-modal__quantity-row {
+    display: flex;
+    align-items: flex-end;
+    gap: var(--space-3); /* 12px, confirmed both breakpoints */
     width: 100%;
-    border-collapse: collapse;
-    font: var(--type-body-sm);
   }
-  .quick-add-modal__sizechart th,
-  .quick-add-modal__sizechart td {
-    border: 1px solid var(--color-border);
-    padding: var(--space-2);
-    text-align: left;
-    white-space: nowrap;
-  }
-  .quick-add-modal__sizechart th { background: var(--color-ink); color: var(--color-paper); }
-
   .quick-add-modal__qty {
     display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: var(--space-4);
+    flex-direction: column;
+    gap: var(--space-2); /* 8px, confirmed both breakpoints */
+    flex: 0 0 auto;
   }
-  .quick-add-modal__qty-label { font: var(--type-label); color: var(--color-ink); }
+  .quick-add-modal__qty-label {
+    font: var(--type-caption);
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-caption);
+    color: var(--color-ink);
+  }
   .quick-add-modal__stepper {
     display: inline-flex;
     align-items: center;
@@ -498,7 +561,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 100%;
+    flex: 1 1 0;
     font: var(--type-cta);
     background: var(--color-teal);
     color: var(--color-paper);
@@ -511,5 +574,34 @@
 
   @media (prefers-reduced-motion: reduce) {
     .quick-add-modal__add:hover { transform: none; }
+  }
+
+  /* ---- Size chart: always-visible full-bleed grid table -------------
+     Was a collapsible <details>; now a real <table> shown whenever
+     item.sizeChart exists (kept `hidden` by default, cleared in
+     populate()). No horizontal padding — Figma's grid runs edge to edge
+     below the padded row above (see .quick-add-modal__top comment). */
+  .quick-add-modal__sizechart[hidden] { display: none; }
+  .quick-add-modal__sizechart-scroll { overflow-x: auto; width: 100%; }
+  .quick-add-modal__sizechart table {
+    width: 100%;
+    table-layout: fixed;
+    border-collapse: collapse;
+  }
+  .quick-add-modal__sizechart th,
+  .quick-add-modal__sizechart td {
+    padding: var(--space-2);
+    text-align: center;
+    white-space: nowrap;
+  }
+  .quick-add-modal__sizechart th {
+    background: var(--color-ink);
+    color: var(--color-paper);
+    font: var(--type-label);
+  }
+  .quick-add-modal__sizechart td {
+    border: 1px solid var(--color-border);
+    font: var(--type-body-16);
+    color: var(--color-ink);
   }
 </style>
