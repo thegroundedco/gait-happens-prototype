@@ -8,9 +8,9 @@ const { item } = Astro.props;
 const price = item.priceRange || item.price;
 ---
 <article class="plp-card">
-  <a class="plp-card__media" href={item.href} tabindex="-1" aria-hidden="true">
+  <div class="plp-card__media">
     <img src={item.image} alt={item.title} loading="lazy" />
-  </a>
+  </div>
   <div class="plp-card__body">
     {item.badges?.length > 0 && (
       <div class="plp-card__badges">
@@ -33,10 +33,10 @@ const price = item.priceRange || item.price;
         <p class="plp-card__description">{item.description}</p>
       </div>
       <div class="plp-card__actions">
-        <a class="plp-card__cta" href={item.href}>
+        <span class="plp-card__cta">
           <span>{item.cta}</span>
           <span class="plp-card__cta-arrow" aria-hidden="true"></span>
-        </a>
+        </span>
         <button type="button" class="plp-card__quick-add" data-quick-add={item.id} aria-label={`Quick add ${item.title}`}>
           {/* Official QuickCart icon (01_Assets/00_Icons/QuickCart.svg); stroke
                switched to currentColor so it recolors teal -> white on hover. */}
@@ -51,6 +51,7 @@ const price = item.priceRange || item.price;
 </article>
 <style>
   .plp-card {
+    position: relative;
     display: flex;
     align-items: stretch;
     border: 1px solid var(--color-border);
@@ -131,6 +132,15 @@ const price = item.priceRange || item.price;
   .plp-card__title a:hover {
     text-decoration: underline;
   }
+  /* Block-link overlay: the title link's hit area covers the whole card, so
+     clicking anywhere (except the quick-add button) navigates to item.href.
+     One real link in the a11y tree (named by the title). */
+  .plp-card__title a::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+  }
   .plp-card__price {
     font: var(--type-caption);
     text-transform: uppercase;
@@ -165,9 +175,6 @@ const price = item.priceRange || item.price;
     padding: var(--space-3) var(--space-5);
     transition: transform var(--motion-fast) var(--ease-standard);
   }
-  .plp-card__cta:hover {
-    transform: translateY(-2px);
-  }
   .plp-card__cta-arrow {
     width: 16px;
     height: 16px;
@@ -181,6 +188,8 @@ const price = item.priceRange || item.price;
   }
 
   .plp-card__quick-add {
+    position: relative;
+    z-index: 2;
     flex-shrink: 0;
     width: 40px;
     height: 40px;
@@ -192,6 +201,9 @@ const price = item.priceRange || item.price;
     border: 2px solid var(--color-teal);
     color: var(--color-teal);
   }
+  /* Quick-add sits ABOVE the block-link overlay so it stays independently
+     clickable (opens the modal, doesn't navigate) — pure layering, no
+     stopPropagation. */
   /* Its own hover: solid teal fill + white icon (independent of the card wash). */
   .plp-card__quick-add:hover {
     background: var(--color-teal);
@@ -266,7 +278,6 @@ const price = item.priceRange || item.price;
 
   @media (prefers-reduced-motion: reduce) {
     .plp-card:hover .plp-card__media img,
-    .plp-card__cta:hover,
     .plp-card__quick-add:hover,
     .plp-card:hover .plp-card__cta-arrow {
       transform: none;
