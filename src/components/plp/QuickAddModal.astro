@@ -510,15 +510,23 @@
     color: var(--color-paper);
   }
 
-  /* Quantity row: stepper + Add to Cart side by side, per the brief (no
-     breakpoint override specified for this rule — kept constant even
-     though the mobile Figma pull itself shows these stacked; see the
-     task report for that discrepancy). */
+  /* Quantity row: stacked (stepper on top, full-width Add to Cart below)
+     on mobile per Figma 1078:16077; side by side on desktop per Figma
+     1062:21145. Mobile-first default matches the row-reordering pattern
+     used elsewhere in this file (e.g. .quick-add-modal__top), switching
+     to the row layout at the same 768px breakpoint. */
   .quick-add-modal__quantity-row {
     display: flex;
-    align-items: flex-end;
+    flex-direction: column;
+    align-items: stretch;
     gap: var(--space-3); /* 12px, confirmed both breakpoints */
     width: 100%;
+  }
+  @media (min-width: 768px) {
+    .quick-add-modal__quantity-row {
+      flex-direction: row;
+      align-items: flex-end;
+    }
   }
   .quick-add-modal__qty {
     display: flex;
@@ -580,12 +588,20 @@
      Was a collapsible <details>; now a real <table> shown whenever
      item.sizeChart exists (kept `hidden` by default, cleared in
      populate()). No horizontal padding — Figma's grid runs edge to edge
-     below the padded row above (see .quick-add-modal__top comment). */
+     below the padded row above (see .quick-add-modal__top comment).
+     table-layout:auto + width:max-content (not a fixed 100%) lets the
+     table grow past the scroll wrapper's width on narrow/mobile viewports
+     — long nowrap cell strings (e.g. Toe Spacers' "13 OR LARGER") keep
+     their natural width instead of being squeezed and overlapping, and
+     .quick-add-modal__sizechart-scroll's overflow-x:auto actually has
+     something to scroll. min-width:100% keeps it filling the modal on
+     desktop where the content comfortably fits. */
   .quick-add-modal__sizechart[hidden] { display: none; }
   .quick-add-modal__sizechart-scroll { overflow-x: auto; width: 100%; }
   .quick-add-modal__sizechart table {
-    width: 100%;
-    table-layout: fixed;
+    table-layout: auto;
+    width: max-content;
+    min-width: 100%;
     border-collapse: collapse;
   }
   .quick-add-modal__sizechart th,
