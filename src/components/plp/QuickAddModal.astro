@@ -4,9 +4,12 @@
 // instance is rendered per PLP page (Plp.astro), matching the one CartDrawer
 // instance Header.astro renders per page. Markup here is SSR-stable and
 // starts closed (`hidden` + `inert`); the co-located client script below
-// fills in title/price/image/variant pills/size chart/quantity and toggles
-// the open state. See that script's header comment for the leak-free
-// (View-Transitions-safe) event-binding pattern.
+// fills in title/price/image/quantity and toggles the open state, plus
+// EITHER a product's variant pills + size chart OR (Task 2) a course's
+// item.pdp.buybox controls (pills + Location select), mirroring
+// CourseDetails.astro's PDP buybox off the same data — never both, an item
+// carries one shape or the other. See that script's header comment for the
+// leak-free (View-Transitions-safe) event-binding pattern.
 ---
 <div class="quick-add-scrim" data-quick-add-scrim hidden></div>
 <div
@@ -21,39 +24,67 @@
 >
   <button type="button" class="quick-add-modal__close" data-quick-add-close aria-label="Close quick add">✕</button>
 
-  <div class="quick-add-modal__media">
-    <img data-quick-add-image src="" alt="" width="420" height="420" />
+  <div class="quick-add-modal__top">
+    <div class="quick-add-modal__media">
+      <img data-quick-add-image src="" alt="" width="420" height="420" />
+    </div>
+
+    <div class="quick-add-modal__panel">
+      <div class="quick-add-modal__title-row">
+        <h3 class="quick-add-modal__title" id="quick-add-title" data-quick-add-title></h3>
+        <p class="quick-add-modal__price" data-quick-add-price></p>
+      </div>
+
+      <div class="quick-add-modal__options">
+        <!-- Task 3 (Foot Health Kit helper note) — optional per-item helper
+             line, mounted above the size selector so a kit's own toe-spacer
+             sizing note is legible before the pills below it. SSR-stable and
+             `hidden` by default; populate() sets textContent + unhides it
+             ONLY when the current item carries `item.quickAddNote` (today,
+             only foot-health-kit), and re-hides + clears it for every other
+             item so nothing leaks across quick-add opens. -->
+        <p class="quick-add-modal__note" data-quick-add-note hidden></p>
+
+        <div class="quick-add-modal__variants" data-quick-add-variants hidden>
+          <span class="quick-add-modal__variants-label" data-quick-add-variants-label>Size</span>
+          <div class="quick-add-modal__pills" data-quick-add-pills></div>
+        </div>
+
+        <!-- Course buybox mount (Task 2) — sibling to the size-variants block
+             above, same Options-block mount point. Renders item.pdp.buybox
+             (course-type pills + Location select) at populate() time,
+             mirroring CourseDetails.astro's buybox render off the SAME data.
+             Mutually exclusive with .quick-add-modal__variants above: an item
+             has EITHER item.variants (product) OR item.pdp.buybox (course),
+             never both, so populate() only ever unhides one of the two. -->
+        <div class="quick-add-modal__buybox" data-quick-add-buybox hidden>
+          <span class="quick-add-modal__buybox-label" data-quick-add-buybox-label></span>
+          <div class="quick-add-modal__buybox-controls" data-quick-add-buybox-controls></div>
+        </div>
+
+        <div class="quick-add-modal__quantity-row">
+          <div class="quick-add-modal__qty">
+            <span class="quick-add-modal__qty-label" id="quick-add-qty-label">Quantity</span>
+            <div class="quick-add-modal__stepper" role="group" aria-labelledby="quick-add-qty-label">
+              <button type="button" class="quick-add-modal__step" data-quick-add-qty-decr aria-label="Decrease quantity">−</button>
+              <span class="quick-add-modal__qty-value" data-quick-add-qty-value aria-live="polite">1</span>
+              <button type="button" class="quick-add-modal__step" data-quick-add-qty-incr aria-label="Increase quantity">+</button>
+            </div>
+          </div>
+
+          <button type="button" class="quick-add-modal__add" data-quick-add-submit>Add to Cart</button>
+        </div>
+      </div>
+    </div>
   </div>
 
-  <div class="quick-add-modal__body">
-    <h3 class="quick-add-modal__title" id="quick-add-title" data-quick-add-title></h3>
-    <p class="quick-add-modal__price" data-quick-add-price></p>
-
-    <div class="quick-add-modal__variants" data-quick-add-variants hidden>
-      <span class="quick-add-modal__variants-label" data-quick-add-variants-label>Size</span>
-      <div class="quick-add-modal__pills" data-quick-add-pills></div>
+  <div class="quick-add-modal__sizechart" data-quick-add-sizechart hidden>
+    <div class="quick-add-modal__sizechart-scroll">
+      <table>
+        <thead data-quick-add-sizechart-head></thead>
+        <tbody data-quick-add-sizechart-body></tbody>
+      </table>
     </div>
-
-    <details class="quick-add-modal__sizechart" data-quick-add-sizechart hidden>
-      <summary>Size chart</summary>
-      <div class="quick-add-modal__sizechart-scroll">
-        <table>
-          <thead data-quick-add-sizechart-head></thead>
-          <tbody data-quick-add-sizechart-body></tbody>
-        </table>
-      </div>
-    </details>
-
-    <div class="quick-add-modal__qty">
-      <span class="quick-add-modal__qty-label" id="quick-add-qty-label">Quantity</span>
-      <div class="quick-add-modal__stepper" role="group" aria-labelledby="quick-add-qty-label">
-        <button type="button" class="quick-add-modal__step" data-quick-add-qty-decr aria-label="Decrease quantity">−</button>
-        <span class="quick-add-modal__qty-value" data-quick-add-qty-value aria-live="polite">1</span>
-        <button type="button" class="quick-add-modal__step" data-quick-add-qty-incr aria-label="Increase quantity">+</button>
-      </div>
-    </div>
-
-    <button type="button" class="quick-add-modal__add" data-quick-add-submit>Add to Cart</button>
   </div>
 </div>
 <script>
@@ -76,9 +107,19 @@
 
   // Closing is instant (state flips synchronously below) so submitAddToCart
   // can close the modal and open the cart drawer back-to-back with no race.
+  //
+  // `state.selections` (Task 2) generalizes the old single `state.variant`
+  // into a per-control map so the same state shape covers both product size
+  // pills and course buybox pills: products use ONE entry, key 'variant'
+  // (the selected size); courses use one entry per `pills` control, key
+  // `c${index}` (index into that item's OWN filtered buybox.controls list —
+  // see populate()). A buybox `select` control's value is intentionally NOT
+  // stored here — Task 3's submit-summary logic reads it straight off the
+  // DOM at submit time instead, since (unlike pills) a native <select>
+  // already IS its own source of truth and needs no mirrored copy.
   const state = {
     item: null,
-    variant: null,
+    selections: {},
     qty: 1,
     trigger: null,
   };
@@ -96,9 +137,13 @@
       title: document.querySelector('[data-quick-add-title]'),
       price: document.querySelector('[data-quick-add-price]'),
       image: document.querySelector('[data-quick-add-image]'),
+      note: document.querySelector('[data-quick-add-note]'),
       variantsWrap: document.querySelector('[data-quick-add-variants]'),
       variantsLabel: document.querySelector('[data-quick-add-variants-label]'),
       pills: document.querySelector('[data-quick-add-pills]'),
+      buyboxWrap: document.querySelector('[data-quick-add-buybox]'),
+      buyboxLabel: document.querySelector('[data-quick-add-buybox-label]'),
+      buyboxControls: document.querySelector('[data-quick-add-buybox-controls]'),
       sizeChart: document.querySelector('[data-quick-add-sizechart]'),
       sizeChartHead: document.querySelector('[data-quick-add-sizechart-head]'),
       sizeChartBody: document.querySelector('[data-quick-add-sizechart-body]'),
@@ -125,26 +170,120 @@
     renderQty();
   }
 
-  function renderPillPressedState() {
-    document.querySelectorAll('[data-quick-add-pill]').forEach((p) => {
-      p.setAttribute('aria-pressed', String(p.getAttribute('data-quick-add-pill') === state.variant));
+  // Re-renders pressed state for ONE control's pills only (identified by
+  // `data-control`, e.g. 'variant' for the product size row, 'c0'/'c1'… for
+  // a course buybox pills row) — a pill is pressed iff its own value
+  // matches that control's current selection. Scoped to the control so
+  // selecting a pill in one course buybox row never touches another row's
+  // pressed state.
+  function renderPillPressedState(control) {
+    document.querySelectorAll(`[data-quick-add-pill][data-control="${control}"]`).forEach((p) => {
+      p.setAttribute('aria-pressed', String(p.getAttribute('data-quick-add-pill') === state.selections[control]));
     });
   }
 
-  function selectVariant(option) {
-    state.variant = option;
-    renderPillPressedState();
+  function selectPill(control, value) {
+    state.selections[control] = value;
+    renderPillPressedState(control);
   }
 
-  // Fills the SSR-stable modal markup from a catalog item. Pre-selects the
-  // first variant option (if any) so Add to Cart always yields a valid line
-  // without requiring the shopper to make a choice first.
+  // Normalizes a course's `item.pdp.buybox.controls` the SAME way
+  // CourseDetails.astro's own `buyboxControls` does (byte-identical guard
+  // logic, deliberately kept in sync rather than re-derived): default
+  // `type: 'pills'`, per-control `show` computed from its own non-emptiness
+  // (`select` survives on `placeholder` alone even with zero options — a
+  // documented client stub, see catalog.js's FGA buybox comments — `pills`
+  // needs at least one option), then filtered down to only the controls
+  // that survive. `disabled` flags a zero-option select as `aria-disabled`
+  // (not `disabled`) so it stays focusable/un-greyed like CourseDetails'
+  // own select, instead of promising an operable combobox with nothing
+  // behind it.
+  function normalizeBuyboxControls(buybox) {
+    return (buybox?.controls ?? [])
+      .map((control) => {
+        const type = control.type === 'select' ? 'select' : 'pills';
+        const optionCount = control.options?.length ?? 0;
+        const show = type === 'select' ? Boolean(control.placeholder) || optionCount > 0 : optionCount > 0;
+        const disabled = type === 'select' && optionCount === 0;
+        return { ...control, type, show, disabled };
+      })
+      .filter((control) => control.show);
+  }
+
+  // Builds one control's markup and (for `pills`) seeds `state.selections`.
+  // `key` is `c${index}` — index into the FILTERED buyboxControls array
+  // (mirrors CourseDetails.astro's own render-order indexing), shared by
+  // both control types even though only `pills` uses it for selection
+  // state — a `select` control reads its own DOM value at submit instead
+  // (see this file's `state` header comment).
+  function renderBuyboxControl(control, key, blockLabel) {
+    if (control.type === 'select') {
+      const ariaLabel = escapeHtml(control.ariaLabel ?? blockLabel ?? '');
+      const placeholderOption = control.placeholder
+        ? `<option value="" selected disabled hidden>${escapeHtml(control.placeholder)}</option>`
+        : '';
+      const options = (control.options ?? [])
+        .map((opt) => `<option value="${escapeHtml(opt.href ?? opt.label)}">${escapeHtml(opt.label)}</option>`)
+        .join('');
+      const disabledAttr = control.disabled ? ' aria-disabled="true"' : '';
+      return `<select class="quick-add-modal__select" data-quick-add-select aria-label="${ariaLabel}"${disabledAttr}>${placeholderOption}${options}</select>`;
+    }
+
+    // Pills — an `href` option is a CROSS-SELL NAVIGATION LINK to another
+    // course's page (e.g. Sole Switch's single pill points at Sole Switch
+    // Pro, and vice versa), not a selectable variant — mirrors
+    // CourseDetails.astro's own `option.href ? <a> : <span>` split (lines
+    // ~189-208 there), except the non-href branch here is a real toggle
+    // BUTTON (not a static `<span>`) since this modal's pills ARE
+    // selectable, unlike the PDP's read-only tier display. An `href` pill
+    // therefore renders as a real `<a>`, is NEVER pre-selected into
+    // `state.selections`, and carries none of `data-quick-add-pill` /
+    // `data-control` / `aria-pressed` — so the delegated click handler's
+    // `[data-quick-add-pill]` branch never matches it and lets the browser
+    // navigate natively.
+    //
+    // Selection seeding pre-selects the `selected: true` option among the
+    // NON-href options only (fallback: the first non-href option) so Add to
+    // Cart always has a valid selection when there IS a real variant to
+    // pick, same guarantee the product size pills already give. A control
+    // made up ENTIRELY of href options (Sole Switch/Sole Switch Pro's own
+    // single cross-sell pill) contributes NO key to `state.selections` at
+    // all — there's no variant to select; the course itself is what's being
+    // added to cart.
+    const options = control.options ?? [];
+    const nonHrefOptions = options.filter((opt) => !opt.href);
+    const selected = nonHrefOptions.find((opt) => opt.selected) ?? nonHrefOptions[0];
+    if (selected) state.selections[key] = selected.label;
+    const pills = options
+      .map((opt) => {
+        if (opt.href) {
+          const selectedClass = opt.selected ? ' quick-add-modal__pill--selected' : '';
+          const ariaCurrent = opt.selected ? ' aria-current="true"' : '';
+          return `<a class="quick-add-modal__pill quick-add-modal__pill--link${selectedClass}" href="${escapeHtml(opt.href)}"${ariaCurrent}>${escapeHtml(opt.label)}</a>`;
+        }
+        return `<button type="button" class="quick-add-modal__pill" data-control="${key}" data-quick-add-pill="${escapeHtml(opt.label)}" aria-pressed="${opt.label === state.selections[key]}">${escapeHtml(opt.label)}</button>`;
+      })
+      .join('');
+    return `<div class="quick-add-modal__pills">${pills}</div>`;
+  }
+
+  // Fills the SSR-stable modal markup from a catalog item. Products and
+  // courses are mutually exclusive BY DATA (an item has `item.variants` XOR
+  // `item.pdp.buybox`, never both — see this file's header comment), so
+  // exactly one of the two branches below ever unhides its container; an
+  // item with neither (e.g. Foot Fest) leaves both hidden and the Options
+  // block just holds the qty row. Each branch pre-selects a valid option
+  // (first variant / each pills control's `selected:true` or first NON-href
+  // option — see renderBuyboxControl) so Add to Cart always yields a valid
+  // line without requiring the shopper to make a choice first, except a
+  // pills control made up entirely of cross-sell `href` options (no real
+  // variant to select) which contributes no selection at all.
   function populate(item) {
     const e = els();
     if (!e.modal) return;
 
     state.item = item;
-    state.variant = item.variants ? item.variants.options[0] : null;
+    state.selections = {};
     state.qty = 1;
 
     if (e.title) e.title.textContent = item.title;
@@ -154,13 +293,27 @@
       e.image.alt = item.title;
     }
 
+    // Task 3 — reset on EVERY populate() call so a previous item's note
+    // never leaks into the next: only show + fill it when the new item
+    // actually carries `item.quickAddNote` (today, only foot-health-kit).
+    if (e.note) {
+      if (item.quickAddNote) {
+        e.note.textContent = item.quickAddNote;
+        e.note.hidden = false;
+      } else {
+        e.note.textContent = '';
+        e.note.hidden = true;
+      }
+    }
+
     if (item.variants && e.variantsWrap && e.pills) {
       e.variantsWrap.hidden = false;
       if (e.variantsLabel) e.variantsLabel.textContent = item.variants.label;
+      state.selections.variant = item.variants.options[0];
       e.pills.innerHTML = item.variants.options
         .map(
           (opt) =>
-            `<button type="button" class="quick-add-modal__pill" data-quick-add-pill="${escapeHtml(opt)}" aria-pressed="${opt === state.variant}">${escapeHtml(opt)}</button>`
+            `<button type="button" class="quick-add-modal__pill" data-control="variant" data-quick-add-pill="${escapeHtml(opt)}" aria-pressed="${opt === state.selections.variant}">${escapeHtml(opt)}</button>`
         )
         .join('');
     } else {
@@ -168,16 +321,33 @@
       if (e.pills) e.pills.innerHTML = '';
     }
 
+    // Course path — renders item.pdp.buybox the same way CourseDetails.astro
+    // does (see normalizeBuyboxControls/renderBuyboxControl above): one
+    // shared `buybox.label` caption, then each surviving control (pills row
+    // and/or Location select) in order. `!item.variants` keeps this and the
+    // product branch above mutually exclusive even if a future item's data
+    // were ever malformed enough to carry both.
+    const buybox = !item.variants ? item.pdp?.buybox : null;
+    const buyboxControls = normalizeBuyboxControls(buybox);
+    if (buyboxControls.length > 0 && e.buyboxWrap && e.buyboxControls) {
+      e.buyboxWrap.hidden = false;
+      if (e.buyboxLabel) e.buyboxLabel.textContent = buybox.label ?? '';
+      e.buyboxControls.innerHTML = buyboxControls
+        .map((control, index) => renderBuyboxControl(control, `c${index}`, buybox.label))
+        .join('');
+    } else {
+      if (e.buyboxWrap) e.buyboxWrap.hidden = true;
+      if (e.buyboxControls) e.buyboxControls.innerHTML = '';
+    }
+
     if (item.sizeChart && e.sizeChart && e.sizeChartHead && e.sizeChartBody) {
       e.sizeChart.hidden = false;
-      e.sizeChart.open = false;
-      e.sizeChartHead.innerHTML = `<tr>${item.sizeChart.columns.map((c) => `<th>${escapeHtml(c)}</th>`).join('')}</tr>`;
+      e.sizeChartHead.innerHTML = `<tr>${item.sizeChart.columns.map((c) => `<th scope="col">${escapeHtml(c)}</th>`).join('')}</tr>`;
       e.sizeChartBody.innerHTML = item.sizeChart.rows
         .map((row) => `<tr>${row.map((cell) => `<td>${escapeHtml(cell)}</td>`).join('')}</tr>`)
         .join('');
     } else if (e.sizeChart) {
       e.sizeChart.hidden = true;
-      e.sizeChart.open = false;
     }
 
     renderQty();
@@ -219,6 +389,31 @@
     trigger?.focus();
   }
 
+  // Task 3 (cart-line selection summary): builds one readable string out of
+  // every current selection so the cart drawer shows what was actually
+  // chosen, not just the item name. `state.selections` already stores
+  // LABELS (not raw values) — a product's size ('Small') or a course pill's
+  // option label — keyed in control order (see this file's `state` header
+  // comment), so `Object.values(...)` alone yields the parts in the right
+  // order. The Location `<select>` is deliberately NOT in `state.selections`
+  // (see that same header comment) so it's read straight off the DOM here;
+  // its TEXT is used rather than `.value` because renderBuyboxControl's
+  // `<option value="${opt.href ?? opt.label}">` can put an HREF in `.value`
+  // (mirroring CourseDetails.astro's own PDP select) — using `.value`
+  // directly would leak a URL into the cart line instead of a label like
+  // "In-Person". The placeholder option has `value=""`, which is falsy, so
+  // an unchosen select is correctly omitted rather than stringified. Yields
+  // e.g. "Small" for a sized product, "In-Person" for a course with a real
+  // Location choice, or `null` for an item with no selectable variant at all
+  // (e.g. Sole Switch's href-only cross-sell pill contributes no key to
+  // `state.selections`).
+  function selectionSummary() {
+    const pillParts = Object.values(state.selections).filter(Boolean);
+    const sel = document.querySelector('[data-quick-add-select]');
+    const selText = sel && sel.value ? (sel.options[sel.selectedIndex]?.text ?? null) : null;
+    return [...pillParts, selText].filter(Boolean).join(' / ') || null;
+  }
+
   function submitAddToCart() {
     const item = state.item;
     if (!item) return;
@@ -226,7 +421,7 @@
     addLine({
       id: item.id,
       title: item.title,
-      variant: state.variant ?? null,
+      variant: selectionSummary(),
       price: item.price ?? item.priceRange,
       qty: state.qty,
       image: item.image,
@@ -248,7 +443,7 @@
   // removed (e.g. a navigation firing while the modal happened to be open).
   function resetQuickAdd() {
     state.item = null;
-    state.variant = null;
+    state.selections = {};
     state.qty = 1;
     state.trigger = null;
     const e = els();
@@ -298,7 +493,8 @@
 
     const pill = target.closest('[data-quick-add-pill]');
     if (pill) {
-      selectVariant(pill.getAttribute('data-quick-add-pill'));
+      const control = pill.getAttribute('data-control');
+      if (control) selectPill(control, pill.getAttribute('data-quick-add-pill'));
       return;
     }
     if (target.closest('[data-quick-add-qty-incr]')) {
@@ -357,7 +553,7 @@
     left: 50%;
     transform: translate(-50%, -50%) scale(0.96);
     opacity: 0;
-    width: min(420px, 92vw);
+    width: min(800px, 94vw);
     max-height: 88vh;
     overflow-y: auto;
     background: var(--color-paper);
@@ -391,11 +587,40 @@
     z-index: 1;
   }
 
+  /* ---- Top region: image + controls -------------------------------
+     Figma 1062:21145 (desktop, product): a row = [Product Details column
+     ~493px | gap 48px | square image ~211px on the right], padding 24px
+     all around. Figma 1078:16077 (mobile): the same content in a column,
+     image first (matches this component's pre-existing DOM order — the
+     image markup is already first, ahead of the panel), padding 24px. The
+     image stays FIRST in the DOM at both breakpoints (needed for mobile's
+     "image on top" order with a plain column) — desktop uses
+     `row-reverse` (not `row`) so the visual order still lands
+     [panel, image] left-to-right without reordering the DOM.
+     Root gap between this region and the size-chart below is 0 in Figma
+     at both breakpoints (confirmed on both pulls) — this padding is what
+     creates ALL the visual spacing, and the size chart is a flush,
+     full-bleed sibling right after it (no extra margin added below). */
+  .quick-add-modal__top {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-6); /* 32px — Figma mobile's outer "Quick Add" gap */
+    padding: var(--space-5); /* 24px, confirmed both breakpoints */
+    width: 100%;
+  }
+  @media (min-width: 768px) {
+    .quick-add-modal__top {
+      flex-direction: row-reverse;
+      align-items: flex-start;
+      gap: var(--space-7); /* 48px, confirmed desktop row gap */
+    }
+  }
+
   .quick-add-modal__media {
     width: 100%;
     aspect-ratio: 1 / 1;
-    max-height: 280px;
     overflow: hidden;
+    flex: 0 0 auto;
   }
   .quick-add-modal__media img {
     width: 100%;
@@ -403,19 +628,72 @@
     object-fit: cover;
     display: block;
   }
-
-  .quick-add-modal__body {
-    padding: var(--space-5);
-    display: grid;
-    gap: var(--space-4);
+  @media (min-width: 768px) {
+    .quick-add-modal__media {
+      width: 211px;
+      max-width: 211px;
+      max-height: 211px;
+    }
   }
 
-  .quick-add-modal__title { font: var(--type-h4); color: var(--color-ink); }
-  .quick-add-modal__price { font: var(--type-label); color: var(--color-ink); }
+  .quick-add-modal__panel {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-7); /* 48px — Figma desktop's Product Details gap */
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .quick-add-modal__title-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: var(--space-4); /* 16px, confirmed both breakpoints */
+    width: 100%;
+  }
+  .quick-add-modal__title {
+    font: var(--type-h3);
+    color: var(--color-ink);
+    flex: 1 1 0;
+    min-width: 0;
+  }
+  .quick-add-modal__price {
+    font: var(--type-caption);
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-caption);
+    color: var(--color-ink);
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .quick-add-modal__options {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-5); /* 24px, confirmed both breakpoints */
+    width: 100%;
+  }
+
+  /* Task 3 — optional per-item helper line (e.g. Foot Health Kit's toe-
+     spacer sizing note), mounted above the size selector. Not a caption
+     (this is a full sentence, not an uppercase label like the variants/
+     buybox labels below), so it uses the smallest plain body token instead
+     of `--type-caption`. It's the first child of `.quick-add-modal__options`,
+     so the small margin-bottom just adds a little breathing room below the
+     note, on top of that block's own flex `gap`, before the size selector. */
+  .quick-add-modal__note[hidden] { display: none; }
+  .quick-add-modal__note {
+    font: var(--type-body-sm);
+    color: var(--color-ink-70);
+    margin: 0 0 var(--space-2);
+  }
 
   .quick-add-modal__variants[hidden] { display: none; }
-  .quick-add-modal__variants { display: grid; gap: var(--space-2); }
-  .quick-add-modal__variants-label {
+  .quick-add-modal__variants { display: flex; flex-direction: column; gap: var(--space-3); width: 100%; }
+  /* Shared caption style for both the product size row's label AND the
+     course buybox's label (Task 2) — same simple uppercase caption in both
+     Figma frames, so one rule covers both rather than duplicating it. */
+  .quick-add-modal__variants-label,
+  .quick-add-modal__buybox-label {
     font: var(--type-caption);
     text-transform: uppercase;
     letter-spacing: var(--tracking-caption);
@@ -441,34 +719,88 @@
     color: var(--color-paper);
   }
 
-  .quick-add-modal__sizechart[hidden] { display: none; }
-  .quick-add-modal__sizechart summary {
-    font: var(--type-label);
-    cursor: pointer;
-    color: var(--color-teal);
+  /* Cross-sell link pill (review fix wave: href buybox options) — a real
+     `<a>`, not a toggle button (see renderBuyboxControl's comment), so its
+     "selected" look can't ride `[aria-pressed]` like the button pills above;
+     `.quick-add-modal__pill--selected` is a dedicated modifier class for
+     that, applied only to this link variant. Base border/padding/font are
+     inherited from the shared `.quick-add-modal__pill` rule above (same
+     look as CourseDetails.astro's own `.course-details__pill`/`--selected`
+     pair for visual consistency); this just adds the anchor-specific
+     display/underline reset and the selected fill. */
+  .quick-add-modal__pill--link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
   }
-  .quick-add-modal__sizechart-scroll { overflow-x: auto; margin-top: var(--space-3); }
-  .quick-add-modal__sizechart table {
-    width: 100%;
-    border-collapse: collapse;
-    font: var(--type-body-sm);
+  .quick-add-modal__pill--link.quick-add-modal__pill--selected {
+    border-color: var(--color-teal);
+    background: var(--color-teal);
+    color: var(--color-paper);
   }
-  .quick-add-modal__sizechart th,
-  .quick-add-modal__sizechart td {
-    border: 1px solid var(--color-border);
-    padding: var(--space-2);
-    text-align: left;
-    white-space: nowrap;
-  }
-  .quick-add-modal__sizechart th { background: var(--color-ink); color: var(--color-paper); }
 
+  /* ---- Course buybox (Task 2) — replaces the size-variants block above
+     for course items, same Options-block mount point, never shown
+     alongside it (see the markup comment). `-buybox` is the outer column
+     (label, then each control), `-buybox-controls` holds the per-control
+     rows (a `.quick-add-modal__pills` row reuses the size pill's own
+     look/behavior above; a `<select>` gets its own rule below) —
+     structurally the same two-level shape as CourseDetails.astro's own
+     `.course-details__tier`/`-tier-label`/`-pills`, rebuilt here since this
+     component renders via runtime innerHTML rather than SSR Astro. */
+  .quick-add-modal__buybox[hidden] { display: none; }
+  .quick-add-modal__buybox { display: flex; flex-direction: column; gap: var(--space-3); width: 100%; }
+  .quick-add-modal__buybox-controls { display: flex; flex-direction: column; gap: var(--space-3); }
+
+  /* Native select field — same bordered-field idiom as
+     CourseDetails.astro's own `.course-details__select` (itself borrowed
+     from FilterSortBar.astro's PLP filter/sort selects): a REAL, focusable,
+     labeled `<select>`, no custom chevron overlay — the browser's native
+     affordance is used as-is, matching that established precedent rather
+     than adding `appearance: none` + a masked icon with no other precedent
+     in this codebase. `239px` matches CourseDetails' own literal, measured
+     width. */
+  .quick-add-modal__select {
+    width: 239px;
+    max-width: 100%;
+    border: 1px solid var(--color-border);
+    background: var(--color-paper);
+    color: var(--color-border); /* placeholder-muted text — matches CourseDetails' own select */
+    font: var(--type-body-16);
+    padding: var(--space-3) var(--space-4);
+  }
+
+  /* Quantity row: stacked (stepper on top, full-width Add to Cart below)
+     on mobile per Figma 1078:16077; side by side on desktop per Figma
+     1062:21145. Mobile-first default matches the row-reordering pattern
+     used elsewhere in this file (e.g. .quick-add-modal__top), switching
+     to the row layout at the same 768px breakpoint. */
+  .quick-add-modal__quantity-row {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--space-3); /* 12px, confirmed both breakpoints */
+    width: 100%;
+  }
+  @media (min-width: 768px) {
+    .quick-add-modal__quantity-row {
+      flex-direction: row;
+      align-items: flex-end;
+    }
+  }
   .quick-add-modal__qty {
     display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: var(--space-4);
+    flex-direction: column;
+    gap: var(--space-2); /* 8px, confirmed both breakpoints */
+    flex: 0 0 auto;
   }
-  .quick-add-modal__qty-label { font: var(--type-label); color: var(--color-ink); }
+  .quick-add-modal__qty-label {
+    font: var(--type-caption);
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-caption);
+    color: var(--color-ink);
+  }
   .quick-add-modal__stepper {
     display: inline-flex;
     align-items: center;
@@ -498,7 +830,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 100%;
+    flex: 1 1 0;
     font: var(--type-cta);
     background: var(--color-teal);
     color: var(--color-paper);
@@ -511,5 +843,42 @@
 
   @media (prefers-reduced-motion: reduce) {
     .quick-add-modal__add:hover { transform: none; }
+  }
+
+  /* ---- Size chart: always-visible full-bleed grid table -------------
+     Was a collapsible <details>; now a real <table> shown whenever
+     item.sizeChart exists (kept `hidden` by default, cleared in
+     populate()). No horizontal padding — Figma's grid runs edge to edge
+     below the padded row above (see .quick-add-modal__top comment).
+     table-layout:auto + width:max-content (not a fixed 100%) lets the
+     table grow past the scroll wrapper's width on narrow/mobile viewports
+     — long nowrap cell strings (e.g. Toe Spacers' "13 OR LARGER") keep
+     their natural width instead of being squeezed and overlapping, and
+     .quick-add-modal__sizechart-scroll's overflow-x:auto actually has
+     something to scroll. min-width:100% keeps it filling the modal on
+     desktop where the content comfortably fits. */
+  .quick-add-modal__sizechart[hidden] { display: none; }
+  .quick-add-modal__sizechart-scroll { overflow-x: auto; width: 100%; }
+  .quick-add-modal__sizechart table {
+    table-layout: auto;
+    width: max-content;
+    min-width: 100%;
+    border-collapse: collapse;
+  }
+  .quick-add-modal__sizechart th,
+  .quick-add-modal__sizechart td {
+    padding: var(--space-2);
+    text-align: center;
+    white-space: nowrap;
+  }
+  .quick-add-modal__sizechart th {
+    background: var(--color-ink);
+    color: var(--color-paper);
+    font: var(--type-label);
+  }
+  .quick-add-modal__sizechart td {
+    border: 1px solid var(--color-border);
+    font: var(--type-body-16);
+    color: var(--color-ink);
   }
 </style>
