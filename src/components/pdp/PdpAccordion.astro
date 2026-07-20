@@ -319,4 +319,37 @@ const wrapperClass = variant === 'onTeal' ? 'pdp-accordion pdp-accordion--on-tea
   .pdp-accordion--on-teal .pdp-accordion__body :global(a) {
     color: var(--color-paper);
   }
+
+  /* ---- Chunk 4: product-accordion teal hover + persist-when-open --------
+     Scoped to the DEFAULT variant (`:not(.pdp-accordion--on-teal)`) so the
+     course-FAQ onTeal band's rules are neither edited nor matched here —
+     it renders byte-for-byte unchanged. The row's inset moves onto the
+     summary + body so the teal summary fills the bordered box edge-to-edge;
+     the row gap drops to var(--space-2) so the summary→body distance stays
+     the original var(--space-5) (16px summary bottom-padding + 8px gap).
+     The summary bar fills solid teal (white label + white +/- icon) on
+     hover and STAYS filled while the row is open; the body stays on white
+     below it so its ink copy remains readable. */
+  .pdp-accordion:not(.pdp-accordion--on-teal) .pdp-accordion__row {
+    padding: 0;
+    gap: var(--space-2);
+  }
+  .pdp-accordion:not(.pdp-accordion--on-teal) .pdp-accordion__summary {
+    padding: var(--space-4) var(--space-6);
+    transition:
+      background var(--motion-fast) var(--ease-standard),
+      color var(--motion-fast) var(--ease-standard);
+  }
+  .pdp-accordion:not(.pdp-accordion--on-teal) .pdp-accordion__body {
+    padding: 0 var(--space-6) var(--space-4);
+  }
+  .pdp-accordion:not(.pdp-accordion--on-teal) .pdp-accordion__summary:hover,
+  .pdp-accordion:not(.pdp-accordion--on-teal) .pdp-accordion__row[open] > .pdp-accordion__summary {
+    background: var(--color-teal);
+    color: var(--color-paper);
+  }
+  .pdp-accordion:not(.pdp-accordion--on-teal) .pdp-accordion__summary:hover .pdp-accordion__icon,
+  .pdp-accordion:not(.pdp-accordion--on-teal) .pdp-accordion__row[open] > .pdp-accordion__summary .pdp-accordion__icon {
+    color: var(--color-paper);
+  }
 </style>
