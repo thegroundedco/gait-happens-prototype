@@ -93,10 +93,16 @@ const heading = item.pdp?.faqsHeading || 'Frequently Asked Questions';
   </section>
 )}
 <style>
+  /* Full-bleed teal band — the background lives on the outer section (spanning
+     the viewport) while the inner wrapper caps + centers the content, matching
+     the CrossSell / BrandSection / LogoWall full-bleed idiom. */
+  .faqs {
+    background: var(--color-teal);
+  }
+
   .faqs__inner {
     max-width: var(--container-max);
     margin-inline: auto;
-    background: var(--color-teal);
     padding-inline: var(--space-5);
     padding-block: var(--space-7);
     display: flex;
