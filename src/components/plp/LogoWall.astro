@@ -16,6 +16,17 @@
 import { pressLogos } from '../../data/catalog.js';
 
 const { logos = pressLogos } = Astro.props;
+
+// Area-normalized per-logo height: for a fixed bounding-box area, h = √(area / aspect),
+// so wide wordmarks get shorter and compact marks taller. Clamped so nothing goes extreme.
+// TARGET_AREA + clamps tuned in the live pass (median logo ≈ 42px at these defaults).
+const TARGET_AREA = 7000;
+const MIN_H = 28;
+const MAX_H = 56;
+function displayHeight({ width, height }) {
+  const aspect = width / height;
+  return Math.round(Math.min(MAX_H, Math.max(MIN_H, Math.sqrt(TARGET_AREA / aspect))));
+}
 ---
 <section class="logo-wall">
   <div class="logo-wall__pad">
@@ -24,12 +35,12 @@ const { logos = pressLogos } = Astro.props;
       <div class="logo-wall__track">
         <ul class="logo-wall__group">
           {logos.map((logo) => (
-            <li class="logo-wall__item"><img class="logo-wall__img" src={logo.src} alt={logo.name} /></li>
+            <li class="logo-wall__item"><img class="logo-wall__img" src={logo.src} alt={logo.name} width={logo.width} height={logo.height} style={`height: ${displayHeight(logo)}px`} /></li>
           ))}
         </ul>
         <ul class="logo-wall__group" aria-hidden="true">
           {logos.map((logo) => (
-            <li class="logo-wall__item"><img class="logo-wall__img" src={logo.src} alt="" /></li>
+            <li class="logo-wall__item"><img class="logo-wall__img" src={logo.src} alt="" width={logo.width} height={logo.height} style={`height: ${displayHeight(logo)}px`} /></li>
           ))}
         </ul>
       </div>
@@ -71,7 +82,8 @@ const { logos = pressLogos } = Astro.props;
     list-style: none;
     margin: 0;
   }
-  .logo-wall__img { height: 44px; width: auto; object-fit: contain; display: block; }
+  /* height is set per-logo inline (area-normalized — see displayHeight above) */
+  .logo-wall__img { width: auto; object-fit: contain; display: block; }
 
   @keyframes logo-wall-scroll {
     from { transform: translateX(0); }
