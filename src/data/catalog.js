@@ -1003,6 +1003,9 @@ export const items = [
           "Consistently wearing toe spacers has reshaped Dr. Conley's feet, strengthening them and reducing her foot pain. She walks and runs in them and using them is one of the best pieces of advice she currently offers her patients.",
         ],
         shopAllHref: '/collections/all',
+        // Chunk 5: the shop-products variant renders TWO Shop All cards
+        // (Figma "Product Cards" 1046:10778) — Products + Courses.
+        shopAllCoursesHref: '/collections/all-courses',
       },
       // Reviews placeholder — same static reviews-app-screenshot values
       // every product/course PDP reuses (Figma-verified for Walk too, node
