@@ -348,6 +348,11 @@ const wrapperClass = variant === 'onTeal' ? 'pdp-accordion pdp-accordion--on-tea
     background: var(--color-teal);
     color: var(--color-paper);
   }
+  /* Ease the icon colour in sync with the summary so the +/- doesn't snap
+     to white a beat before the bar finishes filling teal. */
+  .pdp-accordion:not(.pdp-accordion--on-teal) .pdp-accordion__icon {
+    transition: color var(--motion-fast) var(--ease-standard);
+  }
   .pdp-accordion:not(.pdp-accordion--on-teal) .pdp-accordion__summary:hover .pdp-accordion__icon,
   .pdp-accordion:not(.pdp-accordion--on-teal) .pdp-accordion__row[open] > .pdp-accordion__summary .pdp-accordion__icon {
     color: var(--color-paper);
