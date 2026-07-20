@@ -286,6 +286,11 @@ const hasBody = bodyIsList ? overview.body.length > 0 : Boolean(overview?.body);
          "literal px content column" idiom CourseDetails' 484px buybox
          uses. */
       grid-template-columns: 1fr 651px;
+      /* Three EXPLICIT content rows (heading / details / concepts). Without
+         these the rows are implicit, so the media's `grid-row: 1 / -1` (below)
+         resolves `-1` to the last *explicit* line — line 1 — and the image
+         only ever occupies row 1 instead of spanning the whole column. */
+      grid-template-rows: repeat(3, auto);
       /* 48px between image and content column (Figma's frame gap), but the
          internal content rows (heading -> details -> concepts) are a uniform
          24px per the frame — hence the split, not a single --space-7. */
@@ -311,9 +316,17 @@ const hasBody = bodyIsList ? overview.body.length > 0 : Boolean(overview?.body);
     .course-overview__media {
       grid-column: 1;
       grid-row: 1 / -1;
+      /* Stretch the media to fill the whole content column (all three rows)
+         rather than giving it an explicit height. The image is absolutely
+         positioned (below) so it fills this stretched box via object-fit
+         without its intrinsic size inflating the grid rows. */
       align-self: stretch;
-      height: 100%;
+      position: relative;
       aspect-ratio: auto;
+    }
+    .course-overview__media img {
+      position: absolute;
+      inset: 0;
     }
     .course-overview__concepts {
       grid-column: 2;
