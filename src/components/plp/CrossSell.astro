@@ -79,12 +79,29 @@ const isShopProducts = crossSell?.variant === 'shop-products';
           )}
         </a>
       ))}
-      <a class="cross-sell__card cross-sell__card--all" href={crossSell?.shopAllHref}>
-        <span class="cross-sell__label-row cross-sell__label-row--display">
-          <span class="cross-sell__label cross-sell__label--display">Shop All</span>
-          <img class="cross-sell__arrow" src="/images/nav/arrow-lg.svg" width="64" height="64" alt="" />
-        </span>
-      </a>
+      {isShopProducts ? (
+        <div class="cross-sell__all-stack">
+          <a class="cross-sell__card cross-sell__card--all" href={crossSell?.shopAllHref}>
+            <span class="cross-sell__label-row cross-sell__label-row--display">
+              <span class="cross-sell__label cross-sell__label--display">Shop All Products</span>
+              <img class="cross-sell__arrow" src="/images/nav/arrow.svg" width="24" height="24" alt="" />
+            </span>
+          </a>
+          <a class="cross-sell__card cross-sell__card--all" href={crossSell?.shopAllCoursesHref}>
+            <span class="cross-sell__label-row cross-sell__label-row--display">
+              <span class="cross-sell__label cross-sell__label--display">Shop All Courses</span>
+              <img class="cross-sell__arrow" src="/images/nav/arrow.svg" width="24" height="24" alt="" />
+            </span>
+          </a>
+        </div>
+      ) : (
+        <a class="cross-sell__card cross-sell__card--all" href={crossSell?.shopAllHref}>
+          <span class="cross-sell__label-row cross-sell__label-row--display">
+            <span class="cross-sell__label cross-sell__label--display">Shop All</span>
+            <img class="cross-sell__arrow" src="/images/nav/arrow-lg.svg" width="64" height="64" alt="" />
+          </span>
+        </a>
+      )}
     </div>
   </div>
 </section>
@@ -228,6 +245,9 @@ const isShopProducts = crossSell?.variant === 'shop-products';
     position: relative;
     aspect-ratio: 252 / 226;
     flex-shrink: 0;
+    /* Chunk 5: clip the image so its scale(1.06) hover no longer bleeds out
+       (the base variant's card already provides this via overflow:hidden). */
+    overflow: hidden;
   }
   .cross-sell--shop-products .cross-sell__cart-icon {
     flex-shrink: 0;
@@ -263,18 +283,29 @@ const isShopProducts = crossSell?.variant === 'shop-products';
     height: auto;
     min-height: 125px;
   }
+  /* Chunk 5: the 4th equal column holds two stacked Shop All cards
+     (Products + Courses) that split its height. */
+  .cross-sell--shop-products .cross-sell__all-stack {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-6);
+  }
+  .cross-sell--shop-products .cross-sell__all-stack .cross-sell__card--all {
+    flex: 1 1 0;
+  }
+  /* Figma "Product Cards": these two cards use the nav-label size + 24px arrow
+     (markup), not the base variant's 40px --type-display + 64px arrow. */
+  .cross-sell--shop-products .cross-sell__card--all .cross-sell__label--display {
+    font: var(--type-nav-label);
+  }
 
+  /* Chunk 5: desktop = 4 EQUAL columns (3 product cards + the Shop All stack),
+     replacing the old fixed-252px-card + flexible-Shop-All flex row. */
   @media (min-width: 901px) {
     .cross-sell--shop-products .cross-sell__row {
-      flex-direction: row;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
       align-items: stretch;
-    }
-    .cross-sell--shop-products .cross-sell__card:not(.cross-sell__card--all) {
-      flex: 0 0 252px;
-      width: 252px;
-    }
-    .cross-sell--shop-products .cross-sell__card--all {
-      flex: 1 1 0;
     }
   }
 </style>
