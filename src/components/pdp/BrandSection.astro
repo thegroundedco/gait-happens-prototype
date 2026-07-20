@@ -22,6 +22,7 @@ import { pdpBrand } from '../../data/catalog.js';
 const { tagline = pdpBrand.tagline } = Astro.props;
 ---
 <section class="brand-section">
+  <img class="brand-section__swash" src="/images/pdp/brand-swash.svg" alt="" aria-hidden="true" />
   <div class="brand-section__pad">
     <span class="brand-section__logo" role="img" aria-label="Gait Happens">
       <span class="brand-section__logo-mark"><img src="/images/nav/logo-mark.svg" alt="" /></span>
@@ -33,10 +34,28 @@ const { tagline = pdpBrand.tagline } = Astro.props;
 </section>
 <style>
   .brand-section {
+    position: relative;
+    overflow: hidden;
     background: var(--color-teal);
   }
 
+  /* Decorative footprint/swash layer (Figma 1046:19285) — covers the band,
+     clipped by the band's overflow, sits behind the content. Purely
+     decorative (aria-hidden, empty alt). */
+  .brand-section__swash {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    pointer-events: none;
+    user-select: none;
+  }
+
   .brand-section__pad {
+    position: relative;
+    z-index: 1;
     max-width: var(--container-max);
     margin-inline: auto;
     padding-inline: var(--space-7);
