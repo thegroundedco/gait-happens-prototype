@@ -380,6 +380,10 @@ const gallery = item.pdp?.gallery?.length ? item.pdp.gallery : [item.image];
       background var(--motion-fast) var(--ease-standard),
       color var(--motion-fast) var(--ease-standard);
   }
+  .pdp-details__pill:hover {
+    background: var(--color-teal);
+    color: var(--color-paper);
+  }
   .pdp-details__pill[aria-pressed="true"] {
     background: var(--color-teal);
     color: var(--color-paper);
@@ -441,9 +445,16 @@ const gallery = item.pdp?.gallery?.length ? item.pdp.gallery : [item.image];
     padding: var(--space-4) 20px;
     border: 0;
     cursor: pointer;
-    transition: transform var(--motion-fast) var(--ease-standard);
+    transition:
+      transform var(--motion-fast) var(--ease-standard),
+      background var(--motion-fast) var(--ease-standard),
+      color var(--motion-fast) var(--ease-standard);
   }
-  .pdp-details__add:hover { transform: translateY(-2px); }
+  .pdp-details__add:hover {
+    transform: translateY(-2px);
+    background: var(--color-yellow);
+    color: var(--color-ink);
+  }
 
   .pdp-details__copy {
     font: var(--type-body-sm);
