@@ -292,6 +292,9 @@ const isShopProducts = crossSell?.variant === 'shop-products';
   }
   .cross-sell--shop-products .cross-sell__all-stack .cross-sell__card--all {
     flex: 1 1 0;
+    /* Label bottom-left (Figma) — re-assert flex-end over the shop-products
+       card's own justify-content:flex-start (which the product cards need). */
+    justify-content: flex-end;
   }
   /* Figma "Product Cards": these two cards use the nav-label size + 24px arrow
      (markup), not the base variant's 40px --type-display + 64px arrow. */
