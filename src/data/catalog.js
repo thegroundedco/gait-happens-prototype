@@ -5033,23 +5033,28 @@ export const collections = {
 // Press logos for the "As Seen In" band (LogoWall.astro). Real logo images
 // exported from the design system (file B0fHmlEEm9OdOOnAbnmI8d, node 180:340).
 // `name` is the accessible alt text; `src` is the committed image path.
+// `width`/`height` are each logo's TRIMMED intrinsic content dimensions
+// (padding cropped off — see scripts/normalize-logos.mjs). LogoWall.astro
+// uses them to size each logo by equal bounding-box AREA (not uniform height),
+// and as real <img width height> to avoid layout shift. Regenerate with
+// `node scripts/normalize-logos.mjs` if the source PNGs are ever re-exported.
 export const pressLogos = [
-  { name: 'The New York Times', src: '/images/logos/the-new-york-times.png' },
-  { name: 'People', src: '/images/logos/people.png' },
-  { name: 'New York Post', src: '/images/logos/new-york-post.png' },
-  { name: 'National Geographic', src: '/images/logos/national-geographic.png' },
-  { name: 'WebMD', src: '/images/logos/webmd.png' },
-  { name: 'Bicycling', src: '/images/logos/bicycling.png' },
-  { name: "Women's Health", src: '/images/logos/womens-health.png' },
-  { name: "Men's Health", src: '/images/logos/mens-health.png' },
-  { name: 'Forbes', src: '/images/logos/forbes.png' },
-  { name: "Runner's World", src: '/images/logos/runners-world.png' },
-  { name: 'Yahoo', src: '/images/logos/yahoo.png' },
-  { name: 'GQ', src: '/images/logos/gq.png' },
-  { name: '9News', src: '/images/logos/9news.png' },
-  { name: 'Shape', src: '/images/logos/shape.png' },
-  { name: 'Fox News', src: '/images/logos/fox-news.png' },
-  { name: 'CBS', src: '/images/logos/cbs.png' },
+  { name: 'The New York Times', src: '/images/logos/the-new-york-times.png', width: 891, height: 125 },
+  { name: 'People', src: '/images/logos/people.png', width: 273, height: 92 },
+  { name: 'New York Post', src: '/images/logos/new-york-post.png', width: 869, height: 131 },
+  { name: 'National Geographic', src: '/images/logos/national-geographic.png', width: 274, height: 89 },
+  { name: 'WebMD', src: '/images/logos/webmd.png', width: 129, height: 30 },
+  { name: 'Bicycling', src: '/images/logos/bicycling.png', width: 226, height: 41 },
+  { name: "Women's Health", src: '/images/logos/womens-health.png', width: 228, height: 46 },
+  { name: "Men's Health", src: '/images/logos/mens-health.png', width: 264, height: 55 },
+  { name: 'Forbes', src: '/images/logos/forbes.png', width: 98, height: 26 },
+  { name: "Runner's World", src: '/images/logos/runners-world.png', width: 229, height: 26 },
+  { name: 'Yahoo', src: '/images/logos/yahoo.png', width: 294, height: 57 },
+  { name: 'GQ', src: '/images/logos/gq.png', width: 151, height: 76 },
+  { name: '9News', src: '/images/logos/9news.png', width: 235, height: 89 },
+  { name: 'Shape', src: '/images/logos/shape.png', width: 132, height: 36 },
+  { name: 'Fox News', src: '/images/logos/fox-news.png', width: 140, height: 132 },
+  { name: 'CBS', src: '/images/logos/cbs.png', width: 142, height: 44 },
 ];
 
 // ---- PDP brand content --------------------------------------------------
