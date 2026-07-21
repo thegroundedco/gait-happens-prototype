@@ -75,10 +75,10 @@ function displayHeight({ width, height }) {
   .logo-wall__group {
     display: flex;
     align-items: center;
-    gap: var(--space-5);
+    gap: var(--space-8);
     /* trailing gap so the two groups stream with a uniform gap everywhere,
-       making the -50% loop point invisible */
-    padding-inline-end: var(--space-5);
+       making the -50% loop point invisible (must equal the inter-logo gap) */
+    padding-inline-end: var(--space-8);
     list-style: none;
     margin: 0;
   }
