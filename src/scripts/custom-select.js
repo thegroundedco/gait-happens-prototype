@@ -74,6 +74,15 @@ function buildDropdown(sel) {
   sel.classList.add('cselect__native');
   sel.setAttribute('aria-hidden', 'true');
   sel.tabIndex = -1;
+  // The native select is now a hidden value holder only. Mark it `disabled` so
+  // it drops out of `:not([disabled])` focusable queries (e.g. the quick-add
+  // modal's focus trap, QuickAddModal.astro getFocusable) — a `display:none`
+  // element would otherwise be a phantom tab stop. `.value` can still be set
+  // and `change` dispatched programmatically on a disabled select, and it is
+  // still read via `.value`/`.selectedIndex` (the modal's selectionSummary),
+  // so syncing is unaffected. Runs AFTER `disabled` is computed above, so the
+  // enabled/disabled branch decision is unchanged.
+  sel.disabled = true;
 
   // Trigger.
   const trigger = document.createElement('button');
