@@ -7,12 +7,12 @@ const { count = 0, noun = 'Products' } = Astro.props;
 <div class="filter-sort">
   <div class="filter-sort__group">
     <span class="filter-sort__label">Filter:</span>
-    <select class="filter-sort__select" aria-label="Availability">
+    <select class="filter-sort__select" data-custom-select="yellow" data-cselect-size="compact" aria-label="Availability">
       <option>Availability</option>
       <option>In Stock</option>
       <option>Out of Stock</option>
     </select>
-    <select class="filter-sort__select" aria-label="Price">
+    <select class="filter-sort__select" data-custom-select="yellow" data-cselect-size="compact" aria-label="Price">
       <option>Price</option>
       <option>Under $50</option>
       <option>$50 – $150</option>
@@ -21,7 +21,7 @@ const { count = 0, noun = 'Products' } = Astro.props;
   </div>
   <div class="filter-sort__group">
     <span class="filter-sort__label">Sort by:</span>
-    <select class="filter-sort__select" aria-label="Sort by">
+    <select class="filter-sort__select" data-custom-select="yellow" data-cselect-size="compact" aria-label="Sort by">
       <option selected>Best Selling</option>
       <option>Price: Low to High</option>
       <option>Price: High to Low</option>
