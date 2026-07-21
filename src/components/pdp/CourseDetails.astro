@@ -175,6 +175,7 @@ const heroAvatarCount = item.pdp?.heroAvatars ?? item.pdp?.instructors?.length ?
               control.type === 'select' ? (
                 <select
                   class="course-details__select"
+                  data-custom-select="yellow"
                   aria-label={selectAccessibleName(control, buybox.label)}
                   aria-disabled={control.disabled ? 'true' : undefined}
                 >
