@@ -90,6 +90,7 @@
 <script>
   import { getItem } from '../../data/catalog.js';
   import { addLine } from '../../scripts/cart.js';
+  import { enhanceSelects } from '../../scripts/custom-select.js';
 
   // Astro's ClientRouter (View Transitions) swaps the DOM on navigation and
   // does NOT re-run this already-loaded module script. To stay leak-free
@@ -226,7 +227,7 @@
         .map((opt) => `<option value="${escapeHtml(opt.href ?? opt.label)}">${escapeHtml(opt.label)}</option>`)
         .join('');
       const disabledAttr = control.disabled ? ' aria-disabled="true"' : '';
-      return `<select class="quick-add-modal__select" data-quick-add-select aria-label="${ariaLabel}"${disabledAttr}>${placeholderOption}${options}</select>`;
+      return `<select class="quick-add-modal__select" data-custom-select="yellow" data-quick-add-select aria-label="${ariaLabel}"${disabledAttr}>${placeholderOption}${options}</select>`;
     }
 
     // Pills — an `href` option is a CROSS-SELL NAVIGATION LINK to another
@@ -335,6 +336,11 @@
       e.buyboxControls.innerHTML = buyboxControls
         .map((control, index) => renderBuyboxControl(control, `c${index}`, buybox.label))
         .join('');
+      // The buybox (and its Location <select>) is rebuilt via innerHTML on
+      // every open, so the freshly-injected select has no cselectEnhanced flag
+      // and enhances here; the previous open's wrapper was discarded with the
+      // overwritten innerHTML (idempotent, no leak).
+      enhanceSelects(e.buyboxControls);
     } else {
       if (e.buyboxWrap) e.buyboxWrap.hidden = true;
       if (e.buyboxControls) e.buyboxControls.innerHTML = '';
