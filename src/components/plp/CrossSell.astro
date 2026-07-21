@@ -271,6 +271,11 @@ const isShopProducts = crossSell?.variant === 'shop-products';
     color: var(--color-paper);
     padding: 0 var(--space-5) var(--space-4);
     width: 100%;
+    /* Grow to fill the (grid-stretched, equal-height) card so the teal block
+       reaches the card bottom on shorter blurbs — otherwise a shorter blurb
+       leaves a yellow gap and the cards read as uneven heights. Inert on the
+       mobile stack (cards are content-height there, nothing to grow into). */
+    flex-grow: 1;
   }
   .cross-sell--shop-products .cross-sell__kicker {
     font: var(--type-body-sm);
