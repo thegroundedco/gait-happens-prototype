@@ -699,22 +699,30 @@
     letter-spacing: var(--tracking-caption);
     color: var(--color-ink-70);
   }
-  .quick-add-modal__pills { display: flex; flex-wrap: wrap; gap: var(--space-2); }
-  .quick-add-modal__pill {
-    border: 1px solid var(--color-border);
+  /* The pills, size-chart cells, and select below are injected into the
+     SSR-stable modal at RUNTIME via innerHTML, so they never receive Astro's
+     scoped `data-astro-cid` attribute — a scoped selector wouldn't match them
+     and they'd fall back to default browser styling (gray buttons, an
+     unstyled table). These rules use `:global()` so they reach the injected
+     elements (same escape hatch PdpAccordion.astro uses for its `set:html`
+     content). */
+  :global(.quick-add-modal__pills) { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+  /* Design-system size/course-type pill: teal outline + teal text, filling
+     solid teal (white text) on hover and when selected — matches
+     ProductDetails' .pdp-details__pill and the Figma modal (1062:21145). */
+  :global(.quick-add-modal__pill) {
+    border: 1px solid var(--color-teal);
     background: var(--color-paper);
-    color: var(--color-ink);
-    font: var(--type-body-16);
-    padding: var(--space-2) var(--space-4);
+    color: var(--color-teal);
+    font: var(--type-cta);
+    padding: var(--space-3) var(--space-5);
     cursor: pointer;
     transition:
-      border-color var(--motion-fast) var(--ease-standard),
       background var(--motion-fast) var(--ease-standard),
       color var(--motion-fast) var(--ease-standard);
   }
-  .quick-add-modal__pill:hover { border-color: var(--color-teal); }
-  .quick-add-modal__pill[aria-pressed="true"] {
-    border-color: var(--color-teal);
+  :global(.quick-add-modal__pill:hover),
+  :global(.quick-add-modal__pill[aria-pressed="true"]) {
     background: var(--color-teal);
     color: var(--color-paper);
   }
@@ -728,13 +736,13 @@
      look as CourseDetails.astro's own `.course-details__pill`/`--selected`
      pair for visual consistency); this just adds the anchor-specific
      display/underline reset and the selected fill. */
-  .quick-add-modal__pill--link {
+  :global(.quick-add-modal__pill--link) {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     text-decoration: none;
   }
-  .quick-add-modal__pill--link.quick-add-modal__pill--selected {
+  :global(.quick-add-modal__pill--link.quick-add-modal__pill--selected) {
     border-color: var(--color-teal);
     background: var(--color-teal);
     color: var(--color-paper);
@@ -761,7 +769,7 @@
      than adding `appearance: none` + a masked icon with no other precedent
      in this codebase. `239px` matches CourseDetails' own literal, measured
      width. */
-  .quick-add-modal__select {
+  :global(.quick-add-modal__select) {
     width: 239px;
     max-width: 100%;
     border: 1px solid var(--color-border);
@@ -865,18 +873,18 @@
     min-width: 100%;
     border-collapse: collapse;
   }
-  .quick-add-modal__sizechart th,
-  .quick-add-modal__sizechart td {
+  :global(.quick-add-modal__sizechart th),
+  :global(.quick-add-modal__sizechart td) {
     padding: var(--space-2);
     text-align: center;
     white-space: nowrap;
   }
-  .quick-add-modal__sizechart th {
+  :global(.quick-add-modal__sizechart th) {
     background: var(--color-ink);
     color: var(--color-paper);
     font: var(--type-label);
   }
-  .quick-add-modal__sizechart td {
+  :global(.quick-add-modal__sizechart td) {
     border: 1px solid var(--color-border);
     font: var(--type-body-16);
     color: var(--color-ink);
