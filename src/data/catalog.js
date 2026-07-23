@@ -58,10 +58,10 @@ export const items = [
       ],
       gallery: [
         '/images/plp/toe-spacers.jpg',
-        '/images/plp/toe-spacers.jpg',
-        '/images/plp/toe-spacers.jpg',
-        '/images/plp/toe-spacers.jpg',
-        '/images/plp/toe-spacers.jpg',
+        '/images/pdp/toe-spacers/gallery-2.jpg',
+        '/images/pdp/toe-spacers/gallery-3.jpg',
+        '/images/pdp/toe-spacers/gallery-4.jpg',
+        '/images/pdp/toe-spacers/gallery-5.jpg',
       ],
       crossSell: {
         heading: 'More Resources for Your Movement Journey',
@@ -75,10 +75,10 @@ export const items = [
       // took for `gallery` above).
       featuresHeading: 'Toe Spacer Features',
       features: [
-        { image: '/images/plp/toe-spacers.jpg', label: null, text: 'Support alignment of the toes and metatarsals' },
-        { image: '/images/plp/toe-spacers.jpg', label: null, text: 'Promote muscle engagement of the foot intrinsics' },
-        { image: '/images/plp/toe-spacers.jpg', label: null, text: 'Customizable to create a personalized fit' },
-        { image: '/images/plp/toe-spacers.jpg', label: null, text: 'Combat the effects of years in narrow shoes' },
+        { image: '/images/pdp/toe-spacers/feature-1.jpg', label: null, text: 'Support alignment of the toes and metatarsals' },
+        { image: '/images/pdp/toe-spacers/feature-2.jpg', label: null, text: 'Promote muscle engagement of the foot intrinsics' },
+        { image: '/images/pdp/toe-spacers/feature-3.jpg', label: null, text: 'Customizable to create a personalized fit' },
+        { image: '/images/pdp/toe-spacers/feature-4.jpg', label: null, text: 'Combat the effects of years in narrow shoes' },
       ],
       // Task 3 (Product Details accordion) — Figma-verbatim from node
       // `710:6353` / `1088:15369`'s "Instructions"/"Research" panels. The
@@ -194,10 +194,10 @@ export const items = [
       notes: ['*Shipping available to United States, Canada, and United Kingdom'],
       gallery: [
         '/images/plp/foot-health-kit.jpg',
-        '/images/plp/foot-health-kit.jpg',
-        '/images/plp/foot-health-kit.jpg',
-        '/images/plp/foot-health-kit.jpg',
-        '/images/plp/foot-health-kit.jpg',
+        '/images/pdp/foot-health-kit/gallery-2.jpg',
+        '/images/pdp/foot-health-kit/gallery-3.jpg',
+        '/images/pdp/foot-health-kit/gallery-4.jpg',
+        '/images/pdp/foot-health-kit/gallery-5.jpg',
       ],
       crossSell: {
         heading: 'More Resources for Your Movement Journey',
@@ -206,10 +206,10 @@ export const items = [
       },
       featuresHeading: 'Foot Health Kit Features',
       features: [
-        { image: '/images/plp/foot-health-kit.jpg', label: null, text: 'Simple tools to help improve the mobility and strength of your feet' },
-        { image: '/images/plp/foot-health-kit.jpg', label: null, text: 'Video instructions taught by clinicians specializing in foot health' },
-        { image: '/images/plp/foot-health-kit.jpg', label: null, text: 'Convenient travel-friendly bag to take your kit on the go' },
-        { image: '/images/plp/foot-health-kit.jpg', label: null, text: 'Tools for all foot types' },
+        { image: '/images/pdp/foot-health-kit/feature-1.jpg', label: null, text: 'Simple tools to help improve the mobility and strength of your feet' },
+        { image: '/images/pdp/foot-health-kit/feature-2.jpg', label: null, text: 'Video instructions taught by clinicians specializing in foot health' },
+        { image: '/images/pdp/foot-health-kit/feature-3.jpg', label: null, text: 'Convenient travel-friendly bag to take your kit on the go' },
+        { image: '/images/pdp/foot-health-kit/feature-4.jpg', label: null, text: 'Tools for all foot types' },
       ],
       // Task 7 (data-driven accordion, see PdpAccordion.astro): 3 rows,
       // Figma-verbatim from `719:6544;309:842` / `1088:15396` — same 3 rows
@@ -308,10 +308,9 @@ export const items = [
       ],
       gallery: [
         '/images/plp/cork-supplement.jpg',
-        '/images/plp/cork-supplement.jpg',
-        '/images/plp/cork-supplement.jpg',
-        '/images/plp/cork-supplement.jpg',
-        '/images/plp/cork-supplement.jpg',
+        '/images/pdp/cork-supplement/gallery-2.jpg',
+        '/images/pdp/cork-supplement/gallery-3.jpg',
+        '/images/pdp/cork-supplement/gallery-4.jpg',
       ],
       crossSell: {
         heading: 'More Resources for Your Movement Journey',
@@ -323,8 +322,8 @@ export const items = [
       // flexible `flex: 1 1 0` row, so a shorter `columns` array just
       // renders 2 stretched cards instead of 4, no component change needed.
       features: [
-        { image: '/images/plp/cork-supplement.jpg', label: null, text: 'Great for those with bunions or tailors bunions' },
-        { image: '/images/plp/cork-supplement.jpg', label: null, text: 'Add stiffness to your spacers to keep them in place while walking' },
+        { image: '/images/pdp/cork-supplement/feature-1.jpg', label: null, text: 'Great for those with bunions or tailors bunions' },
+        { image: '/images/pdp/cork-supplement/feature-2.jpg', label: null, text: 'Add stiffness to your spacers to keep them in place while walking' },
       ],
       // Task 7 fix (PDP review): restores the "Shipping to Europe?"
       // accordion row Cork Supplement's desktop frame (node `721:7029`)
@@ -404,10 +403,10 @@ export const items = [
       ],
       gallery: [
         '/images/plp/toe-strengtheners.jpg',
-        '/images/plp/toe-strengtheners.jpg',
-        '/images/plp/toe-strengtheners.jpg',
-        '/images/plp/toe-strengtheners.jpg',
-        '/images/plp/toe-strengtheners.jpg',
+        '/images/pdp/toe-strengtheners/gallery-2.jpg',
+        '/images/pdp/toe-strengtheners/gallery-3.jpg',
+        '/images/pdp/toe-strengtheners/gallery-4.jpg',
+        '/images/pdp/toe-strengtheners/gallery-5.jpg',
       ],
       crossSell: {
         heading: 'More Resources for Your Movement Journey',
@@ -416,9 +415,9 @@ export const items = [
       },
       featuresHeading: 'Toe Strengtheners Features',
       features: [
-        { image: '/images/plp/toe-strengtheners.jpg', label: null, text: 'Patented design by Dr. Courtney Conley, renowned foot health expert' },
-        { image: '/images/plp/toe-strengtheners.jpg', label: null, text: 'Resistance bands with three levels of resistance' },
-        { image: '/images/plp/toe-strengtheners.jpg', label: null, text: 'Multifunctional to strengthen the four layers of muscles in our feet' },
+        { image: '/images/pdp/toe-strengtheners/feature-1.jpg', label: null, text: 'Patented design by Dr. Courtney Conley, renowned foot health expert' },
+        { image: '/images/pdp/toe-strengtheners/feature-2.jpg', label: null, text: 'Resistance bands with three levels of resistance' },
+        { image: '/images/pdp/toe-strengtheners/feature-3.jpg', label: null, text: 'Multifunctional to strengthen the four layers of muscles in our feet' },
       ],
       // Figma-verbatim from node `721:7224;309:842` / `1088:15431` — same 2
       // rows on both breakpoints.
@@ -458,7 +457,7 @@ export const items = [
     price: '$75 USD',
     priceRange: null,
     description: 'A clinical-grade tool that precisely quantifies toe strength so you and your clients can track measurable progress.',
-    image: '/images/plp/toe-dynamometer.jpg',
+    image: '/images/plp/placeholder.svg',
     href: '/products/toe-dynamometer',
     cta: 'View Product',
     rating: 4.5,
@@ -488,12 +487,11 @@ export const items = [
         'These tests can be performed in seconds and repeated upon re-examinations to monitor strength gains.',
         'The objective strength scores for the toes muscles provide the doctor and the patient clear proof of the need to perform exercises. The strength scores provide measurable guidelines for return to sport and/or restoration of activity.',
       ],
+      // No real toe-dynamometer photography exists anywhere in the client
+      // library (2026-07 real-images pass) — honest gray placeholder until
+      // the client supplies product shots.
       gallery: [
-        '/images/plp/toe-dynamometer.jpg',
-        '/images/plp/toe-dynamometer.jpg',
-        '/images/plp/toe-dynamometer.jpg',
-        '/images/plp/toe-dynamometer.jpg',
-        '/images/plp/toe-dynamometer.jpg',
+        '/images/plp/placeholder.svg',
       ],
       crossSell: {
         heading: 'More Resources for Your Movement Journey',
@@ -502,8 +500,8 @@ export const items = [
       },
       featuresHeading: 'More About the Toe Dynamometer',
       features: [
-        { image: '/images/plp/toe-dynamometer.jpg', label: null, text: 'Precisely quantify toe strength for big toe and lesser toes' },
-        { image: '/images/plp/toe-dynamometer.jpg', label: null, text: "Show your clients quantitative progress by remeasuring their strength throughout their programming" },
+        { image: '/images/plp/placeholder.svg', label: null, text: 'Precisely quantify toe strength for big toe and lesser toes' },
+        { image: '/images/plp/placeholder.svg', label: null, text: "Show your clients quantitative progress by remeasuring their strength throughout their programming" },
       ],
       // Figma-verbatim from node `721:8351;309:842` / `1088:15486` — same 3
       // rows on both breakpoints. Each row's body is literally a bare
@@ -562,7 +560,7 @@ export const items = [
     // shot; this one has none) — falls back to a flat placeholder rectangle
     // matching Figma's own unphotographed gray-box treatment of every PDP
     // gallery slot in this file (including the ones with real photos).
-    image: '/images/plp/placeholder.svg',
+    image: '/images/plp/mobility-ball.jpg',
     href: '/products/mobility-ball',
     cta: 'View Product',
     rating: 4.5,
@@ -588,11 +586,11 @@ export const items = [
         'Complements strength & rehab exercises such as adding it between your heels for calf raises to enhance results.',
       ],
       gallery: [
-        '/images/plp/placeholder.svg',
-        '/images/plp/placeholder.svg',
-        '/images/plp/placeholder.svg',
-        '/images/plp/placeholder.svg',
-        '/images/plp/placeholder.svg',
+        '/images/plp/mobility-ball.jpg',
+        '/images/pdp/mobility-ball/gallery-2.jpg',
+        '/images/pdp/mobility-ball/gallery-3.jpg',
+        '/images/pdp/mobility-ball/gallery-4.jpg',
+        '/images/pdp/mobility-ball/gallery-5.jpg',
       ],
       crossSell: {
         heading: 'More Resources for Your Movement Journey',
@@ -601,10 +599,10 @@ export const items = [
       },
       featuresHeading: 'Mobility Ball Features',
       features: [
-        { image: '/images/plp/placeholder.svg', label: null, text: 'Help soothe stiff and sore feet' },
-        { image: '/images/plp/placeholder.svg', label: null, text: 'Clinician recommended' },
-        { image: '/images/plp/placeholder.svg', label: null, text: 'Stimulate thousands of nerves in the soles of your feet' },
-        { image: '/images/plp/placeholder.svg', label: null, text: 'Pair with your favorite exercises' },
+        { image: '/images/pdp/mobility-ball/feature-1.jpg', label: null, text: 'Help soothe stiff and sore feet' },
+        { image: '/images/pdp/mobility-ball/feature-2.jpg', label: null, text: 'Clinician recommended' },
+        { image: '/images/pdp/mobility-ball/feature-3.jpg', label: null, text: 'Stimulate thousands of nerves in the soles of your feet' },
+        { image: '/images/pdp/mobility-ball/feature-4.jpg', label: null, text: 'Pair with your favorite exercises' },
       ],
       // No `accordion` key — Mobility Ball's desktop frame (721:8729) has
       // an empty, childless accordion placeholder div (node
@@ -762,11 +760,9 @@ export const items = [
       // Gallery — Figma's own gallery is 5 flat gray placeholder blocks (1
       // main + 4 thumbnails, no real photography), same "reuse the one PLP
       // shot" placeholder convention every other product's `gallery` takes.
+      // Single frame on purpose: the only real Walk asset is the book render
+      // (real-images pass) — five identical thumbs read as placeholder.
       gallery: [
-        '/images/plp/walk.jpg',
-        '/images/plp/walk.jpg',
-        '/images/plp/walk.jpg',
-        '/images/plp/walk.jpg',
         '/images/plp/walk.jpg',
       ],
       // ---- CLIENT-CONTENT FLAG (mobile hero, 1017:9559) -------------------
@@ -932,7 +928,7 @@ export const items = [
       // header comment for the full reasoning).
       instructors: [
         {
-          photo: '/images/plp/walk.jpg',
+          photo: '/images/pdp/instructors/courtney-conley.jpg',
           name: 'Dr. Courtney Conley',
           credential: null,
           bio: [
@@ -943,7 +939,7 @@ export const items = [
           ],
         },
         {
-          photo: '/images/plp/walk.jpg',
+          photo: '/images/plp/placeholder.svg',
           name: 'Dr. Milica McDowell',
           credential: null,
           // Best-effort transcription of Figma's own clamped preview text —
@@ -1179,7 +1175,7 @@ export const items = [
       // sit" desktop vs "where to sit" mobile) — desktop kept, trailing
       // Figma text-node whitespace trimmed.
       overview: {
-        image: '/images/plp/sole-switch.jpg',
+        image: '/images/pdp/sole-switch/overview.jpg',
         details: [
           { label: 'Course Length', value: '50 minutes' },
           { label: 'Evidence Based', value: 'Yes' },
@@ -1215,22 +1211,22 @@ export const items = [
       featuresHeading: 'What to Expect in the Sole Switch Course',
       features: [
         {
-          image: '/images/plp/sole-switch.jpg',
+          image: '/images/pdp/sole-switch/feature-1.jpg',
           label: null,
           text: 'Walk away with a better understanding of how to select healthy footwear! Plus, get a bonus PDF footwear guide!',
         },
         {
-          image: '/images/plp/sole-switch.jpg',
+          image: '/images/pdp/sole-switch/feature-2.jpg',
           label: null,
           text: 'Receive lifetime access to a course written by clinicians with over 30 years of experience helping patients build foot health naturally.',
         },
         {
-          image: '/images/plp/sole-switch.jpg',
+          image: '/images/pdp/sole-switch/feature-3.jpg',
           label: null,
           text: 'Learn specific and helpful strategies to help transition safely to less restrictive natural footwear.',
         },
         {
-          image: '/images/plp/sole-switch.jpg',
+          image: '/images/pdp/sole-switch/feature-4.jpg',
           label: null,
           text: 'When the toes can properly splay, our foot and ankle muscles engage,',
         },
@@ -1325,7 +1321,7 @@ export const items = [
       // takes), everything else reused verbatim.
       instructors: [
         {
-          photo: '/images/plp/sole-switch.jpg',
+          photo: '/images/pdp/instructors/courtney-conley.jpg',
           name: 'Dr. Courtney Conley',
           credential: 'Lakewood, Colorado',
           bio: [
@@ -1336,7 +1332,7 @@ export const items = [
           ],
         },
         {
-          photo: '/images/plp/sole-switch.jpg',
+          photo: '/images/plp/placeholder.svg',
           name: 'Dr. Allison Riley, DPT',
           credential: 'Salem, Massachusetts',
           bio: [
@@ -1522,7 +1518,7 @@ export const items = [
       // exclusive render branch in CourseDetails.astro (see that file's
       // header comment for the full field-shape/alt-text/layout reasoning).
       // `courseCard` and `heroImage` are never both set on the same item.
-      heroImage: '/images/plp/combating-bunions.jpg',
+      heroImage: '/images/pdp/combating-bunions/hero.jpg',
       // Same placeholder PLP course shot every other image slot on this
       // item already reuses (`overview.image`, `features[].image`,
       // `instructors[].photo` below) — no dedicated hero photography exists
@@ -1541,7 +1537,7 @@ export const items = [
       // Desktop kept canonical for `details`/`body` — mobile disagrees on
       // MORE than wording here (see the CLIENT-CONTENT FLAG below).
       overview: {
-        image: '/images/plp/combating-bunions.jpg',
+        image: '/images/pdp/combating-bunions/overview.jpg',
         details: [
           { label: 'Course Length', value: '4 Module Mini-Course' },
           { label: 'Evidence Based', value: 'Yes' },
@@ -1572,22 +1568,22 @@ export const items = [
       featuresHeading: "What's Included:",
       features: [
         {
-          image: '/images/plp/combating-bunions.jpg',
+          image: '/images/pdp/combating-bunions/feature-1.jpg',
           label: null,
           text: "A 4-module mini-course designed SPECIFICALLY to target discomfort caused by bunions AND Tailor's bunions.",
         },
         {
-          image: '/images/plp/combating-bunions.jpg',
+          image: '/images/pdp/combating-bunions/feature-2.jpg',
           label: null,
           text: 'The ability to improve function of your feet and get back to your favorite activities.',
         },
         {
-          image: '/images/plp/combating-bunions.jpg',
+          image: '/images/pdp/combating-bunions/feature-3.jpg',
           label: null,
           text: 'Crystal clear instruction on how to care for your feet - form exercises to choosing footwear.',
         },
         {
-          image: '/images/plp/combating-bunions.jpg',
+          image: '/images/pdp/combating-bunions/feature-4.jpg',
           label: null,
           // CLIENT-CONTENT FLAG: mobile's 4th blurb (999:7158) reads "When
           // the toes can properly splay, our foot and ankle muscles engage,
@@ -1681,7 +1677,7 @@ export const items = [
       // exists yet, same placeholder convention every other course takes).
       instructors: [
         {
-          photo: '/images/plp/combating-bunions.jpg',
+          photo: '/images/pdp/instructors/courtney-conley.jpg',
           name: 'Dr. Courtney Conley',
           credential: 'Lakewood, Colorado',
           bio: [
@@ -1692,7 +1688,7 @@ export const items = [
           ],
         },
         {
-          photo: '/images/plp/combating-bunions.jpg',
+          photo: '/images/pdp/instructors/jenifer-perez.jpg',
           name: 'Dr. Jenifer Perez, DC',
           credential: 'Lafayette, Colorado',
           bio: [
@@ -1948,7 +1944,7 @@ export const items = [
       // text/colored background (confirmed via get_design_context on both
       // breakpoints) — `heroImage` is used instead (mutually exclusive with
       // `courseCard`, see CourseDetails.astro's header comment).
-      heroImage: '/images/plp/fit-feet.jpg',
+      heroImage: '/images/pdp/fit-feet/hero.jpg',
       // Same placeholder PLP course shot every other image slot on this item
       // already reuses (`overview.image`, `features[].image`,
       // `instructors[].photo` below) — no dedicated hero photography exists
@@ -1967,7 +1963,7 @@ export const items = [
       // Desktop kept canonical for `details`/`body` — mobile disagrees on
       // MORE than wording here (see the CLIENT-CONTENT FLAG below).
       overview: {
-        image: '/images/plp/fit-feet.jpg',
+        image: '/images/pdp/fit-feet/overview.jpg',
         details: [
           { label: 'Course Length', value: '12 Weeks' },
           { label: 'Evidence Based', value: 'Yes' },
@@ -2002,22 +1998,22 @@ export const items = [
       featuresHeading: "What's Included:",
       features: [
         {
-          image: '/images/plp/fit-feet.jpg',
+          image: '/images/pdp/fit-feet/feature-1.jpg',
           label: null,
           text: 'The Fit Feet Program includes a structured 12-week progression divided into four phases.',
         },
         {
-          image: '/images/plp/fit-feet.jpg',
+          image: '/images/pdp/fit-feet/feature-2.jpg',
           label: null,
           text: 'Fifteen 25 minute follow-along workouts led by clinicians, with built-in modifications and progressions.',
         },
         {
-          image: '/images/plp/fit-feet.jpg',
+          image: '/images/pdp/fit-feet/feature-3.jpg',
           label: null,
           text: 'Clinically curated exercises to target your feet and connect your feet to your hips, core, and more.',
         },
         {
-          image: '/images/plp/fit-feet.jpg',
+          image: '/images/pdp/fit-feet/feature-4.jpg',
           label: null,
           // CLIENT-CONTENT FLAG: mobile's 4th blurb (999:7172) reads "When
           // the toes can properly splay, our foot and ankle muscles engage,
@@ -2129,7 +2125,7 @@ export const items = [
       // convention every other course takes).
       instructors: [
         {
-          photo: '/images/plp/fit-feet.jpg',
+          photo: '/images/pdp/instructors/courtney-conley.jpg',
           name: 'Dr. Courtney Conley',
           credential: 'Lakewood, Colorado',
           bio: [
@@ -2140,7 +2136,7 @@ export const items = [
           ],
         },
         {
-          photo: '/images/plp/fit-feet.jpg',
+          photo: '/images/pdp/instructors/jenifer-perez.jpg',
           name: 'Dr. Jenifer Perez, DC',
           credential: 'Lafayette, Colorado',
           bio: [
@@ -2398,7 +2394,7 @@ export const items = [
       // every other slot on this page already reuses (see the `features`
       // comment below).
       overview: {
-        image: '/images/plp/sole-switch-pro.jpg',
+        image: '/images/pdp/sole-switch-pro/overview.jpg',
         details: [
           { label: 'Course Length', value: '2 Hours 13 Minutes' },
           { label: 'Evidence Based', value: 'Yes' },
@@ -2431,22 +2427,22 @@ export const items = [
       featuresHeading: 'What to Expect in the Sole Switch Course',
       features: [
         {
-          image: '/images/plp/sole-switch-pro.jpg',
+          image: '/images/pdp/sole-switch-pro/feature-1.jpg',
           label: null,
           text: 'Walk away with a better understanding of how to select healthy footwear! Plus, get a bonus PDF footwear guide!',
         },
         {
-          image: '/images/plp/sole-switch-pro.jpg',
+          image: '/images/pdp/sole-switch-pro/feature-2.jpg',
           label: null,
           text: 'Receive lifetime access to a course written by clinicians with over 30 years of experience helping patients build foot health naturally.',
         },
         {
-          image: '/images/plp/sole-switch-pro.jpg',
+          image: '/images/pdp/sole-switch-pro/feature-3.jpg',
           label: null,
           text: 'Learn specific and helpful strategies to help transition safely to less restrictive natural footwear.',
         },
         {
-          image: '/images/plp/sole-switch-pro.jpg',
+          image: '/images/pdp/sole-switch-pro/feature-4.jpg',
           label: null,
           text: 'When the toes can properly splay, our foot and ankle muscles engage,',
         },
@@ -2588,7 +2584,7 @@ export const items = [
       // course shot every other slot on this page already reuses.
       instructors: [
         {
-          photo: '/images/plp/sole-switch-pro.jpg',
+          photo: '/images/pdp/instructors/courtney-conley.jpg',
           name: 'Dr. Courtney Conley',
           credential: 'Lakewood, Colorado',
           bio: [
@@ -2599,7 +2595,7 @@ export const items = [
           ],
         },
         {
-          photo: '/images/plp/sole-switch-pro.jpg',
+          photo: '/images/plp/placeholder.svg',
           name: 'Dr. Allison Riley, DPT',
           credential: 'Salem, Massachusetts',
           bio: [
@@ -2789,7 +2785,7 @@ export const items = [
       // CourseDetails.astro's header comment). No dedicated hero photography
       // exists for this course yet — reuses the same PLP course shot every
       // other image slot on this item already reuses.
-      heroImage: '/images/plp/gait-foundations.jpg',
+      heroImage: '/images/pdp/gait-foundations/hero.jpg',
       instructorsByline: 'Course By: Dr. Conley and Dr. Perez',
       // CLIENT-CONTENT FLAG: mobile's own instructors byline (1116:14701)
       // reads "Course By: Dr. Conley and Dr. Riley" instead — Dr. Riley
@@ -2805,7 +2801,7 @@ export const items = [
       // desktop first" directive — mobile disagrees on MORE than wording
       // (see the CLIENT-CONTENT FLAG below).
       overview: {
-        image: '/images/plp/gait-foundations.jpg',
+        image: '/images/pdp/gait-foundations/overview.jpg',
         details: [
           { label: 'Course Length', value: '4 Hours' },
           { label: 'Evidence Based', value: 'Yes' },
@@ -2839,22 +2835,22 @@ export const items = [
       featuresHeading: 'The Gait Foundations Course includes:',
       features: [
         {
-          image: '/images/plp/gait-foundations.jpg',
+          image: '/images/pdp/gait-foundations/feature-1.jpg',
           label: null,
           text: '4 hours of content with forever access.',
         },
         {
-          image: '/images/plp/gait-foundations.jpg',
+          image: '/images/pdp/gait-foundations/feature-2.jpg',
           label: null,
           text: 'Tools you can implement in practice immediately.',
         },
         {
-          image: '/images/plp/gait-foundations.jpg',
+          image: '/images/pdp/gait-foundations/feature-3.jpg',
           label: null,
           text: 'Specific assessments and treatment strategies.',
         },
         {
-          image: '/images/plp/gait-foundations.jpg',
+          image: '/images/pdp/gait-foundations/feature-4.jpg',
           label: null,
           // CLIENT-CONTENT FLAG: mobile's 4th blurb (1116:14703) reads "When
           // the toes can properly splay, our foot and ankle muscles engage,
@@ -2978,7 +2974,7 @@ export const items = [
       // as a component gap, per the brief.
       instructors: [
         {
-          photo: '/images/plp/gait-foundations.jpg',
+          photo: '/images/pdp/instructors/courtney-conley.jpg',
           name: 'Dr. Courtney Conley',
           credential: 'Lakewood, Colorado',
           bio: [
@@ -2989,7 +2985,7 @@ export const items = [
           ],
         },
         {
-          photo: '/images/plp/gait-foundations.jpg',
+          photo: '/images/pdp/instructors/jenifer-perez.jpg',
           name: 'Dr. Jenifer Perez, DC',
           credential: 'Lafayette, Colorado',
           bio: [
@@ -3231,7 +3227,7 @@ export const items = [
       // `I1116:15572;181:674` mobile) is a plain clinical photo, no overlaid
       // text/colored background — `heroImage` is used instead (mutually
       // exclusive with `courseCard`).
-      heroImage: '/images/plp/functional-gait-assessment-l1.jpg',
+      heroImage: '/images/pdp/functional-gait-assessment-l1/hero.jpg',
       //
       // Primary CTA — both frames' own buybox is a literal cart/quantity-
       // stepper "Add to Cart" flow (Kajabi-fulfilled, not a Shopify cart
@@ -3248,7 +3244,7 @@ export const items = [
       // desktop first" directive — mobile disagrees on MORE than wording
       // (see the CLIENT-CONTENT FLAG below).
       overview: {
-        image: '/images/plp/functional-gait-assessment-l1.jpg',
+        image: '/images/pdp/functional-gait-assessment-l1/overview.jpg',
         details: [
           { label: 'Course Length', value: '10 Hours or 2 Days' },
           { label: 'Evidence Based', value: 'Yes' },
@@ -3305,22 +3301,22 @@ export const items = [
       featuresHeading: "Ready to make a real difference in your patients' lives? Here's what you'll learn:",
       features: [
         {
-          image: '/images/plp/functional-gait-assessment-l1.jpg',
+          image: '/images/pdp/functional-gait-assessment-l1/feature-1.jpg',
           label: null,
           text: 'A systematic approach to gait assessment',
         },
         {
-          image: '/images/plp/functional-gait-assessment-l1.jpg',
+          image: '/images/pdp/functional-gait-assessment-l1/feature-2.jpg',
           label: null,
           text: 'How tissues can become overloaded, leading to pain & injury',
         },
         {
-          image: '/images/plp/functional-gait-assessment-l1.jpg',
+          image: '/images/pdp/functional-gait-assessment-l1/feature-3.jpg',
           label: null,
           text: 'How to identify aberrant patterns and connect them with orthopedic findings',
         },
         {
-          image: '/images/plp/functional-gait-assessment-l1.jpg',
+          image: '/images/pdp/functional-gait-assessment-l1/feature-4.jpg',
           label: null,
           // CLIENT-CONTENT FLAG: mobile's 4th blurb (1116:15575) reads "When
           // the toes can properly splay, our foot and ankle muscles engage,
@@ -3462,7 +3458,7 @@ export const items = [
       // prior course.
       instructors: [
         {
-          photo: '/images/plp/functional-gait-assessment-l1.jpg',
+          photo: '/images/pdp/instructors/courtney-conley.jpg',
           name: 'Dr. Courtney Conley, DC',
           credential: 'Lakewood, Colorado',
           bio: [
@@ -3473,7 +3469,7 @@ export const items = [
           ],
         },
         {
-          photo: '/images/plp/functional-gait-assessment-l1.jpg',
+          photo: '/images/pdp/instructors/jenifer-perez.jpg',
           name: 'Dr. Jenifer Perez, DC',
           credential: 'Lafayette, Colorado',
           bio: [
@@ -3481,7 +3477,7 @@ export const items = [
           ],
         },
         {
-          photo: '/images/plp/functional-gait-assessment-l1.jpg',
+          photo: '/images/plp/placeholder.svg',
           name: 'Dr. Megan Drewes, Physical Therapist',
           credential: 'Defiance, Ohio',
           bio: [
@@ -3489,7 +3485,7 @@ export const items = [
           ],
         },
         {
-          photo: '/images/plp/functional-gait-assessment-l1.jpg',
+          photo: '/images/plp/placeholder.svg',
           name: 'Dr. Emily Schilling, DC',
           credential: 'Lakewood, Colorado',
           bio: [
@@ -3658,7 +3654,7 @@ export const items = [
     // placeholder rectangle, matching the Mobility Ball's own fallback
     // approach when real product photography isn't available (see its
     // comment above).
-    image: '/images/plp/placeholder.svg',
+    image: '/images/plp/functional-gait-assessment-l2.jpg',
     href: '/courses/functional-gait-assessment-l2',
     cta: 'View Course',
     variants: null,
@@ -3756,7 +3752,7 @@ export const items = [
       // field's own comment above), so `heroImage` reuses the same
       // placeholder every other image-shaped field on this item reuses,
       // matching Mobility Ball's own "no photography yet" precedent.
-      heroImage: '/images/plp/placeholder.svg',
+      heroImage: '/images/pdp/functional-gait-assessment-l2/hero.jpg',
       //
       // Primary CTA — same Kajabi/"Add to Cart"→"Enroll Now" remap as every
       // other course on this branch (see CourseDetails.astro's own header
@@ -3771,7 +3767,7 @@ export const items = [
       // the SAME divergence shape L1's own overview already hit (see
       // CourseOverview.astro's own header comment).
       overview: {
-        image: '/images/plp/placeholder.svg',
+        image: '/images/pdp/functional-gait-assessment-l2/overview.jpg',
         details: [
           { label: 'Course Length', value: '10 Hours or 2 Days' },
           { label: 'Evidence Based', value: 'Yes' },
@@ -3829,22 +3825,22 @@ export const items = [
       featuresHeading: 'What To Look Forward To',
       features: [
         {
-          image: '/images/plp/placeholder.svg',
+          image: '/images/pdp/functional-gait-assessment-l2/feature-1.jpg',
           label: null,
           text: '2 full days with a Gait Happens Instructor',
         },
         {
-          image: '/images/plp/placeholder.svg',
+          image: '/images/pdp/functional-gait-assessment-l2/feature-2.jpg',
           label: null,
           text: "A combination of lecture and labs packed with content you'll love",
         },
         {
-          image: '/images/plp/placeholder.svg',
+          image: '/images/pdp/functional-gait-assessment-l2/feature-3.jpg',
           label: null,
           text: 'A video library of exercises covered in the course',
         },
         {
-          image: '/images/plp/placeholder.svg',
+          image: '/images/pdp/functional-gait-assessment-l2/feature-4.jpg',
           label: null,
           // CLIENT-CONTENT FLAG: mobile's 4th blurb (1116:16470) instead
           // reads "When the toes can properly splay, our foot and ankle
@@ -4002,7 +3998,7 @@ export const items = [
       // Switch Pro/Functional Gait Assessment Level 1 above.
       instructors: [
         {
-          photo: '/images/plp/placeholder.svg',
+          photo: '/images/pdp/instructors/courtney-conley.jpg',
           name: 'Dr. Courtney Conley, DC',
           credential: 'Lakewood, Colorado',
           bio: [
@@ -4215,7 +4211,7 @@ export const items = [
       // No dedicated video-thumbnail asset exists in this repo — reuses this
       // item's own PLP course shot, the same "no dedicated photography yet"
       // placeholder approach every other heroImage-using course takes.
-      heroImage: '/images/plp/gait-guru-membership.jpg',
+      heroImage: '/images/pdp/gait-guru-membership/hero.jpg',
       // Byline — desktop's own byline (682:9761;173:137) reads "Mentored By:
       // Dr. Conley, Dr. Perez, and Dr. Schilling," — Figma-verbatim,
       // INCLUDING its own trailing comma (a Figma typo, preserved per this
@@ -4263,25 +4259,25 @@ export const items = [
       // authored into it instead of only living in a comment.
       features: [
         {
-          image: '/images/plp/gait-guru-membership.jpg',
+          image: '/images/pdp/gait-guru-membership/feature-1.jpg',
           label: null,
           text: 'Video Library',
           body: 'Unlock over 165 videos of assessments & treatments for the lower body.',
         },
         {
-          image: '/images/plp/gait-guru-membership.jpg',
+          image: '/images/pdp/gait-guru-membership/feature-2.jpg',
           label: null,
           text: 'Member’s Only Case Study Calls',
           body: 'Access monthly live video discussions via Zoom with case study presentations and Q&A sessions.',
         },
         {
-          image: '/images/plp/gait-guru-membership.jpg',
+          image: '/images/pdp/gait-guru-membership/feature-3.jpg',
           label: null,
           text: 'Expert Interviews',
           body: 'Learn directly from various experts in the functional foot health field.',
         },
         {
-          image: '/images/plp/gait-guru-membership.jpg',
+          image: '/images/pdp/gait-guru-membership/feature-4.jpg',
           label: null,
           text: 'The Gait Guru Community',
           // CLIENT-CONTENT FLAG: this card's TITLE agrees on both
@@ -4391,7 +4387,7 @@ export const items = [
       // `instructors` array takes.
       instructors: [
         {
-          photo: '/images/plp/gait-guru-membership.jpg',
+          photo: '/images/pdp/instructors/courtney-conley.jpg',
           name: 'Dr. Courtney Conley, DC',
           credential: 'Lakewood, Colorado',
           bio: [
@@ -4402,7 +4398,7 @@ export const items = [
           ],
         },
         {
-          photo: '/images/plp/gait-guru-membership.jpg',
+          photo: '/images/pdp/instructors/jenifer-perez.jpg',
           name: 'Dr. Jenifer Perez, DC',
           credential: 'Lafayette, Colorado',
           bio: [
@@ -4410,7 +4406,7 @@ export const items = [
           ],
         },
         {
-          photo: '/images/plp/gait-guru-membership.jpg',
+          photo: '/images/plp/placeholder.svg',
           name: 'Dr. Emily Schilling, DC',
           credential: 'Lakewood, Colorado',
           bio: [
@@ -4621,7 +4617,7 @@ export const items = [
       // No dedicated hero photography exists for this course yet — reuses
       // the same PLP course shot every other image slot on this item
       // already reuses.
-      heroImage: '/images/plp/trainer-certification.jpg',
+      heroImage: '/images/pdp/trainer-certification/hero.jpg',
       // Desktop's own byline (683:10088 node `I683:10088;173:137`) reads
       // "Course By: Dr. Perez" — matching this item's real, single-
       // instructor roster below (Dr. Jenifer Perez, DC; see `instructors`).
@@ -4641,7 +4637,7 @@ export const items = [
       // first" directive — mobile disagrees on MORE than wording (see the
       // CLIENT-CONTENT FLAG and COMPONENT GAP below).
       overview: {
-        image: '/images/plp/trainer-certification.jpg',
+        image: '/images/pdp/trainer-certification/overview.jpg',
         details: [
           { label: 'Course Length', value: '1 Day (8am-4pm)' },
           { label: 'Evidence Based', value: 'Yes' },
@@ -4692,22 +4688,22 @@ export const items = [
       featuresHeading: 'The Certification Process',
       features: [
         {
-          image: '/images/plp/trainer-certification.jpg',
+          image: '/images/pdp/trainer-certification/feature-1.jpg',
           label: null,
           text: 'Join us for a 1 day in-person certification course from 8am-4pm.',
         },
         {
-          image: '/images/plp/trainer-certification.jpg',
+          image: '/images/pdp/trainer-certification/feature-2.jpg',
           label: null,
           text: 'After the course you will receive access to the video library of relevant exercises and sample workshops.',
         },
         {
-          image: '/images/plp/trainer-certification.jpg',
+          image: '/images/pdp/trainer-certification/feature-3.jpg',
           label: null,
           text: 'After completing the in-person training you will be required to complete a video submission to demonstrate your teaching and physical ability to lead the workshops.',
         },
         {
-          image: '/images/plp/trainer-certification.jpg',
+          image: '/images/pdp/trainer-certification/feature-4.jpg',
           label: null,
           // CLIENT-CONTENT FLAG: mobile's 4th blurb (1116:17401) reads "When
           // the toes can properly splay, our foot and ankle muscles engage,
@@ -4791,7 +4787,7 @@ export const items = [
       // page's own rendered geometry unchanged from before the review fix
       // wave.
       imageWithText: {
-        image: '/images/plp/trainer-certification.jpg',
+        image: '/images/pdp/trainer-certification/image-with-text.jpg',
         heading: 'Additional Benefits of the Gait Happens Trainer Certification',
         imageWidth: 374,
         items: [
@@ -4826,7 +4822,7 @@ export const items = [
       // placeholder convention every other course takes).
       instructors: [
         {
-          photo: '/images/plp/trainer-certification.jpg',
+          photo: '/images/pdp/instructors/jenifer-perez.jpg',
           name: 'Dr. Jenifer Perez, DC',
           credential: 'Lafayette, Colorado',
           bio: [
