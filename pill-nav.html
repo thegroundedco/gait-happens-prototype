@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Elastic Magnetic Pill Nav</title>
+<style>
+  :root{
+    --bg:#0b0b0d;
+    --fg:#f2f2f0;
+    --muted:#6b6b74;
+    --nav-surface:rgba(255,255,255,.045);
+    --nav-edge:rgba(255,255,255,.09);
+  }
+
+  *{box-sizing:border-box}
+
+  html,body{height:100%}
+
+  body{
+    margin:0;
+    background:
+      radial-gradient(120% 90% at 50% -10%, #17171c 0%, var(--bg) 55%),
+      var(--bg);
+    color:var(--fg);
+    font-family:"Inter","Helvetica Neue",Helvetica,Arial,sans-serif;
+    -webkit-font-smoothing:antialiased;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:38px;
+    min-height:100svh;
+  }
+
+  /* ---------- nav ---------- */
+
+  .nav{
+    position:relative;
+    display:flex;
+    align-items:center;
+    gap:6px;
+    padding:8px;
+    border-radius:999px;
+    background:var(--nav-surface);
+    border:1px solid var(--nav-edge);
+    backdrop-filter:blur(14px);
+    isolation:isolate;            /* keeps the difference blend inside the nav */
+  }
+
+  .nav__link{
+    position:relative;
+    z-index:1;
+    display:inline-block;
+    padding:11px 20px;
+    font-size:14px;
+    font-weight:500;
+    letter-spacing:.01em;
+    line-height:1;
+    color:var(--fg);
+    text-decoration:none;
+    white-space:nowrap;
+    outline:none;
+  }
+
+  .nav__link:focus-visible{
+    text-decoration:underline;
+    text-underline-offset:5px;
+  }
+
+  .nav__pill{
+    position:absolute;
+    z-index:2;                    /* sits above the labels so difference can invert them */
+    top:0; left:0;
+    height:38px;
+    border-radius:999px;
+    background:#fff;
+    mix-blend-mode:difference;    /* label under the pill flips to dark automatically */
+    pointer-events:none;
+    will-change:transform,width;
+    transform-origin:50% 50%;
+  }
+
+  /* ---------- page dressing ---------- */
+
+  .caption{
+    font-size:12px;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color:var(--muted);
+  }
+
+  @media (prefers-reduced-motion:reduce){
+    .nav__link{transition:none}
+  }
+</style>
+</head>
+<body>
+
+  <nav class="nav" id="nav" aria-label="Primary">
+    <div class="nav__pill" id="pill" aria-hidden="true"></div>
+    <a class="nav__link" href="#" data-active>Work</a>
+    <a class="nav__link" href="#">Studio</a>
+    <a class="nav__link" href="#">Motion</a>
+    <a class="nav__link" href="#">Journal</a>
+    <a class="nav__link" href="#">Contact</a>
+  </nav>
+
+  <p class="caption">move across the nav</p>
+
+<script>
+(() => {
+  const nav   = document.getElementById('nav');
+  const pill  = document.getElementById('pill');
+  const links = [...nav.querySelectorAll('.nav__link')];
+
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ---- tuning ---------------------------------------------------------- */
+  const CFG = {
+    posK:      0.16,   // position spring stiffness
+    posDamp:   0.76,   // < 0.8 → visible overshoot / elastic settle
+    widK:      0.13,   // width spring (softer, so the pill lags & stretches)
+    widDamp:   0.70,
+    gapWidth:  44,     // pill width while free-tracking the cursor in a gap
+    pad:       8,      // extra width when locked to a link
+    magnetR:   72,     // px beyond a link where it starts pulling the pill in
+    magnetIn:  0.26,   // how far the pill drifts toward the cursor while on a link
+    stretch:   1.5,    // velocity → extra width
+    stretchMax:52,
+    squash:    0.0075  // velocity → vertical squash
+  };
+
+  /* ---- geometry -------------------------------------------------------- */
+  let rects = [], navRect = null, activeIndex = links.findIndex(l => l.hasAttribute('data-active'));
+  if (activeIndex < 0) activeIndex = 0;
+
+  function measure(){
+    navRect = nav.getBoundingClientRect();
+    rects = links.map(l => {
+      const r = l.getBoundingClientRect();
+      return { x: r.left - navRect.left, w: r.width, c: r.left - navRect.left + r.width / 2 };
+    });
+    pill.style.height = Math.round(rects[0] ? links[0].getBoundingClientRect().height : 38) + 'px';
+    pillH = pill.getBoundingClientRect().height || 38;
+    pillTop = (navRect.height - pillH) / 2;
+  }
+
+  let pillH = 38, pillTop = 8;
+
+  /* ---- state ----------------------------------------------------------- */
+  let cx = 0, w = 0, vcx = 0, vw = 0;      // spring state (center x, width)
+  let pointerX = 0, pointerIn = false, focusIndex = -1;
+
+  const clamp = (v, a, b) => v < a ? a : v > b ? b : v;
+  const lerp  = (a, b, t) => a + (b - a) * t;
+  const ease  = t => t * t * (3 - 2 * t);
+
+  /* distance from the cursor to a link's horizontal band (0 = inside) */
+  const distTo = (r, px) => Math.max(r.x - px, px - (r.x + r.w), 0);
+
+  function targets(){
+    const rest = rects[activeIndex] || { c: 0, w: 0 };
+
+    if (!pointerIn){
+      const i = focusIndex >= 0 ? focusIndex : activeIndex;
+      const r = rects[i] || rest;
+      return { tc: r.c, tw: r.w + CFG.pad };
+    }
+
+    const px = pointerX - navRect.left;
+
+    // nearest link
+    let ni = 0, nd = Infinity;
+    for (let i = 0; i < rects.length; i++){
+      const d = distTo(rects[i], px);
+      if (d < nd){ nd = d; ni = i; }
+    }
+    const r = rects[ni];
+
+    // locked onto a link: settle on its center, with a little magnetic drift
+    const drift  = clamp((px - r.c) * CFG.magnetIn, -r.w * 0.28, r.w * 0.28);
+    const lockC  = r.c + drift;
+    const lockW  = r.w + CFG.pad;
+
+    if (nd === 0) return { tc: lockC, tw: lockW };
+
+    if (nd < CFG.magnetR){                       // inside the magnetic field
+      const t = ease(1 - nd / CFG.magnetR);
+      return { tc: lerp(px, lockC, t), tw: lerp(CFG.gapWidth, lockW, t) };
+    }
+
+    return { tc: px, tw: CFG.gapWidth };         // free-tracking the cursor
+  }
+
+  /* ---- loop ------------------------------------------------------------ */
+  let last = 0;
+  function frame(now){
+    const dt = clamp((now - last) / 16.667, 0.2, 3);   // normalised to 60fps steps
+    last = now;
+
+    const { tc, tw } = targets();
+
+    if (reduce){
+      cx = tc; w = tw; vcx = 0; vw = 0;
+    } else {
+      vcx += (tc - cx) * CFG.posK * dt;
+      vcx *= Math.pow(CFG.posDamp, dt);
+      cx  += vcx * dt;
+
+      vw  += (tw - w) * CFG.widK * dt;
+      vw  *= Math.pow(CFG.widDamp, dt);
+      w   += vw * dt;
+    }
+
+    // velocity-driven squash & stretch
+    const speed   = Math.abs(vcx);
+    const stretch = reduce ? 0 : Math.min(speed * CFG.stretch, CFG.stretchMax);
+    const sy      = reduce ? 1 : 1 - Math.min(speed * CFG.squash, 0.17);
+    const drawW   = Math.max(8, w + stretch);
+
+    pill.style.width = drawW + 'px';
+    pill.style.transform =
+      `translate3d(${(cx - drawW / 2).toFixed(2)}px, ${pillTop.toFixed(2)}px, 0) scaleY(${sy.toFixed(3)})`;
+
+    requestAnimationFrame(frame);
+  }
+
+  /* ---- events ---------------------------------------------------------- */
+  nav.addEventListener('pointerenter', e => { measure(); pointerIn = true; pointerX = e.clientX; });
+  nav.addEventListener('pointermove',  e => { pointerIn = true; pointerX = e.clientX; });
+  nav.addEventListener('pointerleave', () => { pointerIn = false; });
+
+  links.forEach((l, i) => {
+    l.addEventListener('click', e => {
+      e.preventDefault();
+      links[activeIndex]?.removeAttribute('data-active');
+      activeIndex = i;
+      l.setAttribute('data-active', '');
+    });
+    l.addEventListener('focus', () => { focusIndex = i; pointerIn = false; });
+    l.addEventListener('blur',  () => { if (focusIndex === i) focusIndex = -1; });
+  });
+
+  addEventListener('resize', measure);
+  if (window.ResizeObserver) new ResizeObserver(measure).observe(nav);
+  if (document.fonts) document.fonts.ready.then(measure);
+
+  /* ---- boot ------------------------------------------------------------ */
+  measure();
+  cx = rects[activeIndex].c;
+  w  = rects[activeIndex].w + CFG.pad;
+  requestAnimationFrame(t => { last = t; frame(t); });
+})();
+</script>
+</body>
+</html>
