@@ -1,0 +1,60 @@
+name: Deploy prototype to GitHub Pages
+
+# The prototype is published to GitHub project Pages, which serves from
+# /<repo>/ rather than the domain root. astro.config.mjs is deliberately left
+# pointing at the production origin (https://gaithappens.com) so the reference
+# build the client's dev team reads stays honest — the Pages-specific origin
+# and base are supplied here as build flags instead, and scripts/rewrite-base.mjs
+# patches the hand-authored root-absolute paths that Astro cannot see.
+
+on:
+  push:
+    branches: [real-images-pass]
+  workflow_dispatch:
+
+# Pages deployment needs id-token for the deploy action's OIDC handshake.
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Never let two deploys race; a superseded build is not worth finishing.
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      PAGES_ORIGIN: https://thegroundedco.github.io
+      PAGES_BASE: /gait-happens-prototype
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Build
+        run: npx astro build --site "$PAGES_ORIGIN" --base "$PAGES_BASE"
+
+      - name: Rewrite root-absolute paths for the sub-path deploy
+        run: node scripts/rewrite-base.mjs dist "$PAGES_BASE"
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
